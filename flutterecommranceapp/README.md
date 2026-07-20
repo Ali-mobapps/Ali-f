@@ -1,8 +1,5 @@
-# bmiapp
+# flutterecommranceapp
 
-<<<<<<< HEAD
-<img width="1366" height="768" alt="bmi" src="https://github.com/user-attachments/assets/fd0e36f9-2cd1-43d6-952b-1a8a81e064b9" />
-=======
 A new Flutter project.
 
 ## Getting Started
@@ -18,9 +15,3 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
-# BMI calculator
-
-## Screenshots
-
-![App](screenshot/bmi.png)
->>>>>>> abdfca4 (Added flashcardapp, flutterecommranceapp and updated bmiapp)
