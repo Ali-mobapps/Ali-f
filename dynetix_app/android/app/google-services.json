@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "4032384676",
+    "project_id": "dynetix-app",
+    "storage_bucket": "dynetix-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:4032384676:android:d5ee884f3b0765ec4ba031",
+        "android_client_info": {
+          "package_name": "com.example.dynetix_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlnOjIoXP3FOx8p2cpwBpvlCdosI0yYaM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
