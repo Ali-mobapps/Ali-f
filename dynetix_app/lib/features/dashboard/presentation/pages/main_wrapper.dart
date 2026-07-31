@@ -9,7 +9,8 @@ import 'package:dynetix_app/features/settings/presentation/pages/settings_page.d
 import 'package:dynetix_app/features/auth/presentation/pages/login_page.dart';
 
 class MainWrapper extends StatefulWidget {
-  const MainWrapper({super.key});
+  final String userName; // User name accept karne ke liye
+  const MainWrapper({super.key, this.userName = 'Ali Hassan'});
 
   @override
   State<MainWrapper> createState() => _MainWrapperState();
@@ -18,13 +19,19 @@ class MainWrapper extends StatefulWidget {
 class _MainWrapperState extends State<MainWrapper> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    const DashboardPage(),
-    const TasksPage(),
-    const PaymentsPage(),
-    const NotificationsPage(),
-    const ProfilePage(),
-  ];
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      DashboardPage(userName: widget.userName), // Passing userName to Dashboard
+      const TasksPage(),
+      const PaymentsPage(),
+      const NotificationsPage(),
+      const ProfilePage(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,13 +42,13 @@ class _MainWrapperState extends State<MainWrapper> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const UserAccountsDrawerHeader(
-              decoration: BoxDecoration(color: Color(0xFF1D1E33)),
-              accountName: Text('Ali Hassan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              accountEmail: Text('ali.hassan@dynetix.com', style: TextStyle(color: Colors.grey)),
+            UserAccountsDrawerHeader(
+              decoration: const BoxDecoration(color: Color(0xFF1D1E33)),
+              accountName: Text(widget.userName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              accountEmail: const Text('ali.hassan@dynetix.com', style: TextStyle(color: Colors.grey)),
               currentAccountPicture: CircleAvatar(
-                backgroundColor: Color(0xFF0052CC),
-                child: Text('AH', style: TextStyle(color: Colors.white)),
+                backgroundColor: const Color(0xFF0052CC),
+                child: Text(widget.userName.isNotEmpty ? widget.userName[0].toUpperCase() : 'AH', style: const TextStyle(color: Colors.white)),
               ),
             ),
             ListTile(

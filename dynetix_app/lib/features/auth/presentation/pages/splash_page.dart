@@ -1,8 +1,93 @@
 // File path: lib/features/auth/presentation/pages/splash_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:dynetix_app/features/dashboard/presentation/pages/main_wrapper.dart';
 
-class SplashPage extends StatelessWidget {
+class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
+
+  @override
+  State<SplashPage> createState() => _SplashPageState();
+}
+
+class _SplashPageState extends State<SplashPage> {
+  final _secureStorage = const FlutterSecureStorage();
+
+  // Controllers for bottom sheet form
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+
+  String? _formError;
+
+  // Handle Login & Register validation and secure storage
+  Future<void> _submitAuth(BuildContext context, {required bool isLogin}) async {
+    setState(() {
+      _formError = null;
+    });
+
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all required fields.')),
+      );
+      return;
+    }
+
+    if (isLogin) {
+      // Check saved credentials
+      String? savedEmail = await _secureStorage.read(key: 'registered_email');
+      String? savedPassword = await _secureStorage.read(key: 'registered_password');
+
+      // If first time testing, store it automatically
+      if (savedEmail == null) {
+        await _secureStorage.write(key: 'registered_email', value: email);
+        await _secureStorage.write(key: 'registered_password', value: password);
+        savedEmail = email;
+        savedPassword = password;
+      }
+
+      if (email == savedEmail) {
+        if (password == savedPassword) {
+          // Correct password -> Navigate to Dashboard
+          if (!mounted) return;
+          Navigator.pop(context); // Close bottom sheet
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MainWrapper()),
+          );
+        } else {
+          // Wrong password error inside bottom sheet or snackbar
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Wrong password! Please enter the correct password.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Email not found. Please register first.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } else {
+      // Register new account and save securely
+      await _secureStorage.write(key: 'registered_email', value: email);
+      await _secureStorage.write(key: 'registered_password', value: password);
+
+      if (!mounted) return;
+      Navigator.pop(context); // Close bottom sheet
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainWrapper()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +131,8 @@ class SplashPage extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    // Open Login Bottom Sheet or Page
+                    _emailController.clear();
+                    _passwordController.clear();
                     _showAuthForm(context, isLogin: true);
                   },
                   child: const Text(
@@ -69,7 +155,9 @@ class SplashPage extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    // Open Create Account Bottom Sheet or Page
+                    _emailController.clear();
+                    _passwordController.clear();
+                    _nameController.clear();
                     _showAuthForm(context, isLogin: false);
                   },
                   child: const Text(
@@ -171,6 +259,7 @@ class SplashPage extends StatelessWidget {
             const SizedBox(height: 15),
             if (!isLogin) ...[
               TextField(
+                controller: _nameController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   labelText: 'Full Name',
@@ -183,6 +272,7 @@ class SplashPage extends StatelessWidget {
               const SizedBox(height: 12),
             ],
             TextField(
+              controller: _emailController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: 'Email Address',
@@ -194,6 +284,7 @@ class SplashPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             TextField(
+              controller: _passwordController,
               obscureText: true,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
@@ -210,12 +301,7 @@ class SplashPage extends StatelessWidget {
               height: 48,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0052CC)),
-                onPressed: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(isLogin ? 'Logged in successfully!' : 'Account created successfully!')),
-                  );
-                },
+                onPressed: () => _submitAuth(context, isLogin: isLogin),
                 child: Text(isLogin ? 'Login' : 'Register', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
@@ -242,9 +328,11 @@ class SplashPage extends StatelessWidget {
               title: const Text('Ali Hassan', style: TextStyle(color: Colors.white)),
               subtitle: Text(email, style: const TextStyle(color: Colors.grey)),
               onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Successfully signed in with $provider')),
+                Navigator.pop(context); // Close dialog
+                // Navigate directly to dashboard on social login success
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MainWrapper()),
                 );
               },
             ),

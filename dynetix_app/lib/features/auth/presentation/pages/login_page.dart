@@ -1,5 +1,6 @@
 // File path: lib/features/auth/presentation/pages/login_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dynetix_app/features/dashboard/presentation/pages/main_wrapper.dart';
 import 'package:dynetix_app/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:dynetix_app/features/auth/presentation/pages/signup_page.dart';
@@ -14,12 +15,100 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  // Secure storage instance for saving credentials safely
+  final _secureStorage = const FlutterSecureStorage();
+
   bool _obscurePassword = true;
+  bool _rememberPassword = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  // Load saved email and password securely on startup
+  Future<void> _loadSavedCredentials() async {
+    try {
+      String? savedEmail = await _secureStorage.read(key: 'saved_email');
+      String? savedPassword = await _secureStorage.read(key: 'saved_password');
+
+      if (savedEmail != null && savedPassword != null) {
+        setState(() {
+          _emailController.text = savedEmail;
+          _passwordController.text = savedPassword;
+        });
+      }
+    } catch (e) {
+      // Handle storage read error if any
+    }
+  }
+
+  // Login verification logic
+  Future<void> _handleLogin() async {
+    setState(() {
+      _errorMessage = null;
+    });
+
+    String enteredEmail = _emailController.text.trim();
+    String enteredPassword = _passwordController.text.trim();
+
+    if (enteredEmail.isEmpty || enteredPassword.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter both email and password.';
+      });
+      return;
+    }
+
+    // Fetch registered credentials from secure storage (or default test account)
+    String? registeredEmail = await _secureStorage.read(key: 'registered_email');
+    String? registeredPassword = await _secureStorage.read(key: 'registered_password');
+
+    // If no account is registered yet, treat the first login/signup input as registered account for testing
+    if (registeredEmail == null || registeredPassword == null) {
+      await _secureStorage.write(key: 'registered_email', value: enteredEmail);
+      await _secureStorage.write(key: 'registered_password', value: enteredPassword);
+      registeredEmail = enteredEmail;
+      registeredPassword = enteredPassword;
+    }
+
+    // Validate Email and Password
+    if (enteredEmail == registeredEmail) {
+      if (enteredPassword == registeredPassword) {
+        // Save or clear credentials based on "Remember Password" option
+        if (_rememberPassword) {
+          await _secureStorage.write(key: 'saved_email', value: enteredEmail);
+          await _secureStorage.write(key: 'saved_password', value: enteredPassword);
+        } else {
+          await _secureStorage.delete(key: 'saved_email');
+          await _secureStorage.delete(key: 'saved_password');
+        }
+
+        // Navigate to Dashboard / MainWrapper
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainWrapper()),
+        );
+      } else {
+        // Wrong password error message
+        setState(() {
+          _errorMessage = 'Wrong password! Please enter the correct password.';
+        });
+      }
+    } else {
+      setState(() {
+        _errorMessage = 'Email not found. Please check or sign up.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0E21), // Dark theme color matching the mockup
+      backgroundColor: const Color(0xFF0A0E21),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -63,6 +152,22 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(color: Colors.grey, fontSize: 14),
                 ),
                 const SizedBox(height: 24),
+
+                // Error Message Box
+                if (_errorMessage != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      border: Border.all(color: Colors.red),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.redAccent, fontSize: 14),
+                    ),
+                  ),
 
                 // Email Field
                 const Text('Email Address', style: TextStyle(color: Colors.white70)),
@@ -112,20 +217,36 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
 
-                // Forgot Password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
-                      );
-                    },
-                    child: const Text('Forgot Password?', style: TextStyle(color: Color(0xFF0052CC))),
-                  ),
+                // Remember Password & Forgot Password
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _rememberPassword,
+                          activeColor: const Color(0xFF0052CC),
+                          onChanged: (value) {
+                            setState(() {
+                              _rememberPassword = value ?? true;
+                            });
+                          },
+                        ),
+                        const Text('Remember Password', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                      ],
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                        );
+                      },
+                      child: const Text('Forgot Password?', style: TextStyle(color: Color(0xFF0052CC))),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 20),
 
@@ -140,13 +261,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    onPressed: () {
-                      // Navigate to MainWrapper on successful login action
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const MainWrapper()),
-                      );
-                    },
+                    onPressed: _handleLogin,
                     child: const Text(
                       'Login',
                       style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
@@ -189,7 +304,12 @@ class _LoginPageState extends State<LoginPage> {
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const MainWrapper()),
+                          );
+                        },
                         icon: const Icon(Icons.g_mobiledata, color: Colors.white, size: 28),
                         label: const Text('Google', style: TextStyle(color: Colors.white)),
                       ),
@@ -202,7 +322,12 @@ class _LoginPageState extends State<LoginPage> {
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const MainWrapper()),
+                          );
+                        },
                         icon: const Icon(Icons.apple, color: Colors.white),
                         label: const Text('Apple', style: TextStyle(color: Colors.white)),
                       ),
