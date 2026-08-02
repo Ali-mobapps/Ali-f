@@ -11,16 +11,21 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   double _totalBalance = 0.0;
-  int _activeTasksCount = 0;
-  int _projectsCount = 0;
-  int _completedTasksCount = 0;
-  int _pendingTasksCount = 0;
 
+  // Lists for tasks, projects, payments and saved methods
   final List<String> _taskList = [];
+  final List<String> _projectList = [];
   final List<String> _paymentList = [];
   final List<String> _invoiceList = [];
+  final List<Map<String, String>> _savedPaymentMethods = [
+    {'title': 'Visa ending in 4242', 'subtitle': 'Expires 12/27', 'type': 'Card'}
+  ];
+  final List<String> _notifications = [
+    'Welcome to Dynetix! Explore our services.',
+    'Your payment gateway is successfully configured.',
+  ];
 
-  // Aapki di gayi tamam services ki list
+  // Services list
   final List<Map<String, dynamic>> _servicesList = [
     {'title': '3D Modeling', 'icon': Icons.view_in_ar},
     {'title': 'Legal Drafting and Global Compliance', 'icon': Icons.gavel},
@@ -48,6 +53,76 @@ class _DashboardPageState extends State<DashboardPage> {
     {'title': 'WordPress', 'icon': Icons.web},
   ];
 
+  void _showNotificationsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1D1E33),
+        title: const Text('Notifications', style: TextStyle(color: Colors.white)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: _notifications.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                leading: const Icon(Icons.notifications, color: Color(0xFF00C6FF)),
+                title: Text(_notifications[index], style: const TextStyle(color: Colors.white, fontSize: 13)),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close', style: TextStyle(color: Colors.grey)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showProfileDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1D1E33),
+        title: const Text('User Profile', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 30,
+              backgroundColor: const Color(0xFF0052CC),
+              child: Text(
+                widget.userName.isNotEmpty ? widget.userName[0].toUpperCase() : 'U',
+                style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(widget.userName, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            const Text('Active Member', style: TextStyle(color: Colors.grey, fontSize: 13)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: const Text('Logout', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showAddTaskDialog() {
     final TextEditingController taskController = TextEditingController();
     showDialog(
@@ -59,7 +134,7 @@ class _DashboardPageState extends State<DashboardPage> {
           controller: taskController,
           style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(
-            hintText: 'Enter task name...',
+            hintText: 'Enter task title...',
             hintStyle: TextStyle(color: Colors.grey),
             enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
             focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF0052CC))),
@@ -76,7 +151,6 @@ class _DashboardPageState extends State<DashboardPage> {
               if (taskController.text.isNotEmpty) {
                 setState(() {
                   _taskList.add(taskController.text);
-                  _activeTasksCount++;
                 });
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -91,19 +165,18 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  void _showMakePaymentDialog() {
-    final TextEditingController amountController = TextEditingController();
+  void _showAddProjectDialog() {
+    final TextEditingController projectController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1D1E33),
-        title: const Text('Make Payment', style: TextStyle(color: Colors.white)),
+        title: const Text('Add New Project', style: TextStyle(color: Colors.white)),
         content: TextField(
-          controller: amountController,
-          keyboardType: TextInputType.number,
+          controller: projectController,
           style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(
-            hintText: 'Enter amount (PKR)...',
+            hintText: 'Enter project title...',
             hintStyle: TextStyle(color: Colors.grey),
             enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
             focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF0052CC))),
@@ -117,21 +190,196 @@ class _DashboardPageState extends State<DashboardPage> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0052CC)),
             onPressed: () {
-              final val = double.tryParse(amountController.text);
-              if (val != null && val > 0) {
+              if (projectController.text.isNotEmpty) {
                 setState(() {
-                  _totalBalance += val;
-                  _paymentList.add('Paid: PKR $val');
+                  _projectList.add(projectController.text);
                 });
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Payment of PKR $val processed successfully!')),
+                  const SnackBar(content: Text('Project added successfully!')),
                 );
               }
             },
-            child: const Text('Pay', style: TextStyle(color: Colors.white)),
+            child: const Text('Add', style: TextStyle(color: Colors.white)),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showAddPaymentMethodDialog() {
+    final TextEditingController detailController = TextEditingController();
+    String selectedMethod = 'EasyPaisa';
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF1D1E33),
+          title: const Text('Add Payment Method', style: TextStyle(color: Colors.white)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Select Type', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: selectedMethod,
+                  dropdownColor: const Color(0xFF1D1E33),
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF0052CC))),
+                  ),
+                  items: ['EasyPaisa', 'JazzCash', 'Bank Transfer', 'Visa / Master Card']
+                      .map((method) => DropdownMenuItem(
+                    value: method,
+                    child: Text(method),
+                  ))
+                      .toList(),
+                  onChanged: (val) {
+                    setDialogState(() {
+                      selectedMethod = val!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: detailController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: selectedMethod.contains('Card') ? 'Card Number / Details' : 'Mobile Number / Account No',
+                    labelStyle: const TextStyle(color: Colors.grey),
+                    enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                    focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF0052CC))),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0052CC)),
+              onPressed: () {
+                if (detailController.text.isNotEmpty) {
+                  setState(() {
+                    _savedPaymentMethods.add({
+                      'title': '$selectedMethod (${detailController.text})',
+                      'subtitle': 'Linked account',
+                      'type': selectedMethod,
+                    });
+                  });
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('$selectedMethod added successfully!')),
+                  );
+                }
+              },
+              child: const Text('Save Method', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showMakePaymentDialog() {
+    final TextEditingController amountController = TextEditingController();
+    final TextEditingController refController = TextEditingController();
+    String selectedMethod = 'EasyPaisa';
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF1D1E33),
+          title: const Text('Make Real Payment', style: TextStyle(color: Colors.white)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Select Payment Method', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: selectedMethod,
+                  dropdownColor: const Color(0xFF1D1E33),
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF0052CC))),
+                  ),
+                  items: ['EasyPaisa', 'JazzCash', 'Bank Transfer', 'Stripe Card']
+                      .map((method) => DropdownMenuItem(
+                    value: method,
+                    child: Text(method),
+                  ))
+                      .toList(),
+                  onChanged: (val) {
+                    setDialogState(() {
+                      selectedMethod = val!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Enter Amount (PKR)',
+                    labelStyle: TextStyle(color: Colors.grey),
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF0052CC))),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: refController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Transaction ID / Reference No',
+                    labelStyle: TextStyle(color: Colors.grey),
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF0052CC))),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0052CC)),
+              onPressed: () {
+                final val = double.tryParse(amountController.text);
+                if (val != null && val > 0) {
+                  setState(() {
+                    _totalBalance += val;
+                    _paymentList.add('$selectedMethod: PKR $val (Ref: ${refController.text})');
+                  });
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Successfully added PKR $val via $selectedMethod!')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter a valid amount')),
+                  );
+                }
+              },
+              child: const Text('Confirm Payment', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -213,21 +461,24 @@ class _DashboardPageState extends State<DashboardPage> {
         backgroundColor: const Color(0xFF0A0E21),
         elevation: 0,
         title: const Text(
-          'Welcome to Dynetix',
+          'Payments & Dashboard',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () {},
+            onPressed: _showNotificationsDialog,
           ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundColor: const Color(0xFF1D1E33),
-              child: Text(
-                widget.userName.isNotEmpty ? widget.userName[0].toUpperCase() : 'U',
-                style: const TextStyle(color: Colors.white),
+            child: GestureDetector(
+              onTap: _showProfileDialog,
+              child: CircleAvatar(
+                backgroundColor: const Color(0xFF1D1E33),
+                child: Text(
+                  widget.userName.isNotEmpty ? widget.userName[0].toUpperCase() : 'U',
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
             ),
           ),
@@ -238,6 +489,7 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Balance Card
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -252,24 +504,83 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Total Balance', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                  const Text('Current Balance', style: TextStyle(color: Colors.white70, fontSize: 14)),
                   const SizedBox(height: 8),
                   Text(
                     'PKR ${_totalBalance.toStringAsFixed(2)}',
                     style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 8),
-                  const Row(
-                    children: [
-                      Icon(Icons.account_balance_wallet, color: Colors.white70, size: 16),
-                      SizedBox(width: 4),
-                      Text('Real account balance', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                    ],
-                  ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
+
+            // Payment Methods Section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Payment Methods', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                TextButton.icon(
+                  onPressed: _showAddPaymentMethodDialog,
+                  icon: const Icon(Icons.add, color: Color(0xFF00C6FF), size: 16),
+                  label: const Text('Add New', style: TextStyle(color: Color(0xFF00C6FF))),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _savedPaymentMethods.length,
+              itemBuilder: (context, index) {
+                final method = _savedPaymentMethods[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1D1E33),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.payment, color: Color(0xFF00C6FF), size: 24),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(method['title']!, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Text(method['subtitle']!, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      if (index == 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0052CC),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text('Default', style: TextStyle(color: Colors.white, fontSize: 11)),
+                        )
+                      else
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.redAccent, size: 20),
+                          onPressed: () {
+                            setState(() {
+                              _savedPaymentMethods.removeAt(index);
+                            });
+                          },
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // Quick Actions Section
             const Text('Quick Actions', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             Row(
@@ -280,8 +591,12 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: _buildQuickActionItem(Icons.add_task, 'Add Task'),
                 ),
                 GestureDetector(
+                  onTap: _showAddProjectDialog,
+                  child: _buildQuickActionItem(Icons.create_new_folder, 'Add Project'),
+                ),
+                GestureDetector(
                   onTap: _showMakePaymentDialog,
-                  child: _buildQuickActionItem(Icons.payment, 'Make Payment'),
+                  child: _buildQuickActionItem(Icons.payment, 'Payment'),
                 ),
                 GestureDetector(
                   onTap: _showInvoicesDialog,
@@ -294,32 +609,24 @@ class _DashboardPageState extends State<DashboardPage> {
               ],
             ),
             const SizedBox(height: 24),
+
+            // Overview Section (Active Tasks & Projects)
             const Text('Overview', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
-                  child: _buildOverviewCard('Active Tasks', '$_activeTasksCount', 'Updated live', Colors.blue),
+                  child: _buildOverviewCard('Active Tasks', '${_taskList.length}', 'Updated live', Colors.blue),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildOverviewCard('Projects', '$_projectsCount', 'Updated live', Colors.purple),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildOverviewCard('Completed', '$_completedTasksCount', 'Finished items', Colors.green),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildOverviewCard('Pending', '$_pendingTasksCount', 'In progress', Colors.orange),
+                  child: _buildOverviewCard('Projects', '${_projectList.length}', 'Updated live', Colors.purple),
                 ),
               ],
             ),
             const SizedBox(height: 24),
+
+            // Dynetix Services & Programs Section
             const Text('Dynetix Services & Programs', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             ListView.builder(
@@ -361,15 +668,15 @@ class _DashboardPageState extends State<DashboardPage> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: const Color(0xFF1D1E33),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, color: const Color(0xFF0052CC), size: 24),
+          child: Icon(icon, color: const Color(0xFF0052CC), size: 22),
         ),
-        const SizedBox(height: 8),
-        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+        const SizedBox(height: 6),
+        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 11)),
       ],
     );
   }
