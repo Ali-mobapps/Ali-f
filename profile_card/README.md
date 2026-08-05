@@ -1,17 +1,2 @@
-# profile_card
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img width="571" height="612" alt="profilecard" src="https://github.com/user-attachments/assets/ec7f2bb2-0535-42d3-9a45-aa4248f07cdb" />
+<img width="565" height="470" alt="profilecard2" src="https://github.com/user-attachments/assets/beca9b90-a21e-47a3-8491-fab584e2e428" />
