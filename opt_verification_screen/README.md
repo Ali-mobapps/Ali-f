@@ -1,17 +1,2 @@
-# opt_verification_screen
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img width="528" height="485" alt="opt1" src="https://github.com/user-attachments/assets/0bf05f6a-1612-43ca-87e8-3c9f7478c52b" />
+<img width="521" height="563" alt="opt2" src="https://github.com/user-attachments/assets/757a3961-60e5-4204-b0a1-ade31bbe928a" />
