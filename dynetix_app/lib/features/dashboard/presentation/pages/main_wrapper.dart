@@ -1,16 +1,15 @@
 // File path: lib/features/dashboard/presentation/pages/main_wrapper.dart
 import 'package:flutter/material.dart';
+import 'package:dynetix_app/core/services/database_service.dart';
 import 'package:dynetix_app/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:dynetix_app/features/tasks/presentation/pages/tasks_page.dart';
-import 'package:dynetix_app/features/payments/presentation/pages/payments_page.dart';
+import 'package:dynetix_app/features/payments/presentation/pages/activity_page.dart';
 import 'package:dynetix_app/features/notifications/presentation/pages/notifications_page.dart';
-import 'package:dynetix_app/features/profile/presentation/pages/profile_page.dart';
-import 'package:dynetix_app/features/settings/presentation/pages/settings_page.dart';
-import 'package:dynetix_app/features/auth/presentation/pages/login_page.dart';
+import 'package:dynetix_app/features/auth/presentation/pages/profile_page.dart';
 
 class MainWrapper extends StatefulWidget {
-  final String userName; // User name accept karne ke liye
-  const MainWrapper({super.key, this.userName = 'Ali Hassan'});
+  final String? userEmail;
+  const MainWrapper({super.key, this.userEmail});
 
   @override
   State<MainWrapper> createState() => _MainWrapperState();
@@ -19,94 +18,32 @@ class MainWrapper extends StatefulWidget {
 class _MainWrapperState extends State<MainWrapper> {
   int _currentIndex = 0;
 
-  late final List<Widget> _pages;
-
   @override
-  void initState() {
-    super.initState();
-    _pages = [
-      DashboardPage(userName: widget.userName), // Passing userName to Dashboard
+  Widget build(BuildContext context) {
+    // Get user email safely from widget or current database session
+    String email = widget.userEmail ?? AppDatabase.currentUser?['email'] ?? 'admin@dynetix.com';
+
+    final List<Widget> pages = [
+      DashboardPage(userEmail: email),
       const TasksPage(),
-      const PaymentsPage(),
+      const ActivityPage(),
       const NotificationsPage(),
       const ProfilePage(),
     ];
-  }
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0E21),
-      drawer: Drawer(
-        backgroundColor: const Color(0xFF0A0E21),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            UserAccountsDrawerHeader(
-              decoration: const BoxDecoration(color: Color(0xFF1D1E33)),
-              accountName: Text(widget.userName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              accountEmail: const Text('ali.hassan@dynetix.com', style: TextStyle(color: Colors.grey)),
-              currentAccountPicture: CircleAvatar(
-                backgroundColor: const Color(0xFF0052CC),
-                child: Text(widget.userName.isNotEmpty ? widget.userName[0].toUpperCase() : 'AH', style: const TextStyle(color: Colors.white)),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.dashboard, color: Colors.white70),
-              title: const Text('Dashboard', style: TextStyle(color: Colors.white)),
-              onTap: () { Navigator.pop(context); setState(() => _currentIndex = 0); },
-            ),
-            ListTile(
-              leading: const Icon(Icons.task, color: Colors.white70),
-              title: const Text('My Tasks', style: TextStyle(color: Colors.white)),
-              onTap: () { Navigator.pop(context); setState(() => _currentIndex = 1); },
-            ),
-            ListTile(
-              leading: const Icon(Icons.payment, color: Colors.white70),
-              title: const Text('Payments', style: TextStyle(color: Colors.white)),
-              onTap: () { Navigator.pop(context); setState(() => _currentIndex = 2); },
-            ),
-            ListTile(
-              leading: const Icon(Icons.notifications, color: Colors.white70),
-              title: const Text('Notifications', style: TextStyle(color: Colors.white)),
-              onTap: () { Navigator.pop(context); setState(() => _currentIndex = 3); },
-            ),
-            ListTile(
-              leading: const Icon(Icons.person, color: Colors.white70),
-              title: const Text('Profile', style: TextStyle(color: Colors.white)),
-              onTap: () { Navigator.pop(context); setState(() => _currentIndex = 4); },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings, color: Colors.white70),
-              title: const Text('Settings', style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
-              },
-            ),
-            const Divider(color: Colors.white12),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Logout', style: TextStyle(color: Colors.red)),
-              onTap: () {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
-              },
-            ),
-          ],
-        ),
-      ),
-      body: _pages[_currentIndex],
+      body: pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF1D1E33),
-        selectedItemColor: const Color(0xFF0052CC),
-        unselectedItemColor: Colors.grey,
         currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
+        backgroundColor: const Color(0xFF1D1E33),
+        selectedItemColor: const Color(0xFF0052CC),
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.task), label: 'Tasks'),

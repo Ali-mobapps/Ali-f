@@ -1,344 +1,204 @@
-// File path: lib/features/dashboard/presentation/pages/dashboard_page.dart
+// File path: lib/features/auth/presentation/pages/dashboard_page.dart
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:dynetix_app/core/services/database_service.dart';
+import 'package:dynetix_app/features/dashboard/presentation/pages/admin_panel_page.dart';
 
 class DashboardPage extends StatefulWidget {
-  final String userName;
-  const DashboardPage({super.key, required this.userName});
+  final String userEmail;
+  const DashboardPage({super.key, required this.userEmail});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  // Real dynamic states starting from 0
-  double _totalBalance = 0.0;
-  int _activeTasksCount = 0;
-  int _projectsCount = 0;
-  int _completedTasksCount = 0;
-  int _pendingTasksCount = 0;
+  final ImagePicker _picker = ImagePicker();
 
-  final List<String> _taskList = [];
-  final List<String> _paymentList = [];
-  final List<String> _invoiceList = [];
-
-  // Function to show Add Task dialog
-  void _showAddTaskDialog() {
-    final TextEditingController taskController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1D1E33),
-        title: const Text('Add New Task', style: TextStyle(color: Colors.white)),
-        content: TextField(
-          controller: taskController,
-          style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
-            hintText: 'Enter task name...',
-            hintStyle: TextStyle(color: Colors.grey),
-            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF0052CC))),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0052CC)),
-            onPressed: () {
-              if (taskController.text.isNotEmpty) {
-                setState(() {
-                  _taskList.add(taskController.text);
-                  _activeTasksCount++;
-                });
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Task added successfully!')),
-                );
-              }
-            },
-            child: const Text('Add', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
+  Future<void> _pickProfileImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null && AppDatabase.currentUser != null) {
+      setState(() {
+        AppDatabase.currentUser!['imagePath'] = image.path;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile picture updated!')),
+        );
+      }
+    }
   }
 
-  // Function to show Make Payment dialog
-  void _showMakePaymentDialog() {
-    final TextEditingController amountController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1D1E33),
-        title: const Text('Make Payment', style: TextStyle(color: Colors.white)),
-        content: TextField(
-          controller: amountController,
-          keyboardType: TextInputType.number,
-          style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
-            hintText: 'Enter amount (PKR)...',
-            hintStyle: TextStyle(color: Colors.grey),
-            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF0052CC))),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0052CC)),
-            onPressed: () {
-              final val = double.tryParse(amountController.text);
-              if (val != null && val > 0) {
-                setState(() {
-                  _totalBalance += val; // Adding real payment amount to balance
-                  _paymentList.add('Paid: PKR $val');
-                });
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Payment of PKR $val processed successfully!')),
-                );
-              }
-            },
-            child: const Text('Pay', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
+  void _openPaymentDialog(String title, double amount) {
+    String selectedMethod = 'JazzCash';
+    final accountCtrl = TextEditingController();
+    final pinCtrl = TextEditingController();
 
-  // Function to show Invoices dialog / view
-  void _showInvoicesDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1D1E33),
-        title: const Text('Invoices', style: TextStyle(color: Colors.white)),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('No pending invoices available right now.', style: TextStyle(color: Colors.grey)),
-              const SizedBox(height: 16),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          String adminTarget = selectedMethod == 'JazzCash'
+              ? AppDatabase.adminJazzCash
+              : selectedMethod == 'EasyPaisa'
+              ? AppDatabase.adminEasyPaisa
+              : AppDatabase.adminBank;
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF1D1E33),
+            title: Text('Pay for: $title', style: const TextStyle(color: Colors.white, fontSize: 14)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Amount: PKR ${amount.toStringAsFixed(0)}', style: const TextStyle(color: Color(0xFF00C6FF), fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedMethod,
+                    dropdownColor: const Color(0xFF1D1E33),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    items: ['JazzCash', 'EasyPaisa', 'Bank Transfer'].map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setDialogState(() => selectedMethod = val);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blueGrey.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Send money to Admin Account:', style: TextStyle(color: Colors.amber, fontSize: 9, fontWeight: FontWeight.bold)),
+                        Text(adminTarget, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(controller: accountCtrl, keyboardType: TextInputType.phone, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Your Account No', labelStyle: TextStyle(color: Colors.grey, fontSize: 11))),
+                  TextField(controller: pinCtrl, obscureText: true, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'PIN / Password', labelStyle: TextStyle(color: Colors.grey, fontSize: 11))),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel', style: TextStyle(color: Colors.grey))),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0052CC)),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
                 onPressed: () {
-                  setState(() {
-                    _invoiceList.add('Invoice #${_invoiceList.length + 1}');
-                  });
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('New invoice generated!')),
-                  );
+                  if (accountCtrl.text.isNotEmpty && pinCtrl.text.isNotEmpty) {
+                    setState(() {
+                      AppDatabase.totalRevenue += amount;
+                      AppDatabase.allPaymentsLog.add({'client': AppDatabase.currentUser!['name'], 'item': title, 'amount': amount});
+                    });
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment processed successfully!')));
+                  }
                 },
-                child: const Text('Generate New Invoice', style: TextStyle(color: Colors.white)),
+                child: const Text('Pay Now', style: TextStyle(color: Colors.white, fontSize: 11)),
               ),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close', style: TextStyle(color: Colors.grey)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Function to show Support dialog
-  void _showSupportDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1D1E33),
-        title: const Text('Customer Support', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'Need help? Contact our support team at support@dynetix.com or call us directly through the app.',
-          style: TextStyle(color: Colors.grey),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0052CC)),
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Support ticket submitted successfully!')),
-              );
-            },
-            child: const Text('Contact Support', style: TextStyle(color: Colors.white)),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0E21),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0A0E21),
-        elevation: 0,
-        title: Text(
-          'Welcome, ${widget.userName}',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () {},
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundColor: const Color(0xFF1D1E33),
-              child: Text(
-                widget.userName.isNotEmpty ? widget.userName[0].toUpperCase() : 'U',
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Total Balance Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF0052CC), Color(0xFF00C6FF)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Total Balance', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                  const SizedBox(height: 8),
-                  Text(
-                    'PKR ${_totalBalance.toStringAsFixed(2)}',
-                    style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Row(
-                    children: [
-                      Icon(Icons.account_balance_wallet, color: Colors.white70, size: 16),
-                      SizedBox(width: 4),
-                      Text('Real account balance', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
+    var user = AppDatabase.currentUser ?? {'name': 'User', 'email': widget.userEmail, 'isAdmin': false, 'imagePath': null};
+    bool isAdmin = user['isAdmin'] ?? false;
 
-            // Quick Actions (All functional now)
-            const Text('Quick Actions', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: _showAddTaskDialog,
-                  child: _buildQuickActionItem(Icons.add_task, 'Add Task'),
-                ),
-                GestureDetector(
-                  onTap: _showMakePaymentDialog,
-                  child: _buildQuickActionItem(Icons.payment, 'Make Payment'),
-                ),
-                GestureDetector(
-                  onTap: _showInvoicesDialog,
-                  child: _buildQuickActionItem(Icons.description_outlined, 'Invoices'),
-                ),
-                GestureDetector(
-                  onTap: _showSupportDialog,
-                  child: _buildQuickActionItem(Icons.support_agent, 'Support'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Overview Section
-            const Text('Overview', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildOverviewCard('Active Tasks', '$_activeTasksCount', 'Updated live', Colors.blue),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildOverviewCard('Projects', '$_projectsCount', 'Updated live', Colors.purple),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildOverviewCard('Completed', '$_completedTasksCount', 'Finished items', Colors.green),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildOverviewCard('Pending', '$_pendingTasksCount', 'In progress', Colors.orange),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickActionItem(IconData icon, String label) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1D1E33),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: const Color(0xFF0052CC), size: 24),
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
-      ],
-    );
-  }
-
-  Widget _buildOverviewCard(String title, String value, String subtitle, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1D1E33),
-        borderRadius: BorderRadius.circular(16),
-      ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(color: Colors.grey, fontSize: 14)),
-          const SizedBox(height: 8),
-          Text(value, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text(subtitle, style: TextStyle(color: color, fontSize: 12)),
+          // Profile Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [Color(0xFF0052CC), Color(0xFF00C6FF)]),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Colors.white,
+                      backgroundImage: user['imagePath'] != null ? FileImage(File(user['imagePath'])) : null,
+                      child: user['imagePath'] == null ? const Icon(Icons.person, size: 30, color: Color(0xFF0052CC)) : null,
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(user['name'], style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text(user['email'], style: const TextStyle(color: Colors.white70, fontSize: 11)),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: const Color(0xFF0052CC)),
+                      onPressed: _pickProfileImage,
+                      child: const Text('Photo', style: TextStyle(fontSize: 10)),
+                    ),
+                  ],
+                ),
+                if (isAdmin) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminPanelPage())),
+                      icon: const Icon(Icons.admin_panel_settings, color: Colors.black, size: 16),
+                      label: const Text('Open Admin Management Panel', style: TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Available Services Catalog (Dynamic from Admin)
+          const Text('🛠️ Available Services', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          ...AppDatabase.servicesCatalog.map((s) => Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: const Color(0xFF1D1E33), borderRadius: BorderRadius.circular(12)),
+            child: Row(
+              children: [
+                Icon(s['icon'] ?? Icons.code, color: const Color(0xFF00C6FF), size: 22),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(s['title'], style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                      Text('PKR ${s['price']}', style: const TextStyle(color: Colors.greenAccent, fontSize: 11)),
+                    ],
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0052CC)),
+                  onPressed: () => _openPaymentDialog(s['title'], s['price']),
+                  child: const Text('Order & Pay', style: TextStyle(color: Colors.white, fontSize: 11)),
+                ),
+              ],
+            ),
+          )),
         ],
       ),
     );

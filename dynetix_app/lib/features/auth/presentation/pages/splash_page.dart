@@ -1,7 +1,9 @@
 // File path: lib/features/auth/presentation/pages/splash_page.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:dynetix_app/core/services/database_service.dart';
 import 'package:dynetix_app/features/dashboard/presentation/pages/main_wrapper.dart';
+import 'package:dynetix_app/features/auth/presentation/pages/login_page.dart';
+import 'package:dynetix_app/features/auth/presentation/pages/signup_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -11,84 +13,6 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  final _secureStorage = const FlutterSecureStorage();
-
-  // Controllers for bottom sheet form
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _nameController = TextEditingController();
-
-  String? _formError;
-
-  // Handle Login & Register validation and secure storage
-  Future<void> _submitAuth(BuildContext context, {required bool isLogin}) async {
-    setState(() {
-      _formError = null;
-    });
-
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all required fields.')),
-      );
-      return;
-    }
-
-    if (isLogin) {
-      // Check saved credentials
-      String? savedEmail = await _secureStorage.read(key: 'registered_email');
-      String? savedPassword = await _secureStorage.read(key: 'registered_password');
-
-      // If first time testing, store it automatically
-      if (savedEmail == null) {
-        await _secureStorage.write(key: 'registered_email', value: email);
-        await _secureStorage.write(key: 'registered_password', value: password);
-        savedEmail = email;
-        savedPassword = password;
-      }
-
-      if (email == savedEmail) {
-        if (password == savedPassword) {
-          // Correct password -> Navigate to Dashboard
-          if (!mounted) return;
-          Navigator.pop(context); // Close bottom sheet
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MainWrapper()),
-          );
-        } else {
-          // Wrong password error inside bottom sheet or snackbar
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Wrong password! Please enter the correct password.'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Email not found. Please register first.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } else {
-      // Register new account and save securely
-      await _secureStorage.write(key: 'registered_email', value: email);
-      await _secureStorage.write(key: 'registered_password', value: password);
-
-      if (!mounted) return;
-      Navigator.pop(context); // Close bottom sheet
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainWrapper()),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,250 +24,99 @@ class _SplashPageState extends State<SplashPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              // Logo and Title Section
-              const Icon(Icons.bolt, size: 80, color: Color(0xFF0052CC)),
-              const SizedBox(height: 16),
-              const Text(
-                'DYNETIX',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
+              // Logo with background blending to hide white square if any
+              ColorFiltered(
+                colorFilter: const ColorFilter.mode(
+                  Color(0xFF0A0E21),
+                  BlendMode.multiply,
                 ),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  height: 100,
+                  width: 100,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Dynetix App',
+                style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
-                'Simplify. Connect. Grow.',
+                'Your Ultimate Business & Admin Solution',
                 style: TextStyle(color: Colors.grey, fontSize: 14),
+                textAlign: TextAlign.center,
               ),
               const Spacer(),
-
               // Login Button
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 48,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0052CC),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0052CC)),
                   onPressed: () {
-                    _emailController.clear();
-                    _passwordController.clear();
-                    _showAuthForm(context, isLogin: true);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginPage()),
+                    );
                   },
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  child: const Text('Login', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Create Account Button
+              // Register / Create Account Button
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 48,
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF0052CC), width: 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    side: const BorderSide(color: Color(0xFF0052CC)),
                   ),
                   onPressed: () {
-                    _emailController.clear();
-                    _passwordController.clear();
-                    _nameController.clear();
-                    _showAuthForm(context, isLogin: false);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SignupPage()),
+                    );
                   },
-                  child: const Text(
-                    'Create Account',
-                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  child: const Text('Create Account (Register)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Google Sign-In Option (Working Database Integration)
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black87,
+                  ),
+                  onPressed: () {
+                    // Automatically login/create user via Google simulation
+                    AppDatabase.loginUser('google_user@dynetix.com', 'google_pass', 'Google User');
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainWrapper()),
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.g_mobiledata, size: 30, color: Colors.blue),
+                      SizedBox(width: 8),
+                      Text(
+                        'Continue with Google',
+                        style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // Divider
-              Row(
-                children: const [
-                  Expanded(child: Divider(color: Colors.grey)),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('or continue with', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                  ),
-                  Expanded(child: Divider(color: Colors.grey)),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Google and Apple Social Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: Colors.grey),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () {
-                        _showSocialAuthDialog(context, 'Google Account', 'ali.hassan@gmail.com');
-                      },
-                      icon: const Icon(Icons.g_mobiledata, color: Colors.white, size: 28),
-                      label: const Text('Google', style: TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: Colors.grey),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () {
-                        _showSocialAuthDialog(context, 'Apple ID', 'ali.hassan@icloud.com');
-                      },
-                      icon: const Icon(Icons.apple, color: Colors.white, size: 24),
-                      label: const Text('Apple', style: TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Secure & Trusted Footer
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.lock_outline, color: Colors.grey, size: 14),
-                  SizedBox(width: 6),
-                  Text('Secure & Trusted', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                ],
-              ),
+              const SizedBox(height: 30),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  void _showAuthForm(BuildContext context, {required bool isLogin}) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF1D1E33),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 20,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              isLogin ? 'Welcome Back!' : 'Create Account',
-              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 15),
-            if (!isLogin) ...[
-              TextField(
-                controller: _nameController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Full Name',
-                  labelStyle: const TextStyle(color: Colors.grey),
-                  filled: true,
-                  fillColor: const Color(0xFF0A0E21),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-            TextField(
-              controller: _emailController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: 'Email Address',
-                labelStyle: const TextStyle(color: Colors.grey),
-                filled: true,
-                fillColor: const Color(0xFF0A0E21),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: 'Password',
-                labelStyle: const TextStyle(color: Colors.grey),
-                filled: true,
-                fillColor: const Color(0xFF0A0E21),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0052CC)),
-                onPressed: () => _submitAuth(context, isLogin: isLogin),
-                child: Text(isLogin ? 'Login' : 'Register', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showSocialAuthDialog(BuildContext context, String provider, String email) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1D1E33),
-        title: Text('Sign in with $provider', style: const TextStyle(color: Colors.white)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Select account:', style: TextStyle(color: Colors.grey)),
-            const SizedBox(height: 10),
-            ListTile(
-              leading: const CircleAvatar(backgroundColor: Color(0xFF0052CC), child: Text('AH', style: TextStyle(color: Colors.white))),
-              title: const Text('Ali Hassan', style: TextStyle(color: Colors.white)),
-              subtitle: Text(email, style: const TextStyle(color: Colors.grey)),
-              onTap: () {
-                Navigator.pop(context); // Close dialog
-                // Navigate directly to dashboard on social login success
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MainWrapper()),
-                );
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-          ),
-        ],
       ),
     );
   }
