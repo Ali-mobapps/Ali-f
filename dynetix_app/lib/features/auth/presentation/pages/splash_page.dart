@@ -13,6 +13,96 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+
+  // Professional Google Account Selector Dialog
+  void _showGoogleAccountPicker() {
+    final List<Map<String, String>> savedEmails = [
+      {'name': 'Ali Hassan', 'email': 'alihassan6236007@gmail.com', 'avatar': 'A'},
+      {'name': 'Ali Yaseen', 'email': 'ay9805782@gmail.com', 'avatar': 'A'},
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1D1E33),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: const [
+                  Icon(Icons.g_mobiledata, color: Colors.blue, size: 36),
+                  SizedBox(width: 8),
+                  Text(
+                    'Sign in with Google',
+                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Choose an account to continue to Dynetix App',
+                style: TextStyle(color: Colors.grey, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              const Divider(color: Colors.white12),
+
+              // Email accounts list
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: savedEmails.length,
+                itemBuilder: (context, index) {
+                  final account = savedEmails[index];
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: const Color(0xFF0052CC),
+                      child: Text(account['avatar']!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                    title: Text(account['name']!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    subtitle: Text(account['email']!, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                    onTap: () {
+                      Navigator.pop(context); // Close bottom sheet
+                      _processGoogleLogin(account['email']!, account['name']!);
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Professional Loading and Login Process
+  void _processGoogleLogin(String email, String name) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(color: Color(0xFF0052CC)),
+      ),
+    );
+
+    await Future.delayed(const Duration(seconds: 1)); // Simulate secure login
+
+    AppDatabase.loginUser(email, 'google_secure_pass', name);
+
+    if (mounted) {
+      Navigator.pop(context); // Close loading
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainWrapper()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,18 +114,11 @@ class _SplashPageState extends State<SplashPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              // Logo with background blending to hide white square if any
-              ColorFiltered(
-                colorFilter: const ColorFilter.mode(
-                  Color(0xFF0A0E21),
-                  BlendMode.multiply,
-                ),
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  height: 100,
-                  width: 100,
-                  fit: BoxFit.contain,
-                ),
+              Image.asset(
+                'assets/images/logo.png',
+                height: 180,
+                width: 180,
+                fit: BoxFit.contain,
               ),
               const SizedBox(height: 24),
               const Text(
@@ -65,7 +148,7 @@ class _SplashPageState extends State<SplashPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Register / Create Account Button
+              // Register Button
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -83,7 +166,7 @@ class _SplashPageState extends State<SplashPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Google Sign-In Option (Working Database Integration)
+              // Google Sign-In Professional Button
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -92,14 +175,7 @@ class _SplashPageState extends State<SplashPage> {
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.black87,
                   ),
-                  onPressed: () {
-                    // Automatically login/create user via Google simulation
-                    AppDatabase.loginUser('google_user@dynetix.com', 'google_pass', 'Google User');
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MainWrapper()),
-                    );
-                  },
+                  onPressed: _showGoogleAccountPicker,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [

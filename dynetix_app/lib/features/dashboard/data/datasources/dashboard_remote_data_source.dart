@@ -1,3 +1,4 @@
+// File path: lib/features/dashboard/data/datasources/dashboard_remote_data_source.dart
 import '../models/user_dashboard_model.dart';
 
 abstract class DashboardRemoteDataSource {
@@ -5,15 +6,10 @@ abstract class DashboardRemoteDataSource {
 }
 
 class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
-  DashboardRemoteDataSourceImpl();
-
   @override
   Future<UserDashboardModel> getDashboardData() async {
-    // Fake Network Delay (1 second) to simulate real API call
-    await Future.delayed(const Duration(milliseconds: 1000));
-
-    // Simulated Successful Response with balance set to 0 and initial counts
-    return const UserDashboardModel(
+    // Simulated Successful Response
+    return UserDashboardModel(
       id: 'usr_123456',
       name: 'Ali Hassan',
       email: 'ali@dynetix.com',

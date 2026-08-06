@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:dynetix_app/core/services/database_service.dart';
 import 'package:dynetix_app/features/dashboard/presentation/pages/main_wrapper.dart';
+import 'package:dynetix_app/features/dashboard/presentation/pages/admin_panel_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -37,10 +38,18 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const MainWrapper()),
-    );
+    // Redirect to Admin Panel if admin email, otherwise MainWrapper
+    if (email.toLowerCase() == 'admin@dynetix.com') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const AdminPanelPage()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainWrapper()),
+      );
+    }
   }
 
   @override

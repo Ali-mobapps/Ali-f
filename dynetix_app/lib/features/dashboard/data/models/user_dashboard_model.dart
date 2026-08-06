@@ -1,4 +1,4 @@
-import '../../domain/entities/user_dashboard_entity.dart';
+import 'package:dynetix_app/features/dashboard/domain/entities/user_dashboard_entity.dart';
 
 class UserDashboardModel extends UserDashboardEntity {
   const UserDashboardModel({
