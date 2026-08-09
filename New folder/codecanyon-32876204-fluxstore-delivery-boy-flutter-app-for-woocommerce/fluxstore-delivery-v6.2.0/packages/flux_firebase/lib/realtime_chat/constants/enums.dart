@@ -1,1 +1,0 @@
-enum RealtimeChatType { userToUser, userToUsers }

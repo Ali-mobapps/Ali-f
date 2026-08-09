@@ -5,10 +5,11 @@ import 'package:dynetix_app/features/dashboard/presentation/pages/dashboard_page
 import 'package:dynetix_app/features/tasks/presentation/pages/tasks_page.dart';
 import 'package:dynetix_app/features/payments/presentation/pages/activity_page.dart';
 import 'package:dynetix_app/features/notifications/presentation/pages/notifications_page.dart';
-import 'package:dynetix_app/features/auth/presentation/pages/profile_page.dart';
+import 'package:dynetix_app/features/dashboard/presentation/pages/profile_page.dart';
 
 class MainWrapper extends StatefulWidget {
   final String? userEmail;
+
   const MainWrapper({super.key, this.userEmail});
 
   @override
@@ -20,15 +21,18 @@ class _MainWrapperState extends State<MainWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    // Get user email safely from widget or current database session
-    String email = widget.userEmail ?? AppDatabase.currentUser?['email'] ?? 'admin@dynetix.com';
+    // Get user email and admin status safely from database or widget session
+    String email = widget.userEmail ??
+        AppDatabase.currentUser?['email'] ??
+        'admin@dynetix.com';
+    bool isAdmin = AppDatabase.currentUser?['isAdmin'] ?? false;
 
     final List<Widget> pages = [
       DashboardPage(userEmail: email),
       const TasksPage(),
       const ActivityPage(),
       const NotificationsPage(),
-      const ProfilePage(),
+      ProfilePage(userEmail: email, isAdmin: isAdmin),
     ];
 
     return Scaffold(
@@ -48,7 +52,8 @@ class _MainWrapperState extends State<MainWrapper> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.task), label: 'Tasks'),
           BottomNavigationBarItem(icon: Icon(Icons.payment), label: 'Activity'),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Alerts'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.notifications), label: 'Alerts'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
