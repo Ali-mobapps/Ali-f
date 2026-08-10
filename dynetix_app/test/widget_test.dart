@@ -1,6 +1,6 @@
 // File path: lib/features/dashboard/presentation/pages/main_wrapper.dart
 import 'package:flutter/material.dart';
-import 'package:dynetix_app/core/services/database_service.dart';
+import 'package:dynetix_app/core/storage/database_service.dart';
 import 'package:dynetix_app/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:dynetix_app/features/tasks/presentation/pages/tasks_page.dart';
 import 'package:dynetix_app/features/payments/presentation/pages/activity_page.dart';
