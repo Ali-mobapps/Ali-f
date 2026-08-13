@@ -24,14 +24,3 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
-
-// Firebase Google Services Plugin Dependency Block (Added)
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath("com.google.gms:google-services:4.4.2")
-    }
-}

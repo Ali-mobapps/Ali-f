@@ -1,31 +1,38 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../domain/entities/payment_entity.dart';
 import '../../domain/repositories/payment_repository.dart';
+import '../../domain/repositories/payment_methods_repository.dart';
+import '../../domain/entities/payment_method_entity.dart';
 import 'payment_state.dart';
 
 class PaymentCubit extends Cubit<PaymentState> {
   final PaymentRepository repository;
+  final PaymentMethodsRepository methodsRepository;
 
-  PaymentCubit(this.repository) : super(PaymentInitial());
+  PaymentCubit(this.repository, this.methodsRepository) : super(PaymentInitial());
 
-  Future<void> fetchPayments() async {
+  Future<void> fetchPaymentMethods() async {
     emit(PaymentLoading());
     try {
-      final payments = await repository.getPayments();
-      emit(PaymentLoaded(payments));
+      final methods = await methodsRepository.getPaymentMethods();
+      emit(PaymentLoaded(payments: methods));
     } catch (e) {
       emit(PaymentError(e.toString()));
     }
   }
 
-  Future<void> makePayment(PaymentEntity payment) async {
-    emit(PaymentLoading());
+  Future<void> addPaymentMethod(PaymentMethodEntity method) async {
     try {
-      await repository.processPayment(payment);
-      emit(PaymentSuccessState('Payment processed successfully!'));
-      final payments = await repository.getPayments();
-      emit(PaymentLoaded(payments));
+      await methodsRepository.addPaymentMethod(method);
+      fetchPaymentMethods();
+    } catch (e) {
+      emit(PaymentError(e.toString()));
+    }
+  }
+
+  Future<void> updatePaymentMethod(PaymentMethodEntity method) async {
+    try {
+      await methodsRepository.updatePaymentMethod(method);
+      fetchPaymentMethods();
     } catch (e) {
       emit(PaymentError(e.toString()));
     }

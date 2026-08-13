@@ -27,6 +27,8 @@ class BookingEntry {
   final bool isApproved;
   final bool showedUp;
   final bool isFinalized;
+  final String? assignedSeat;
+  final String? arrivalDeadline;
 
   BookingEntry({
     required this.userId,
@@ -35,6 +37,8 @@ class BookingEntry {
     required this.isApproved,
     required this.showedUp,
     required this.isFinalized,
+    this.assignedSeat,
+    this.arrivalDeadline,
   });
 }
 

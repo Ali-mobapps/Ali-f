@@ -104,11 +104,12 @@ class DataService extends ChangeNotifier {
   }
 
   UserAccount _mapUser(Map<String, dynamic> json) {
+    final roleStr = json['role']?.toString().toLowerCase() ?? 'student';
     return UserAccount(
       id: json['id'],
       name: json['name'] ?? 'Unknown',
       email: json['email'] ?? '',
-      role: json['role'] == 'admin' ? UserRole.admin : UserRole.student,
+      role: roleStr == 'admin' ? UserRole.admin : UserRole.student,
       isApproved: json['is_approved'] ?? false,
       fineAmount: json['fine_amount'] ?? 0,
     );
@@ -122,6 +123,8 @@ class DataService extends ChangeNotifier {
       isApproved: json['is_approved'] ?? false,
       showedUp: json['showed_up'] ?? false,
       isFinalized: json['is_finalized'] ?? false,
+      assignedSeat: json['assigned_seat'],
+      arrivalDeadline: json['arrival_deadline'],
     );
   }
 
@@ -184,15 +187,29 @@ class DataService extends ChangeNotifier {
     }
   }
 
+  Future<void> reFetchUser(String userId) async {
+    await _loadUserData(userId);
+    _listenToChanges();
+    await _loadSettings();
+  }
+
   Future<String?> login(String email, String password) async {
     try {
       _isLoading = true;
       notifyListeners();
       final res = await _supabase.auth.signInWithPassword(email: email, password: password);
       if (res.user != null) {
+        // Automatically promote the designated admin email if it logs in
+        if (email.toLowerCase() == 'admin11@gmail.com') {
+          await _supabase.from('profiles').update({
+            'role': 'admin',
+            'is_approved': true,
+          }).eq('id', res.user!.id);
+        }
+        
         await _loadUserData(res.user!.id);
         _listenToChanges();
-        notifyListeners(); // Ensure listeners are notified after data load
+        notifyListeners();
         return null;
       }
       return 'Login failed';
@@ -284,6 +301,26 @@ class DataService extends ChangeNotifier {
 
   Future<void> updateFineAmount(String userId, int newAmount) async {
     await _supabase.from('profiles').update({'fine_amount': newAmount}).eq('id', userId);
+  }
+
+  Future<void> cancelReservation(String userId, DateTime date) async {
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+    await _supabase.from('reservations').update({
+      'reservation_type': 'none',
+      'is_finalized': true,
+      'is_approved': false
+    }).eq('user_id', userId).eq('date', dateStr);
+  }
+
+  Future<void> approveReservationWithDetails(String userId, DateTime date, String seat, TimeOfDay time) async {
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+    final timeStr = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    
+    await _supabase.from('reservations').update({
+      'is_approved': true,
+      'assigned_seat': seat,
+      'arrival_deadline': timeStr,
+    }).eq('user_id', userId).eq('date', dateStr);
   }
 
   Future<void> approveReservation(String userId, DateTime date) async {

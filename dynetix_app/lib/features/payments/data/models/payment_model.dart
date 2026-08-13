@@ -18,7 +18,7 @@ class PaymentModel extends PaymentEntity {
   factory PaymentModel.fromJson(Map<String, dynamic> json) {
     return PaymentModel(
       id: json['id'] ?? '',
-      itemTitle: json['itemTitle'] ?? '',
+      itemTitle: json['item_title'] ?? '',
       amount: (json['amount'] ?? 0.0).toDouble(),
       status: json['status'] ?? 'Pending',
       timestamp: json['timestamp'] != null
@@ -29,8 +29,7 @@ class PaymentModel extends PaymentEntity {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'itemTitle': itemTitle,
+      'item_title': itemTitle,
       'amount': amount,
       'status': status,
       'timestamp': timestamp.toIso8601String(),

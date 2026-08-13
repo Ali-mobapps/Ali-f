@@ -1,11 +1,13 @@
 class UserEntity {
   final String id;
   final String email;
-  final String role; // 'admin' ya 'customer'
+  final String role; // 'admin' or 'customer'
+  final String? name;
 
   const UserEntity({
     required this.id,
     required this.email,
     required this.role,
+    this.name,
   });
 }

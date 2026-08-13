@@ -1,176 +1,169 @@
-import 'package:dynetix_app/features/inquiries/domain/entities/inquiry_entity.dart';
-import 'package:dynetix_app/features/inquiries/presentation/bloc/inquiries_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/theme/vip_theme.dart';
+import '../../domain/entities/service_entity.dart';
+import '../bloc/services_cubit.dart';
+import '../bloc/services_state.dart';
+import 'service_details_screen.dart';
 
-class ServicesScreen extends StatelessWidget {
+class ServicesScreen extends StatefulWidget {
   final bool isAdmin;
-  final String userEmail;
 
   const ServicesScreen({
     super.key,
     required this.isAdmin,
-    this.userEmail = 'customer@dynetix.com',
   });
 
-  // Aap ki di gayi mukammal 24+ Services aur Courses ki list
-  final List<Map<String, String>> _items = const [
-    {'title': '3D Modeling', 'category': 'Service', 'price': '\$250'},
-    {
-      'title': 'Legal Drafting and Global Compliance',
-      'category': 'Service',
-      'price': '\$300'
-    },
-    {
-      'title': 'Full Stack Development with MERN',
-      'category': 'Course',
-      'price': '\$600'
-    },
-    {'title': 'Cloud Computing', 'category': 'Course', 'price': '\$450'},
-    {
-      'title': 'Shopify Development and Dropshipping',
-      'category': 'Service',
-      'price': '\$350'
-    },
-    {
-      'title': 'Mobile Game and App Development',
-      'category': 'Service',
-      'price': '\$700'
-    },
-    {'title': 'UI/UX & Webflow', 'category': 'Service', 'price': '\$200'},
-    {
-      'title': 'Artificial Intelligence using Python',
-      'category': 'Course',
-      'price': '\$550'
-    },
-    {
-      'title': 'Startup Strategies and Entrepreneurship',
-      'category': 'Course',
-      'price': '\$300'
-    },
-    {'title': 'Virtual Assistant', 'category': 'Service', 'price': '\$150'},
-    {
-      'title': 'Data Analytics and Business Intelligence',
-      'category': 'Course',
-      'price': '\$500'
-    },
-    {'title': 'QuickBooks', 'category': 'Service', 'price': '\$180'},
-    {
-      'title': 'SEO (Search Engine Optimization)',
-      'category': 'Service',
-      'price': '\$220'
-    },
-    {'title': 'Graphic Design', 'category': 'Service', 'price': '\$180'},
-    {'title': 'Creative Writing', 'category': 'Service', 'price': '\$120'},
-    {'title': 'AutoCAD', 'category': 'Course', 'price': '\$280'},
-    {'title': 'Digital Literacy', 'category': 'Course', 'price': '\$100'},
-    {'title': 'Digital Marketing', 'category': 'Service', 'price': '\$250'},
-    {'title': 'E-Commerce Management', 'category': 'Service', 'price': '\$300'},
-    {'title': 'Freelancing', 'category': 'Course', 'price': '\$150'},
-    {
-      'title': 'Communication and Soft Skills',
-      'category': 'Course',
-      'price': '\$130'
-    },
-    {
-      'title': 'Video Editing, Animation and Vlogging',
-      'category': 'Service',
-      'price': '\$260'
-    },
-    {'title': 'Affiliate Marketing', 'category': 'Service', 'price': '\$200'},
-    {'title': 'WordPress', 'category': 'Service', 'price': '\$220'},
-  ];
+  @override
+  State<ServicesScreen> createState() => _ServicesScreenState();
+}
 
-  void _showInquiryDialog(BuildContext context, String serviceName) {
-    final TextEditingController messageController = TextEditingController();
+class _ServicesScreenState extends State<ServicesScreen> {
+  String _selectedCategory = 'All';
 
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('Inquire about $serviceName'),
-        content: TextField(
-          controller: messageController,
-          decoration: const InputDecoration(
-            hintText: 'Enter your message or what you want...',
-            border: OutlineInputBorder(),
-          ),
-          maxLines: 3,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final text = messageController.text.trim();
-              if (text.isNotEmpty) {
-                final newInquiry = InquiryEntity(
-                  id: DateTime.now().millisecondsSinceEpoch.toString(),
-                  customerEmail: userEmail,
-                  message: 'Service/Course: $serviceName\nDetails: $text',
-                  timestamp: DateTime.now(),
-                );
-
-                context.read<InquiriesCubit>().sendInquiry(
-                      newInquiry,
-                      userEmail,
-                      isAdmin,
-                    );
-
-                Navigator.pop(dialogContext);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Inquiry sent to Admin successfully!')),
-                );
-              }
-            },
-            child: const Text('Send'),
-          ),
-        ],
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    context.read<ServicesCubit>().fetchServices();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Services & Academy Courses'),
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: _items.length,
-        itemBuilder: (context, index) {
-          final item = _items[index];
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.only(bottom: 10),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: ListTile(
-              title: Text(
-                item['title']!,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle:
-                  Text('Type: ${item['category']} | Price: ${item['price']}'),
-              trailing: isAdmin
-                  ? const Icon(Icons.admin_panel_settings, color: Colors.indigo)
-                  : ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.indigo,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () =>
-                          _showInquiryDialog(context, item['title']!),
-                      child: const Text('Inquire'),
+      backgroundColor: VIPTheme.darkBackground,
+      body: BlocBuilder<ServicesCubit, ServicesState>(
+        builder: (context, state) {
+          if (state is ServicesLoading) {
+            return const Center(child: CircularProgressIndicator(color: VIPTheme.primaryGold));
+          } else if (state is ServicesLoaded) {
+            var services = state.services.where((s) => s.type == 'service').toList();
+            
+            if (_selectedCategory != 'All') {
+              services = services.where((s) => s.category.contains(_selectedCategory)).toList();
+            }
+
+            return CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  expandedHeight: 120,
+                  floating: false,
+                  pinned: true,
+                  backgroundColor: VIPTheme.darkBackground,
+                  flexibleSpace: FlexibleSpaceBar(
+                    title: const Text('Our Services', style: TextStyle(color: VIPTheme.primaryGold, fontWeight: FontWeight.bold)),
+                    background: Container(color: VIPTheme.darkBackground),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Welcome to Dynetix',
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 16),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Elite Solutions for Your Growth',
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
+                        ),
+                        const SizedBox(height: 24),
+                        // Search bar
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: VIPTheme.cardBackground,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.search, color: Colors.white54, size: 20),
+                              SizedBox(width: 12),
+                              Text('Search services...', style: TextStyle(color: Colors.white54)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // Categories
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: ['All', 'Development', 'Design', 'Marketing']
+                                .map((cat) => Padding(
+                                      padding: const EdgeInsets.only(right: 12),
+                                      child: FilterChip(
+                                        label: Text(cat),
+                                        selected: _selectedCategory == cat,
+                                        onSelected: (val) => setState(() => _selectedCategory = cat),
+                                        backgroundColor: VIPTheme.cardBackground,
+                                        selectedColor: VIPTheme.primaryGold,
+                                        labelStyle: TextStyle(
+                                          color: _selectedCategory == cat ? Colors.black : Colors.white70,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                        showCheckmark: false,
+                                        side: BorderSide.none,
+                                      ),
+                                    ))
+                                .toList(),
+                          ),
+                        ),
+                      ],
                     ),
-            ),
-          );
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildServiceListItem(context, services[index]),
+                      childCount: services.length,
+                    ),
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+              ],
+            );
+          } else if (state is ServicesError) {
+            return Center(child: Text(state.message, style: const TextStyle(color: Colors.white)));
+          }
+          return const SizedBox();
         },
+      ),
+    );
+  }
+
+  Widget _buildServiceListItem(BuildContext context, ServiceEntity service) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: VIPTheme.cardBackground,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: VIPTheme.primaryGold.withValues(alpha: 0.1)),
+      ),
+      child: ListTile(
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ServiceDetailsScreen(service: service))),
+        contentPadding: const EdgeInsets.all(16),
+        leading: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: VIPTheme.primaryGold.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Icon(Icons.miscellaneous_services_rounded, color: VIPTheme.primaryGold),
+        ),
+        title: Text(
+          service.title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+        ),
+        subtitle: Text(
+          '\$${service.price.toStringAsFixed(2)}',
+          style: const TextStyle(color: VIPTheme.primaryGold, fontWeight: FontWeight.bold),
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white54),
       ),
     );
   }

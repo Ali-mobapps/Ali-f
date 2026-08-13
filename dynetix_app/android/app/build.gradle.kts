@@ -1,12 +1,11 @@
 plugins {
     id("com.android.application")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.dynetix_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -24,7 +23,7 @@ android {
     defaultConfig {
         applicationId = "com.example.dynetix_app"
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 37
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -37,9 +36,4 @@ android {
 }
 
 dependencies {
-    // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
-
-    // Firebase Auth
-    implementation("com.google.firebase:firebase-auth")
 }

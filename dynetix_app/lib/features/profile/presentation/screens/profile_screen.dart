@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../domain/entities/profile_entity.dart';
+import '../../../../core/theme/vip_theme.dart';
+import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../bloc/profile_cubit.dart';
 import '../bloc/profile_state.dart';
+import '../../../../core/theme/bloc/theme_cubit.dart';
+import '../../../settings/presentation/screens/about_screen.dart';
+import '../../../settings/presentation/screens/update_screen.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
+import '../../../settings/presentation/screens/settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String userEmail;
@@ -15,179 +20,128 @@ class ProfileScreen extends StatelessWidget {
     context.read<ProfileCubit>().fetchProfile(userEmail);
 
     return Scaffold(
+      backgroundColor: VIPTheme.darkBackground,
       appBar: AppBar(
-        title: const Text('My Profile & Settings'),
+        title: const Text('Profile'),
+        backgroundColor: VIPTheme.darkBackground,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: VIPTheme.primaryGold),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-      body: BlocConsumer<ProfileCubit, ProfileState>(
-        listener: (context, state) {
-          if (state is ProfileUpdateSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(state.message), backgroundColor: Colors.green),
-            );
-          } else if (state is ProfileError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(state.message), backgroundColor: Colors.red),
-            );
-          }
-        },
+      body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
-          if (state is ProfileLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is ProfileLoaded || state is ProfileUpdateSuccess) {
-            final profile = state is ProfileLoaded
-                ? state.profile
-                : (state as ProfileUpdateSuccess).profile;
+          String name = 'User';
+          String email = userEmail;
 
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ListView(
-                children: [
-                  Center(
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.blue.withOpacity(0.2),
-                      child: const Icon(Icons.person,
-                          size: 50, color: Colors.blue),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    profile.name,
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    profile.email,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Center(
-                    child: Chip(
-                      label: Text(profile.role,
-                          style: const TextStyle(color: Colors.white)),
-                      backgroundColor: profile.role == 'Administrator'
-                          ? Colors.indigo
-                          : Colors.teal,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    'Account Information',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          ListTile(
-                            leading:
-                                const Icon(Icons.phone, color: Colors.blue),
-                            title: const Text('Phone Number'),
-                            subtitle: Text(profile.phone),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            leading:
-                                const Icon(Icons.security, color: Colors.green),
-                            title: const Text('Account Status'),
-                            subtitle: const Text('Active & Verified'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    onPressed: () => _showEditDialog(context, profile),
-                    icon: const Icon(Icons.edit),
-                    label: const Text('Edit Profile'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      // Navigate back to login
-                      Navigator.popUntil(context, (route) => route.isFirst);
-                    },
-                    icon: const Icon(Icons.logout, color: Colors.red),
-                    label: const Text('Logout',
-                        style: TextStyle(color: Colors.red)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.red),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ],
-              ),
-            );
+          if (state is ProfileLoaded) {
+            name = state.profile.name;
+            email = state.profile.email;
           }
-          return const SizedBox();
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Center(
+                  child: Column(
+                    children: [
+                      const CircleAvatar(
+                        radius: 50,
+                        backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=customer'),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        name,
+                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: VIPTheme.primaryGold),
+                      ),
+                      Text(
+                        email,
+                        style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+                _buildProfileItem(Icons.edit_outlined, 'Edit Profile', () {}),
+                _buildProfileItem(Icons.notifications_none_rounded, 'Notifications', () {
+                   Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationsScreen(userEmail: userEmail)));
+                }),
+                _buildProfileItem(Icons.dark_mode_outlined, 'Theme Mode', () {}, 
+                  trailing: BlocBuilder<ThemeCubit, ThemeMode>(
+                    builder: (context, mode) => Switch(
+                      value: mode == ThemeMode.dark,
+                      onChanged: (_) => context.read<ThemeCubit>().toggleTheme(),
+                      activeColor: VIPTheme.primaryGold,
+                    ),
+                  )
+                ),
+                _buildProfileItem(Icons.settings_outlined, 'Settings', () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen(userEmail: userEmail)));
+                }),
+                _buildProfileItem(Icons.info_outline_rounded, 'About Dynetix', () {
+                   Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
+                }),
+                _buildProfileItem(Icons.system_update_rounded, 'App Update', () {
+                   Navigator.push(context, MaterialPageRoute(builder: (_) => const AppUpdateScreen()));
+                }),
+                const SizedBox(height: 40),
+                TextButton(
+                  onPressed: () => _showLogoutConfirmation(context),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.logout_rounded, color: Colors.redAccent),
+                      SizedBox(width: 8),
+                      Text('Logout', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          );
         },
       ),
     );
   }
 
-  void _showEditDialog(BuildContext context, ProfileEntity profile) {
-    final nameController = TextEditingController(text: profile.name);
-    final phoneController = TextEditingController(text: profile.phone);
-
+  void _showLogoutConfirmation(BuildContext context) {
     showDialog(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Edit Profile'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Full Name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        backgroundColor: VIPTheme.cardBackground,
+        title: const Text('Logout', style: TextStyle(color: Colors.white)),
+        content: const Text('Are you sure you want to logout?', style: TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
+          TextButton(
+            onPressed: () {
+              context.read<AuthCubit>().logout();
+              Navigator.pushNamedAndRemoveUntil(context, '/role-selection', (route) => false);
+            },
+            child: const Text('Logout', style: TextStyle(color: Colors.redAccent)),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final updatedProfile = profile.copyWith(
-                  name: nameController.text.trim(),
-                  phone: phoneController.text.trim(),
-                );
+        ],
+      ),
+    );
+  }
 
-                context.read<ProfileCubit>().updateProfile(updatedProfile);
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
+  Widget _buildProfileItem(IconData icon, String title, VoidCallback onTap, {Widget? trailing}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: VIPTheme.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: VIPTheme.primaryGold, size: 22),
+        title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500)),
+        trailing: trailing ?? const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white54),
+        onTap: onTap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
     );
   }
 }

@@ -1,143 +1,163 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import '../../../../core/theme/vip_theme.dart';
 import '../../domain/entities/inquiry_entity.dart';
 import '../bloc/inquiries_cubit.dart';
 import '../bloc/inquiries_state.dart';
 
-class InquiriesScreen extends StatelessWidget {
+class InquiriesScreen extends StatefulWidget {
   final bool isAdmin;
-  final String userEmail;
+  final String userId;
+  final String userRole;
 
   const InquiriesScreen({
     super.key,
     required this.isAdmin,
-    required this.userEmail,
+    required this.userId,
+    required this.userRole,
   });
 
   @override
-  Widget build(BuildContext context) {
-    // Pass required arguments here
-    context.read<InquiriesCubit>().fetchInquiries(userEmail, isAdmin);
+  State<InquiriesScreen> createState() => _InquiriesScreenState();
+}
 
+class _InquiriesScreenState extends State<InquiriesScreen> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // For general inquiries, we use a fixed ID like 'general_support'
+    context.read<InquiriesCubit>().watchInquiries('general_support');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: VIPTheme.darkBackground,
       appBar: AppBar(
-        title: Text(isAdmin ? 'Customer Inquiries' : 'Support / Send Inquiry'),
+        backgroundColor: VIPTheme.darkBackground,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.isAdmin ? 'Client Support' : 'Ask Admin', 
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: VIPTheme.primaryGold)),
+            const Text('We are here to help you 24/7', 
+              style: TextStyle(fontSize: 12, color: Colors.white70)),
+          ],
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: VIPTheme.primaryGold),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-      body: BlocBuilder<InquiriesCubit, InquiriesState>(
-        builder: (context, state) {
-          if (state is InquiriesLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is InquiriesLoaded) {
-            if (state.inquiries.isEmpty) {
-              return const Center(child: Text('No inquiries found.'));
-            }
-            return ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: state.inquiries.length,
-              itemBuilder: (context, index) {
-                final inquiry = state.inquiries[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          // Fixed from MainAxisAlignment.between to MainAxisAlignment.spaceBetween
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              inquiry.customerEmail,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent,
-                              ),
-                            ),
-                            Text(
-                              '${inquiry.timestamp.hour}:${inquiry.timestamp.minute.toString().padLeft(2, '0')}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(inquiry.message),
-                      ],
-                    ),
-                  ),
-                );
+      body: Column(
+        children: [
+          Expanded(
+            child: BlocBuilder<InquiriesCubit, InquiriesState>(
+              builder: (context, state) {
+                if (state is InquiriesLoading) {
+                  return const Center(child: CircularProgressIndicator(color: VIPTheme.primaryGold));
+                } else if (state is InquiriesLoaded) {
+                  final inquiries = state.inquiries;
+                  if (inquiries.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'Start a conversation with Dynetix Admin!',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(20),
+                    itemCount: inquiries.length,
+                    itemBuilder: (context, index) {
+                      final inquiry = inquiries[index];
+                      final isMe = inquiry.senderRole == widget.userRole;
+                      return _buildMessageBubble(inquiry, isMe);
+                    },
+                  );
+                }
+                return const SizedBox();
               },
-            );
-          } else if (state is InquiriesError) {
-            return Center(child: Text('Error: ${state.message}'));
-          }
-          return const SizedBox();
-        },
+            ),
+          ),
+          _buildInputArea(),
+        ],
       ),
-      floatingActionButton: !isAdmin
-          ? FloatingActionButton.extended(
-              onPressed: () => _showSendInquiryDialog(context),
-              label: const Text('New Message'),
-              icon: const Icon(Icons.send),
-            )
-          : null,
     );
   }
 
-  void _showSendInquiryDialog(BuildContext context) {
-    final messageController = TextEditingController();
+  Widget _buildMessageBubble(InquiryEntity inquiry, bool isMe) {
+    return Align(
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isMe ? VIPTheme.primaryGold : VIPTheme.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(
+          inquiry.message,
+          style: TextStyle(color: isMe ? Colors.black : Colors.white),
+        ),
+      ),
+    );
+  }
 
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Send Inquiry to Admin'),
-          content: TextField(
-            controller: messageController,
-            maxLines: 4,
-            decoration: const InputDecoration(
-              hintText: 'Type your message or question here...',
-              border: OutlineInputBorder(),
+  Widget _buildInputArea() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      color: VIPTheme.cardBackground,
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _controller,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Type your message...',
+                hintStyle: const TextStyle(color: Colors.white54),
+                filled: true,
+                fillColor: VIPTheme.darkBackground,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
+          const SizedBox(width: 12),
+          InkWell(
+            onTap: () {
+              final text = _controller.text.trim();
+              if (text.isNotEmpty) {
+                final inquiry = InquiryEntity(
+                  id: '',
+                  userId: widget.userId,
+                  itemId: 'general_support',
+                  itemType: 'support',
+                  senderRole: widget.userRole,
+                  message: text,
+                  createdAt: DateTime.now(),
+                );
+                context.read<InquiriesCubit>().sendInquiry(inquiry);
+                _controller.clear();
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: const BoxDecoration(
+                color: VIPTheme.primaryGold,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.send_rounded, color: Colors.black, size: 20),
             ),
-            ElevatedButton(
-              onPressed: () {
-                final messageText = messageController.text.trim();
-                if (messageText.isNotEmpty) {
-                  final newInquiry = InquiryEntity(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    customerEmail: userEmail,
-                    message: messageText,
-                    timestamp: DateTime.now(),
-                  );
-
-                  // Pass all 3 required arguments to sendInquiry
-                  context.read<InquiriesCubit>().sendInquiry(
-                        newInquiry,
-                        userEmail,
-                        isAdmin,
-                      );
-                  Navigator.pop(dialogContext);
-                }
-              },
-              child: const Text('Send'),
-            ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }

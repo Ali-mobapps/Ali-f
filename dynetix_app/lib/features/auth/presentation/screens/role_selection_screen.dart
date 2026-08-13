@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/vip_theme.dart';
+import 'admin_login_screen.dart';
+import 'login_screen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
@@ -6,41 +9,39 @@ class RoleSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Dynetix App')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Welcome to Dynetix',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      body: Container(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/logo.png', height: 120, errorBuilder: (context, error, stackTrace) => const Icon(Icons.business, size: 120, color: VIPTheme.primaryGold)),
+            const SizedBox(height: 30),
+            const Text(
+              "DYNETIX PORTAL",
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 2, color: VIPTheme.primaryGold),
+            ),
+            const SizedBox(height: 50),
+            ElevatedButton(
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminLoginScreen())),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [Icon(Icons.admin_panel_settings), SizedBox(width: 10), Text("ADMIN LOGIN")],
               ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50)),
-                onPressed: () {
-                  // Admin Login par click karne par /login route khulega
-                  Navigator.pushNamed(context, '/login');
-                },
-                child:
-                    const Text('Admin Login', style: TextStyle(fontSize: 18)),
+            ),
+            const SizedBox(height: 20),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: VIPTheme.primaryGold, width: 2),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              const SizedBox(height: 15),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50)),
-                onPressed: () {
-                  // Customer Access par click karne par bhi /login route khulega
-                  Navigator.pushNamed(context, '/login');
-                },
-                child: const Text('Customer Access',
-                    style: TextStyle(fontSize: 18)),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [Icon(Icons.person, color: VIPTheme.primaryGold), SizedBox(width: 10), Text("CUSTOMER LOGIN", style: TextStyle(color: VIPTheme.primaryGold))],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

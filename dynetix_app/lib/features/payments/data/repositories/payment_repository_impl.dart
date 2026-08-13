@@ -1,28 +1,38 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/payment_entity.dart';
 import '../../domain/repositories/payment_repository.dart';
+import '../models/payment_model.dart';
 
 class PaymentRepositoryImpl implements PaymentRepository {
-  // Temporary in-memory payment history list
-  final List<PaymentEntity> _payments = [
-    PaymentEntity(
-      id: 'pay_1',
-      itemTitle: 'Flutter Mobile App Development',
-      amount: 150.0,
-      status: 'Success',
-      timestamp: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-  ];
+  SupabaseClient get _supabase => Supabase.instance.client;
 
   @override
   Future<List<PaymentEntity>> getPayments() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return _payments;
+    try {
+      final List<dynamic> data = await _supabase
+          .from('payments')
+          .select()
+          .order('timestamp', ascending: false);
+      
+      return data.map<PaymentEntity>((json) => PaymentModel.fromJson({...json, 'id': json['id'].toString()})).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch payments: $e');
+    }
   }
 
   @override
   Future<void> processPayment(PaymentEntity payment) async {
-    await Future.delayed(
-        const Duration(milliseconds: 800)); // Simulating gateway delay
-    _payments.insert(0, payment);
+    try {
+      final model = PaymentModel(
+        id: payment.id,
+        itemTitle: payment.itemTitle,
+        amount: payment.amount,
+        status: payment.status,
+        timestamp: payment.timestamp,
+      );
+      await _supabase.from('payments').insert(model.toJson());
+    } catch (e) {
+      throw Exception('Failed to process payment: $e');
+    }
   }
 }

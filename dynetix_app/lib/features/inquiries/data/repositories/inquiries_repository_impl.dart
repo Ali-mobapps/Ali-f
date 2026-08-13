@@ -1,34 +1,56 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/inquiry_entity.dart';
 import '../../domain/repositories/inquiries_repository.dart';
+import '../models/inquiry_model.dart';
 
 class InquiriesRepositoryImpl implements InquiriesRepository {
-  final List<InquiryEntity> _inquiries = [
-    InquiryEntity(
-      id: '1',
-      customerEmail: 'customer@dynetix.com',
-      message: 'I want to inquire about the Flutter course enrollment details.',
-      timestamp: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-    InquiryEntity(
-      id: '2',
-      customerEmail: 'customer@dynetix.com',
-      message: 'Need details for 3D Modeling and Graphic Design services.',
-      timestamp: DateTime.now().subtract(const Duration(hours: 5)),
-    ),
-  ];
+  SupabaseClient get _supabase => Supabase.instance.client;
 
   @override
-  Future<List<InquiryEntity>> getInquiries(String email, bool isAdmin) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (isAdmin) {
-      return _inquiries;
-    }
-    return _inquiries.where((e) => e.customerEmail == email).toList();
+  Future<List<InquiryEntity>> getInquiriesByItem(String itemId) async {
+    final List<dynamic> data = await _supabase
+        .from('inquiries')
+        .select()
+        .eq('item_id', itemId)
+        .order('created_at', ascending: true);
+        
+    return data.map<InquiryEntity>((json) => InquiryModel.fromJson(json, json['id'].toString())).toList();
+  }
+
+  @override
+  Stream<List<InquiryEntity>> watchInquiriesByItem(String itemId) {
+    return _supabase
+        .from('inquiries')
+        .stream(primaryKey: ['id'])
+        .eq('item_id', itemId)
+        .order('created_at', ascending: true)
+        .map((data) => data
+            .map<InquiryEntity>((json) => InquiryModel.fromJson(json, json['id'].toString()))
+            .toList());
+  }
+
+  @override
+  Future<List<InquiryEntity>> getAllInquiries() async {
+    final List<dynamic> data = await _supabase
+        .from('inquiries')
+        .select()
+        .order('created_at', ascending: false);
+        
+    return data.map<InquiryEntity>((json) => InquiryModel.fromJson(json, json['id'].toString())).toList();
   }
 
   @override
   Future<void> sendInquiry(InquiryEntity inquiry) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _inquiries.insert(0, inquiry);
+    final model = InquiryModel(
+      id: inquiry.id,
+      userId: inquiry.userId,
+      itemId: inquiry.itemId,
+      itemType: inquiry.itemType,
+      senderRole: inquiry.senderRole,
+      message: inquiry.message,
+      createdAt: inquiry.createdAt,
+    );
+    
+    await _supabase.from('inquiries').insert(model.toJson());
   }
 }

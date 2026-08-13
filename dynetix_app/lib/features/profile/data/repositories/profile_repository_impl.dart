@@ -1,32 +1,50 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/profile_entity.dart';
 import '../../domain/repositories/profile_repository.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
-  // Temporary in-memory storage for profiles based on email
-  ProfileEntity _cachedProfile = const ProfileEntity(
-    name: 'Dynetix User',
-    email: 'user@dynetix.com',
-    role: 'Customer',
-    phone: '+92 300 1234567',
-  );
+  SupabaseClient get _supabase => Supabase.instance.client;
 
   @override
   Future<ProfileEntity> getProfile(String email) async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (email.contains('admin')) {
-      return ProfileEntity(
-        name: 'Dynetix Admin',
-        email: email,
-        role: 'Administrator',
-        phone: '+92 321 9876543',
-      );
+    try {
+      final List<dynamic> data = await _supabase
+          .from('users')
+          .select()
+          .eq('email', email)
+          .limit(1);
+
+      if (data.isNotEmpty) {
+        final user = data.first;
+        return ProfileEntity(
+          name: user['name'] ?? 'User',
+          email: user['email'] ?? email,
+          role: user['role'] ?? 'Customer',
+          phone: user['phone'] ?? '+92 000 0000000',
+        );
+      } else {
+        return ProfileEntity(
+          name: 'Dynetix User',
+          email: email,
+          role: 'Customer',
+          phone: '+92 300 1234567',
+        );
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch profile: $e');
     }
-    return _cachedProfile.copyWith(email: email);
   }
 
   @override
   Future<void> updateProfile(ProfileEntity profile) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    _cachedProfile = profile;
+    try {
+      await _supabase.from('users').update({
+        'name': profile.name,
+        'phone': profile.phone,
+        'role': profile.role,
+      }).eq('email', profile.email);
+    } catch (e) {
+      throw Exception('Failed to update profile: $e');
+    }
   }
 }

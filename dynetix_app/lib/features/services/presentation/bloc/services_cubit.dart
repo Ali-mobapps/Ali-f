@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../domain/entities/service_entity.dart';
 import '../../domain/repositories/services_repository.dart';
 import 'services_state.dart';
@@ -20,11 +19,27 @@ class ServicesCubit extends Cubit<ServicesState> {
   }
 
   Future<void> addService(ServiceEntity service) async {
-    emit(ServicesLoading());
     try {
       await repository.addService(service);
-      final services = await repository.getServices();
-      emit(ServicesLoaded(services));
+      fetchServices();
+    } catch (e) {
+      emit(ServicesError(e.toString()));
+    }
+  }
+
+  Future<void> updateService(ServiceEntity service) async {
+    try {
+      await repository.updateService(service);
+      fetchServices();
+    } catch (e) {
+      emit(ServicesError(e.toString()));
+    }
+  }
+
+  Future<void> deleteService(String id) async {
+    try {
+      await repository.deleteService(id);
+      fetchServices();
     } catch (e) {
       emit(ServicesError(e.toString()));
     }

@@ -1,13 +1,12 @@
-import 'package:dynetix_app/features/inquiries/presentation/bloc/inquiries_cubit.dart';
-import 'package:dynetix_app/features/inquiries/presentation/screens/inquiries_screen.dart';
-import 'package:dynetix_app/features/payments/presentation/bloc/payment_cubit.dart';
-import 'package:dynetix_app/features/payments/presentation/screens/payment_screen.dart';
-import 'package:dynetix_app/features/profile/presentation/bloc/profile_cubit.dart';
-import 'package:dynetix_app/features/profile/presentation/screens/profile_screen.dart';
-import 'package:dynetix_app/features/services/presentation/bloc/services_cubit.dart';
-import 'package:dynetix_app/features/services/presentation/screens/services_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/theme/vip_theme.dart';
+import '../../../../core/widgets/dynetix_widgets.dart';
+import '../../../auth/presentation/bloc/auth_cubit.dart';
+import '../../../services/presentation/screens/services_screen.dart';
+import '../../../services/presentation/screens/academy_screen.dart';
+import '../../../payments/presentation/screens/payment_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 
 class CustomerDashboardScreen extends StatefulWidget {
   final String customerEmail;
@@ -25,67 +24,38 @@ class CustomerDashboardScreen extends StatefulWidget {
 class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
   int _currentIndex = 0;
 
-  late final List<Widget> _screens;
-
   @override
-  void initState() {
-    super.initState();
-    _screens = [
+  Widget build(BuildContext context) {
+    final List<Widget> screens = [
       _HomeTabContent(customerEmail: widget.customerEmail),
       const ServicesScreen(isAdmin: false),
+      const AcademyScreen(),
       const PaymentScreen(isAdmin: false),
       ProfileScreen(userEmail: widget.customerEmail),
     ];
-  }
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFF8FAFC), Color(0xFFE2E8F0)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: _screens[_currentIndex],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.design_services_outlined),
-            selectedIcon: Icon(Icons.design_services),
-            label: 'Services',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.payment_outlined),
-            selectedIcon: Icon(Icons.payment),
-            label: 'Payments',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+      backgroundColor: VIPTheme.darkBackground,
+      body: screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: VIPTheme.cardBackground,
+        selectedItemColor: VIPTheme.primaryGold,
+        unselectedItemColor: Colors.white54,
+        currentIndex: _currentIndex,
+        type: BottomNavigationBarType.fixed,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view_outlined), activeIcon: Icon(Icons.grid_view_rounded), label: 'Services'),
+          BottomNavigationBarItem(icon: Icon(Icons.school_outlined), activeIcon: Icon(Icons.school), label: 'Academy'),
+          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_outlined), activeIcon: Icon(Icons.account_balance_wallet_rounded), label: 'Payment'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline_rounded), activeIcon: Icon(Icons.person_rounded), label: 'Profile'),
         ],
       ),
     );
   }
 }
 
-// Home tab content with clean design, company logo, and customer name
 class _HomeTabContent extends StatelessWidget {
   final String customerEmail;
 
@@ -93,239 +63,194 @@ class _HomeTabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        String displayName = customerEmail.split('@').first;
+        if (state is AuthAuthenticated && state.user.name != null) {
+          displayName = state.user.name!;
+        }
+
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Logo and Header
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Company Logo / Icon Placeholder
+                    const DynetixLogo(size: 60),
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.indigo,
-                        borderRadius: BorderRadius.circular(12),
+                        color: VIPTheme.primaryGold.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: VIPTheme.primaryGold.withValues(alpha: 0.3)),
                       ),
-                      child: const Icon(
-                        Icons.business,
-                        color: Colors.white,
-                        size: 28,
+                      child: const Row(
+                        children: [
+                          Icon(Icons.star_rounded, color: VIPTheme.primaryGold, size: 18),
+                          SizedBox(width: 6),
+                          Text(
+                            'VIP ACCESS',
+                            style: TextStyle(color: VIPTheme.primaryGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Dynetix Customer',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          customerEmail.split('@').first.toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.indigo,
-                          ),
-                        ),
-                      ],
                     ),
                   ],
                 ),
-                CircleAvatar(
-                  backgroundColor: Colors.indigo.withValues(alpha: 0.1),
-                  child: IconButton(
-                    icon: const Icon(Icons.message, color: Colors.indigo),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BlocProvider.value(
-                            value: context.read<InquiriesCubit>(),
-                            child: InquiriesScreen(
-                              isAdmin: false,
-                              userEmail: customerEmail,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                const SizedBox(height: 32),
+                const Text(
+                  'Welcome to',
+                  style: TextStyle(fontSize: 16, color: Colors.white70),
+                ),
+                Text(
+                  'Dynetix, $displayName',
+                  style: const TextStyle(
+                    fontSize: 28, 
+                    fontWeight: FontWeight.bold, 
+                    color: VIPTheme.primaryGold,
+                    letterSpacing: 0.5,
                   ),
                 ),
+                const SizedBox(height: 32),
+                
+                // Search Bar
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: VIPTheme.cardBackground,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.search, color: Colors.white54, size: 20),
+                      SizedBox(width: 12),
+                      Text('Search for solutions...', style: TextStyle(color: Colors.white54)),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 40),
+                
+                // Services Quick Access
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Featured Services', 
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    TextButton(
+                      onPressed: () {}, 
+                      child: const Text('View All', style: TextStyle(color: VIPTheme.primaryGold)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
+                // Grid of Categories
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 1.4,
+                  children: [
+                    _buildCategoryCard(Icons.code_rounded, 'Development', 'Modern Solutions'),
+                    _buildCategoryCard(Icons.brush_rounded, 'UI/UX Design', 'Elite Creative'),
+                    _buildCategoryCard(Icons.auto_awesome_rounded, 'AI & Python', 'Future Tech'),
+                    _buildCategoryCard(Icons.trending_up_rounded, 'Digital Marketing', 'Scale Fast'),
+                  ],
+                ),
+                
+                const SizedBox(height: 40),
+                
+                // Banner Card
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFB8860B), VIPTheme.primaryGold],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: VIPTheme.primaryGold.withValues(alpha: 0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Master New Skills',
+                              style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Join our premium academy and learn from industry experts.',
+                              style: TextStyle(color: Colors.black87, fontSize: 12),
+                            ),
+                            const SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                foregroundColor: VIPTheme.primaryGold,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: const Text('Explore Academy', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.school_rounded, size: 80, color: Colors.black12),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
               ],
             ),
-            const SizedBox(height: 25),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Colors.indigo, Colors.blueAccent],
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.school, size: 45, color: Colors.white),
-                  SizedBox(width: 15),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Dynetix Academy',
-                          style: TextStyle(color: Colors.white70, fontSize: 13),
-                        ),
-                        Text(
-                          'Explore Professional Tech & Skill Courses',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 25),
-            const Text(
-              'Quick Actions',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 15),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-                children: [
-                  _buildDashboardCard(
-                    context,
-                    'Services',
-                    Icons.design_services,
-                    Colors.blue,
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BlocProvider.value(
-                            value: context.read<ServicesCubit>(),
-                            child: const ServicesScreen(isAdmin: false),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  _buildDashboardCard(
-                    context,
-                    'Payments',
-                    Icons.payment,
-                    Colors.purple,
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BlocProvider.value(
-                            value: context.read<PaymentCubit>(),
-                            child: const PaymentScreen(isAdmin: false),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  _buildDashboardCard(
-                    context,
-                    'Inquiries',
-                    Icons.chat_bubble_outline_rounded,
-                    Colors.orange,
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BlocProvider.value(
-                            value: context.read<InquiriesCubit>(),
-                            child: InquiriesScreen(
-                              isAdmin: false,
-                              userEmail: customerEmail,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  _buildDashboardCard(
-                    context,
-                    'Profile',
-                    Icons.person,
-                    Colors.teal,
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BlocProvider.value(
-                            value: context.read<ProfileCubit>(),
-                            child: ProfileScreen(userEmail: customerEmail),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  static Widget _buildDashboardCard(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.1),
-              blurRadius: 10,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 25,
-              backgroundColor: color.withValues(alpha: 0.1),
-              child: Icon(icon, color: color, size: 28),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-          ],
-        ),
+  Widget _buildCategoryCard(IconData icon, String title, String subtitle) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: VIPTheme.cardBackground,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: VIPTheme.primaryGold.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: VIPTheme.primaryGold, size: 28),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+          Text(
+            subtitle,
+            style: const TextStyle(color: Colors.white54, fontSize: 10),
+          ),
+        ],
       ),
     );
   }
