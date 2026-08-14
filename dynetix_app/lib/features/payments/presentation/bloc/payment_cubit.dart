@@ -1,14 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/repositories/payment_repository.dart';
 import '../../domain/repositories/payment_methods_repository.dart';
 import '../../domain/entities/payment_method_entity.dart';
 import 'payment_state.dart';
 
 class PaymentCubit extends Cubit<PaymentState> {
-  final PaymentRepository repository;
   final PaymentMethodsRepository methodsRepository;
 
-  PaymentCubit(this.repository, this.methodsRepository) : super(PaymentInitial());
+  PaymentCubit(this.methodsRepository) : super(PaymentInitial());
 
   Future<void> fetchPaymentMethods() async {
     emit(PaymentLoading());

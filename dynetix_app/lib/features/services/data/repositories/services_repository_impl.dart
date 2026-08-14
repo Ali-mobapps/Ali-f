@@ -9,7 +9,7 @@ class ServicesRepositoryImpl implements ServicesRepository {
   @override
   Future<List<ServiceEntity>> getServices() async {
     final List<dynamic> data = await _supabase.from('services').select().order('title');
-    return data.map<ServiceEntity>((json) => ServiceModel.fromJson(json, json['id'].toString())).toList();
+    return data.map((json) => ServiceModel.fromJson(json, json['id'].toString())).toList();
   }
 
   @override
@@ -19,9 +19,9 @@ class ServicesRepositoryImpl implements ServicesRepository {
       title: service.title,
       description: service.description,
       price: service.price,
-      isActive: service.isActive,
       category: service.category,
       type: service.type,
+      isActive: service.isActive,
       instructor: service.instructor,
       duration: service.duration,
       level: service.level,
@@ -36,9 +36,9 @@ class ServicesRepositoryImpl implements ServicesRepository {
       title: service.title,
       description: service.description,
       price: service.price,
-      isActive: service.isActive,
       category: service.category,
       type: service.type,
+      isActive: service.isActive,
       instructor: service.instructor,
       duration: service.duration,
       level: service.level,
@@ -51,42 +51,29 @@ class ServicesRepositoryImpl implements ServicesRepository {
     await _supabase.from('services').delete().eq('id', id);
   }
 
+  @override
   Future<void> seedInitialData() async {
-    final List<String> items = [
-      "3D Modeling", "Legal Drafting and Global Compliance", "Full Stack Development with MERN",
-      "Cloud Computing", "Shopify Development and Dropshipping", "Mobile Game and App Development",
-      "UI/UX & Webflow", "Artificial Intelligence using Python", "Startup Strategies and Entrepreneurship",
-      "Virtual Assistant", "Data Analytics and Business Intelligence", "QuickBooks",
-      "SEO (Search Engine Optimization)", "Graphic Design", "Creative Writing", "AutoCAD",
-      "Digital Literacy", "Digital Marketing", "E-Commerce Management", "Freelancing",
-      "Communication and Soft Skills", "Video Editing, Animation and Vlogging",
-      "Affiliate Marketing", "WordPress"
+    final List<String> services = [
+      '3D Modeling', 'Legal Drafting and Global Compliance', 'Full Stack Development with MERN',
+      'Cloud Computing', 'Shopify Development and Dropshipping', 'Mobile Game and App Development',
+      'UI/UX & Webflow', 'Artificial Intelligence using Python', 'Startup Strategies and Entrepreneurship',
+      'Virtual Assistant', 'Data Analytics and Business Intelligence', 'QuickBooks',
+      'SEO (Search Engine Optimization)', 'Graphic Design', 'Creative Writing', 'AutoCAD',
+      'Digital Literacy', 'Digital Marketing', 'E-Commerce Management', 'Freelancing',
+      'Communication and Soft Skills', 'Video Editing, Animation and Vlogging',
+      'Affiliate Marketing', 'WordPress'
     ];
 
-    for (var title in items) {
-      // Add as Service
-      await addService(ServiceModel(
-        id: 'service_${title.hashCode}_${DateTime.now().millisecondsSinceEpoch}',
+    for (var title in services) {
+      final id = DateTime.now().millisecondsSinceEpoch.toString() + title.hashCode.toString();
+      await addService(ServiceEntity(
+        id: id,
         title: title,
-        description: "Professional $title services tailored for your needs.",
+        description: 'Elite professional training and solutions by Dynetix.',
         price: 150.0,
+        category: 'General',
+        type: 'service',
         isActive: true,
-        category: "General",
-        type: "service",
-      ));
-
-      // Add as Course (Academy)
-      await addService(ServiceModel(
-        id: 'course_${title.hashCode}_${DateTime.now().millisecondsSinceEpoch}',
-        title: title,
-        description: "Master $title with our elite academy course.",
-        price: 299.0,
-        isActive: true,
-        category: "Academy",
-        type: "course",
-        instructor: "Dynetix Expert",
-        duration: "3 Months",
-        level: "Beginner to Advanced",
       ));
     }
   }

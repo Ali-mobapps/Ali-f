@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dynetix VIP - Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&amp;family=Inter:wght@400&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed-variant": "#574500",
+                      "on-primary": "#3c2f00",
+                      "secondary-fixed": "#f0e0c8",
+                      "tertiary-container": "#97b0ff",
+                      "on-secondary-fixed-variant": "#4f4533",
+                      "surface-bright": "#3a3939",
+                      "on-secondary": "#382f1e",
+                      "on-tertiary-fixed-variant": "#27438a",
+                      "error-container": "#93000a",
+                      "error": "#ffb4ab",
+                      "inverse-surface": "#e5e2e1",
+                      "outline": "#99907c",
+                      "soft-ivory": "#F7E7CE",
+                      "on-secondary-fixed": "#221b0b",
+                      "champagne-gold": "#D4AF37",
+                      "surface-container": "#201f1f",
+                      "on-secondary-container": "#c5b79f",
+                      "surface-container-highest": "#353534",
+                      "surface-dim": "#131313",
+                      "surface-container-high": "#2a2a2a",
+                      "surface": "#131313",
+                      "on-tertiary-fixed": "#00174b",
+                      "on-background": "#e5e2e1",
+                      "on-surface": "#e5e2e1",
+                      "background": "#131313",
+                      "tertiary-fixed-dim": "#b4c5ff",
+                      "on-tertiary-container": "#254188",
+                      "surface-variant": "#353534",
+                      "primary": "#f2ca50",
+                      "outline-variant": "#4d4635",
+                      "secondary-fixed-dim": "#d3c5ad",
+                      "surface-tint": "#e9c349",
+                      "secondary": "#d3c5ad",
+                      "glass-border": "rgba(255, 255, 255, 0.1)",
+                      "inverse-on-surface": "#313030",
+                      "charcoal-depth": "#1A1A1A",
+                      "surface-container-low": "#1c1b1b",
+                      "on-error": "#690005",
+                      "on-primary-container": "#554300",
+                      "tertiary": "#bfcdff",
+                      "on-error-container": "#ffdad6",
+                      "primary-fixed-dim": "#e9c349",
+                      "surface-container-lowest": "#0e0e0e",
+                      "on-tertiary": "#082b72",
+                      "obsidian": "#0A0A0A",
+                      "on-surface-variant": "#d0c5af",
+                      "primary-fixed": "#ffe088",
+                      "tertiary-fixed": "#dbe1ff",
+                      "inverse-primary": "#735c00",
+                      "primary-container": "#d4af37",
+                      "secondary-container": "#524835",
+                      "on-primary-fixed": "#241a00"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin-mobile": "20px",
+                      "gutter": "24px",
+                      "unit": "8px",
+                      "container-max": "1280px",
+                      "section-gap": "120px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "label-sm": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-xl": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "40px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.0",
+                                      "letterSpacing": "0.1em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-xl": [
+                              "64px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: theme('colors.obsidian');
+            color: theme('colors.on-surface');
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .glass-panel {
+            background-color: theme('colors.charcoal-depth');
+            border: 1px solid theme('colors.glass-border');
+            backdrop-filter: blur(20px);
+        }
+
+        .service-card {
+            transition: all 0.3s ease;
+        }
+        .service-card:hover {
+            border-color: theme('colors.champagne-gold');
+            box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.05);
+        }
+        
+        .glow-active {
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+        }
+
+        /* Hide scrollbar for cleaner look but keep functionality */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.surface-variant');
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline');
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-24 md:pb-0 pt-20">
+<!-- TopAppBar (From JSON) -->
+<header class="bg-obsidian/80 backdrop-blur-xl fixed top-0 w-full z-50 border-b border-glass-border shadow-[0_4px_30px_rgba(0,0,0,0.1)] flex justify-between items-center px-margin-mobile h-16 w-full hidden md:flex">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-full bg-charcoal-depth border border-champagne-gold flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined text-champagne-gold" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-champagne-gold tracking-tighter">DYNETIX</h1>
+</div>
+<!-- Desktop Nav Cluster (Injected logic) -->
+<nav class="hidden md:flex items-center gap-8">
+<a class="font-label-sm text-label-sm text-champagne-gold flex flex-col items-center justify-center relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-champagne-gold after:rounded-full" href="#">dashboard</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">workspace_premium</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">account_balance_wallet</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">person</a>
+</nav>
+<button class="hover:opacity-80 transition-opacity text-champagne-gold">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<!-- Mobile Header (Simplified for md:hidden, assuming TopAppBar handles top structural nav on mobile but simplified) -->
+<header class="bg-obsidian/80 backdrop-blur-xl fixed top-0 w-full z-50 border-b border-glass-border shadow-[0_4px_30px_rgba(0,0,0,0.1)] flex justify-between items-center px-margin-mobile h-16 w-full md:hidden">
+<div class="w-8 h-8 rounded-full bg-charcoal-depth border border-champagne-gold flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-champagne-gold" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-champagne-gold tracking-tighter">DYNETIX</h1>
+<button class="text-champagne-gold">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<main class="max-w-container-max mx-auto px-margin-mobile md:px-gutter mt-8">
+<!-- Welcome Section -->
+<section class="mb-12">
+<h2 class="font-headline-xl text-headline-lg-mobile md:text-headline-xl text-on-surface mb-2">Welcome to Dynetix</h2>
+<p class="font-body-lg text-body-md md:text-body-lg text-on-surface-variant">Manage your premium services portfolio.</p>
+</section>
+<!-- Services Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter mb-section-gap">
+<!-- Service Card Template -->
+<script>
+                const services = [
+                    "3D Modeling", "Legal Drafting", "MERN Stack", "Cloud Computing", 
+                    "Shopify", "Mobile App Dev", "UI/UX", "AI/Python", 
+                    "Startup Strategies", "Virtual Assistant", "Data Analytics", "QuickBooks", 
+                    "SEO", "Graphic Design", "Creative Writing", "AutoCAD", 
+                    "Digital Literacy", "Digital Marketing", "E-Commerce", "Freelancing", 
+                    "Communication Skills", "Video Editing/Animation", "Affiliate Marketing", "WordPress"
+                ];
+
+                const icons = [
+                    "view_in_ar", "gavel", "code", "cloud",
+                    "storefront", "smartphone", "design_services", "psychology",
+                    "rocket_launch", "support_agent", "analytics", "account_balance",
+                    "troubleshoot", "brush", "draw", "architecture",
+                    "menu_book", "campaign", "shopping_cart", "work",
+                    "forum", "movie_edit", "share", "web"
+                ];
+
+                services.forEach((service, index) => {
+                    document.write(`
+                        <div class="glass-panel p-6 rounded-xl service-card group relative overflow-hidden flex flex-col justify-between min-h-[160px]">
+                            <div class="absolute top-0 right-0 p-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="text-champagne-gold hover:text-primary transition-colors" title="Edit">
+                                    <span class="material-symbols-outlined text-sm">edit</span>
+                                </button>
+                                <button class="text-champagne-gold hover:text-primary transition-colors" title="Delete">
+                                    <span class="material-symbols-outlined text-sm">delete</span>
+                                </button>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <span class="material-symbols-outlined text-champagne-gold text-3xl mb-2" style="font-variation-settings: 'FILL' 0;">${icons[index] || 'category'}</span>
+                                <h3 class="font-body-lg text-body-lg font-semibold text-on-surface">${service}</h3>
+                            </div>
+                            
+                            <div class="mt-auto">
+                                <span class="font-label-sm text-label-sm text-on-surface-variant">Active Service</span>
+                            </div>
+                        </div>
+                    `);
+                });
+            </script>
+</section>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 md:bottom-12 right-6 md:right-12 w-14 h-14 bg-champagne-gold text-obsidian rounded-full shadow-[0_4px_20px_rgba(212,175,55,0.4)] flex items-center justify-center hover:scale-105 transition-transform z-40" title="Add New Service">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+<!-- BottomNavBar (From JSON, Mobile Only) -->
+<nav class="bg-charcoal-depth/90 backdrop-blur-2xl fixed bottom-0 w-full z-50 rounded-t-xl border-t border-glass-border shadow-[0_-4px_20px_rgba(212,175,55,0.05)] fixed bottom-0 left-0 w-full h-20 flex justify-around items-center px-6 pb-safe md:hidden">
+<a class="flex flex-col items-center justify-center text-champagne-gold relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-champagne-gold after:rounded-full hover:text-primary transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm mt-1">dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">workspace_premium</span>
+<span class="font-label-sm text-label-sm mt-1">workspace_premium</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm mt-1">account_balance_wallet</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm mt-1">person</span>
+</a>
+</nav>
+</body></html>

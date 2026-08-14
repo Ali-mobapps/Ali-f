@@ -1,9 +1,11 @@
-class InquiryEntity {
+import 'package:equatable/equatable.dart';
+
+class InquiryEntity extends Equatable {
   final String id;
   final String userId;
-  final String itemId;
-  final String itemType;
-  final String senderRole;
+  final String itemId; // Service or Course ID
+  final String itemType; // 'service' or 'course'
+  final String senderRole; // 'customer' or 'admin'
   final String message;
   final DateTime createdAt;
 
@@ -17,14 +19,6 @@ class InquiryEntity {
     required this.createdAt,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'user_id': userId,
-      'item_id': itemId,
-      'item_type': itemType,
-      'sender_role': senderRole,
-      'message': message,
-      'created_at': createdAt.toIso8601String(),
-    };
-  }
+  @override
+  List<Object?> get props => [id, userId, itemId, senderRole, message, createdAt];
 }

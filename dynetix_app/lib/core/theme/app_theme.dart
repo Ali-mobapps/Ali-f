@@ -14,9 +14,11 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.primary,
         surface: AppColors.surface,
+        background: AppColors.background,
         error: AppColors.error,
         onPrimary: Colors.white,
         onSurface: AppColors.textPrimary,
+        onBackground: AppColors.textPrimary,
       ),
 
       fontFamily: GoogleFonts.poppins().fontFamily,
@@ -132,7 +134,7 @@ class AppTheme {
       ),
 
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.navBarBackground,
+        backgroundColor: AppColors.charcoalDepth,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textDisabled,
         showSelectedLabels: true,
@@ -159,6 +161,7 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.primary,
         surface: Colors.white,
+        background: Color(0xFFF8F9FA),
         error: AppColors.error,
       ),
       fontFamily: GoogleFonts.poppins().fontFamily,

@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../domain/entities/profile_entity.dart';
 import '../../domain/repositories/profile_repository.dart';
+import '../../domain/entities/profile_entity.dart';
 import 'profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
@@ -20,10 +19,9 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 
   Future<void> updateProfile(ProfileEntity profile) async {
-    emit(ProfileLoading());
     try {
       await repository.updateProfile(profile);
-      emit(ProfileUpdateSuccess(profile, 'Profile updated successfully!'));
+      fetchProfile(profile.email);
     } catch (e) {
       emit(ProfileError(e.toString()));
     }

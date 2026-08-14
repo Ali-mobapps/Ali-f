@@ -1,8 +1,6 @@
 import '../../domain/entities/inquiry_entity.dart';
 
-/// Data model for inquiries, extending [InquiryEntity] with JSON serialization.
 class InquiryModel extends InquiryEntity {
-  /// Creates an [InquiryModel] instance.
   const InquiryModel({
     required super.id,
     required super.userId,
@@ -13,7 +11,6 @@ class InquiryModel extends InquiryEntity {
     required super.createdAt,
   });
 
-  /// Factory constructor to create an [InquiryModel] from JSON data and a document ID.
   factory InquiryModel.fromJson(Map<String, dynamic> json, String id) {
     return InquiryModel(
       id: id,
@@ -28,10 +25,14 @@ class InquiryModel extends InquiryEntity {
     );
   }
 
-  /// Converts the [InquiryModel] to a JSON map for storage.
-  @override
   Map<String, dynamic> toJson() {
-    final json = super.toJson();
-    return json;
+    return {
+      'user_id': userId,
+      'item_id': itemId,
+      'item_type': itemType,
+      'sender_role': senderRole,
+      'message': message,
+      'created_at': createdAt.toIso8601String(),
+    };
   }
 }

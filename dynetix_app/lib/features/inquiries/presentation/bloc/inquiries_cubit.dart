@@ -19,19 +19,23 @@ class InquiriesCubit extends Cubit<InquiriesState> {
     );
   }
 
-  Future<void> fetchInquiries(String identifier, bool isAdmin) async {
-    emit(InquiriesLoading());
+  Future<void> sendInquiry(InquiryEntity inquiry) async {
     try {
-      final inquiries = await repository.getAllInquiries();
-      emit(InquiriesLoaded(inquiries));
+      await repository.sendInquiry(inquiry);
     } catch (e) {
       emit(InquiriesError(e.toString()));
     }
   }
 
-  Future<void> sendInquiry(InquiryEntity inquiry, [String? sender, bool? isAdmin]) async {
+  Future<void> fetchInquiries(String identifier, bool isAdmin) async {
+    emit(InquiriesLoading());
     try {
-      await repository.sendInquiry(inquiry);
+      if (isAdmin) {
+        final inquiries = await repository.getAllInquiries();
+        emit(InquiriesLoaded(inquiries));
+      } else {
+        // Customer logic if needed, usually they see by item
+      }
     } catch (e) {
       emit(InquiriesError(e.toString()));
     }

@@ -25,7 +25,7 @@ class AppUpdateScreen extends StatelessWidget {
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.check_circle, color: AppColors.tileGreen),
+                  Icon(Icons.check_circle, color: AppColors.success),
                   SizedBox(width: 16),
                   Text('Your app is up to date!', style: TextStyle(fontWeight: FontWeight.bold)),
                 ],

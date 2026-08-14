@@ -14,7 +14,7 @@ class InquiriesRepositoryImpl implements InquiriesRepository {
         .eq('item_id', itemId)
         .order('created_at', ascending: true);
         
-    return data.map<InquiryEntity>((json) => InquiryModel.fromJson(json, json['id'].toString())).toList();
+    return data.map((json) => InquiryModel.fromJson(json, json['id'].toString())).toList();
   }
 
   @override
@@ -25,7 +25,7 @@ class InquiriesRepositoryImpl implements InquiriesRepository {
         .eq('item_id', itemId)
         .order('created_at', ascending: true)
         .map((data) => data
-            .map<InquiryEntity>((json) => InquiryModel.fromJson(json, json['id'].toString()))
+            .map((json) => InquiryModel.fromJson(json, json['id'].toString()))
             .toList());
   }
 
@@ -35,8 +35,8 @@ class InquiriesRepositoryImpl implements InquiriesRepository {
         .from('inquiries')
         .select()
         .order('created_at', ascending: false);
-        
-    return data.map<InquiryEntity>((json) => InquiryModel.fromJson(json, json['id'].toString())).toList();
+    
+    return data.map((json) => InquiryModel.fromJson(json, json['id'].toString())).toList();
   }
 
   @override

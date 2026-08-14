@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/theme/vip_theme.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/dynetix_widgets.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../bloc/profile_cubit.dart';
 import '../bloc/profile_state.dart';
@@ -8,7 +9,6 @@ import '../../../../core/theme/bloc/theme_cubit.dart';
 import '../../../settings/presentation/screens/about_screen.dart';
 import '../../../settings/presentation/screens/update_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
-import '../../../settings/presentation/screens/settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String userEmail;
@@ -20,127 +20,166 @@ class ProfileScreen extends StatelessWidget {
     context.read<ProfileCubit>().fetchProfile(userEmail);
 
     return Scaffold(
-      backgroundColor: VIPTheme.darkBackground,
-      appBar: AppBar(
-        title: const Text('Profile'),
-        backgroundColor: VIPTheme.darkBackground,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: VIPTheme.primaryGold),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      backgroundColor: AppColors.background,
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
-          String name = 'User';
-          String email = userEmail;
+          String name = 'Director';
+          String role = 'Elite Member';
 
           if (state is ProfileLoaded) {
             name = state.profile.name;
-            email = state.profile.email;
+            role = state.profile.role;
           }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                Center(
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 100,
+                floating: false,
+                pinned: true,
+                backgroundColor: AppColors.background,
+                elevation: 0,
+                title: const Text('PROFILE', style: TextStyle(letterSpacing: 4, fontWeight: FontWeight.bold, fontSize: 16)),
+                centerTitle: true,
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
                     children: [
-                      const CircleAvatar(
-                        radius: 50,
-                        backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=customer'),
-                      ),
+                      // Avatar
+                      _buildProfileHeader(context),
+                      const SizedBox(height: 24),
+                      Text(name, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.softIvory)),
+                      const SizedBox(height: 4),
+                      Text(role.toUpperCase(), style: const TextStyle(color: AppColors.primary, letterSpacing: 2, fontSize: 11, fontWeight: FontWeight.w600)),
+                      
+                      const SizedBox(height: 48),
+                      
+                      // Settings Sections
+                      _buildSectionTitle('System Configuration'),
                       const SizedBox(height: 16),
-                      Text(
-                        name,
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: VIPTheme.primaryGold),
+                      _buildOption(context, Icons.settings_outlined, 'Account Preferences', 'Manage your core profile security'),
+                      _buildOption(context, Icons.notifications_none_rounded, 'Alert Configurations', 'Routing and priority settings', 
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationsScreen(userEmail: userEmail)))),
+                      _buildOption(context, Icons.contrast_rounded, 'Interface Mode', 'Toggle high contrast VIP mode', 
+                        trailing: BlocBuilder<ThemeCubit, ThemeMode>(
+                          builder: (context, mode) => Switch(
+                            value: mode == ThemeMode.dark,
+                            onChanged: (_) => context.read<ThemeCubit>().toggleTheme(),
+                            activeColor: AppColors.primary,
+                          ),
+                        ),
                       ),
-                      Text(
-                        email,
-                        style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      
+                      const SizedBox(height: 32),
+                      _buildSectionTitle('Information Hub'),
+                      const SizedBox(height: 16),
+                      _buildOption(context, Icons.info_outline_rounded, 'System Details', 'Version: VIP-9.4.2 Platinum', 
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()))),
+                      _buildOption(context, Icons.system_update_rounded, 'Connectivity Check', 'Verify latest system updates',
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppUpdateScreen()))),
+                      
+                      const SizedBox(height: 48),
+                      
+                      // Logout
+                      DynetixButton(
+                        text: 'TERMINATE SESSION',
+                        color: Colors.redAccent.withOpacity(0.05),
+                        textColor: Colors.redAccent,
+                        isOutline: true,
+                        onPressed: () => _showLogoutDialog(context),
                       ),
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
-                const SizedBox(height: 40),
-                _buildProfileItem(Icons.edit_outlined, 'Edit Profile', () {}),
-                _buildProfileItem(Icons.notifications_none_rounded, 'Notifications', () {
-                   Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationsScreen(userEmail: userEmail)));
-                }),
-                _buildProfileItem(Icons.dark_mode_outlined, 'Theme Mode', () {}, 
-                  trailing: BlocBuilder<ThemeCubit, ThemeMode>(
-                    builder: (context, mode) => Switch(
-                      value: mode == ThemeMode.dark,
-                      onChanged: (_) => context.read<ThemeCubit>().toggleTheme(),
-                      activeColor: VIPTheme.primaryGold,
-                    ),
-                  )
-                ),
-                _buildProfileItem(Icons.settings_outlined, 'Settings', () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen(userEmail: userEmail)));
-                }),
-                _buildProfileItem(Icons.info_outline_rounded, 'About Dynetix', () {
-                   Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
-                }),
-                _buildProfileItem(Icons.system_update_rounded, 'App Update', () {
-                   Navigator.push(context, MaterialPageRoute(builder: (_) => const AppUpdateScreen()));
-                }),
-                const SizedBox(height: 40),
-                TextButton(
-                  onPressed: () => _showLogoutConfirmation(context),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.logout_rounded, color: Colors.redAccent),
-                      SizedBox(width: 8),
-                      Text('Logout', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 40),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),
     );
   }
 
-  void _showLogoutConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: VIPTheme.cardBackground,
-        title: const Text('Logout', style: TextStyle(color: Colors.white)),
-        content: const Text('Are you sure you want to logout?', style: TextStyle(color: Colors.white70)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
-          TextButton(
-            onPressed: () {
-              context.read<AuthCubit>().logout();
-              Navigator.pushNamedAndRemoveUntil(context, '/role-selection', (route) => false);
-            },
-            child: const Text('Logout', style: TextStyle(color: Colors.redAccent)),
+  Widget _buildProfileHeader(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: 130,
+          height: 130,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 1),
           ),
-        ],
+        ),
+        const CircleAvatar(
+          radius: 60,
+          backgroundColor: AppColors.charcoalDepth,
+          backgroundImage: NetworkImage('https://i.pravatar.cc/300?img=12'),
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+            child: const Icon(Icons.photo_camera_rounded, size: 18, color: Colors.black),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        title.toUpperCase(),
+        style: const TextStyle(color: AppColors.textDisabled, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2),
       ),
     );
   }
 
-  Widget _buildProfileItem(IconData icon, String title, VoidCallback onTap, {Widget? trailing}) {
+  Widget _buildOption(BuildContext context, IconData icon, String title, String subtitle, {Widget? trailing, VoidCallback? onTap}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: VIPTheme.cardBackground,
-        borderRadius: BorderRadius.circular(16),
+      child: GlassPanel(
+        padding: 4,
+        child: ListTile(
+          onTap: onTap,
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(10)),
+            child: Icon(icon, color: AppColors.primary, size: 20),
+          ),
+          title: Text(title, style: const TextStyle(color: AppColors.softIvory, fontSize: 15, fontWeight: FontWeight.w500)),
+          subtitle: Text(subtitle, style: const TextStyle(color: AppColors.textDisabled, fontSize: 11)),
+          trailing: trailing ?? const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textDisabled),
+        ),
       ),
-      child: ListTile(
-        leading: Icon(icon, color: VIPTheme.primaryGold, size: 22),
-        title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500)),
-        trailing: trailing ?? const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white54),
-        onTap: onTap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Confirm Termination'),
+        content: const Text('Are you sure you want to end this elite session?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () {
+              context.read<AuthCubit>().logout();
+              Navigator.pushNamedAndRemoveUntil(context, '/role-selection', (route) => false);
+            },
+            child: const Text('TERMINATE'),
+          ),
+        ],
       ),
     );
   }

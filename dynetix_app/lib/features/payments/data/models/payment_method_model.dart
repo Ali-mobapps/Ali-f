@@ -30,22 +30,4 @@ class PaymentMethodModel extends PaymentMethodEntity {
       'is_active': isActive,
     };
   }
-
-  PaymentMethodModel copyWith({
-    String? id,
-    String? name,
-    String? accountNumber,
-    String? accountTitle,
-    String? logoUrl,
-    bool? isActive,
-  }) {
-    return PaymentMethodModel(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      accountNumber: accountNumber ?? this.accountNumber,
-      accountTitle: accountTitle ?? this.accountTitle,
-      logoUrl: logoUrl ?? this.logoUrl,
-      isActive: isActive ?? this.isActive,
-    );
-  }
 }

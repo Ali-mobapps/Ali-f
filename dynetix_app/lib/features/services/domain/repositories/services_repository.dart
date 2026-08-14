@@ -5,4 +5,5 @@ abstract class ServicesRepository {
   Future<void> addService(ServiceEntity service);
   Future<void> updateService(ServiceEntity service);
   Future<void> deleteService(String id);
+  Future<void> seedInitialData();
 }

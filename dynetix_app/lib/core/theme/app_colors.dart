@@ -1,46 +1,35 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Premium VIP Palette
-  static const Color gold = Color(0xFFFFD700); // Premium Gold
-  static const Color darkBackground = Color(0xFF0F111A); // Deep Navy/Black
-  static const Color cardBackground = Color(0xFF1E2230); // Dark Slate
-  static const Color accentBlue = Color(0xFF6C5CE7); // Royal Purple/Blue
-
-  // Semantic Aliases
-  static const Color primary = gold;
-  static const Color background = darkBackground;
-  static const Color surface = cardBackground;
-  static const Color navBarBackground = Color(0xFF161925);
+  // Premium VIP Palette - Exact matches from design specifications
+  static const Color champagneGold = Color(0xFFD4AF37);
+  static const Color obsidian = Color(0xFF0A0A0A);
+  static const Color charcoalDepth = Color(0xFF1A1A1A);
+  static const Color softIvory = Color(0xFFF7E7CE);
+  
+  static const Color primary = champagneGold;
+  static const Color background = obsidian;
+  static const Color surface = charcoalDepth;
+  static const Color glassBorder = Color(0x1AFFFFFF); // 0.1 opacity white
   
   // Dashboard Tile Colors
-  static const Color tilePurple = Color(0xFFA855F7);
-  static const Color tileBlue = Color(0xFF3B82F6);
-  static const Color tileGreen = Color(0xFF10B981);
-  static const Color tileOrange = Color(0xFFF59E0B);
-  static const Color tileRed = Color(0xFFEF4444);
+  static const Color gold = Color(0xFFFFD700);
+  static const Color darkBackground = Color(0xFF0F111A);
+  static const Color cardBackground = Color(0xFF1E2230);
   
   // Text Colors
-  static const Color textPrimary = Color(0xFFF8FAFC);
-  static const Color textSecondary = Color(0xFF94A3B8);
-  static const Color textDisabled = Color(0xFF475569);
+  static const Color textPrimary = Color(0xFFE5E2E1);
+  static const Color textSecondary = Color(0xFFD0C5AF);
+  static const Color textDisabled = Color(0xFF99907C);
   
   // Accents & Actions
-  static const Color success = Color(0xFF10B981);
-  static const Color error = Color(0xFFEF4444);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color info = Color(0xFF3B82F6);
+  static const Color success = Color(0xFF00E676);
+  static const Color error = Color(0xFFFFB4AB);
 
   // Gradients
   static const LinearGradient goldGradient = LinearGradient(
-    colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
+    colors: [Color(0xFFD4AF37), Color(0xFFF2CA50)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-  );
-
-  static const LinearGradient darkGradient = LinearGradient(
-    colors: [Color(0xFF1E2230), Color(0xFF0F111A)],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
   );
 }

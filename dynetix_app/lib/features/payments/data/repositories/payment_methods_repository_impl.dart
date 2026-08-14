@@ -10,7 +10,7 @@ class PaymentMethodsRepositoryImpl implements PaymentMethodsRepository {
   Future<List<PaymentMethodEntity>> getPaymentMethods() async {
     try {
       final List<dynamic> data = await _supabase.from('payment_methods').select();
-      return data.map<PaymentMethodEntity>((json) => PaymentMethodModel.fromJson(json, json['id'].toString())).toList();
+      return data.map((json) => PaymentMethodModel.fromJson(json, json['id'].toString())).toList();
     } catch (e) {
       rethrow;
     }
@@ -42,6 +42,7 @@ class PaymentMethodsRepositoryImpl implements PaymentMethodsRepository {
     await _supabase.from('payment_methods').insert(model.toJson());
   }
 
+  @override
   Future<void> seedInitialMethods() async {
     final methods = [
       {'name': 'EasyPaisa', 'number': '03451495330', 'title': 'Dynetix Official'},

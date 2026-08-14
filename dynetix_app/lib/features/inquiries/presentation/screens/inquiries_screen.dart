@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/theme/vip_theme.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/dynetix_widgets.dart';
 import '../../domain/entities/inquiry_entity.dart';
 import '../bloc/inquiries_cubit.dart';
 import '../bloc/inquiries_state.dart';
+import 'inquiry_chat_screen.dart';
 
 class InquiriesScreen extends StatefulWidget {
   final bool isAdmin;
@@ -22,141 +24,95 @@ class InquiriesScreen extends StatefulWidget {
 }
 
 class _InquiriesScreenState extends State<InquiriesScreen> {
-  final TextEditingController _controller = TextEditingController();
-
   @override
   void initState() {
     super.initState();
-    // For general inquiries, we use a fixed ID like 'general_support'
-    context.read<InquiriesCubit>().watchInquiries('general_support');
+    // For admin, we might want to fetch all unique inquiries.
+    // For customer, they see their own.
+    // Assuming the Cubit has a method to fetch list of inquiry threads.
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: VIPTheme.darkBackground,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: VIPTheme.darkBackground,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(widget.isAdmin ? 'Client Support' : 'Ask Admin', 
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: VIPTheme.primaryGold)),
-            const Text('We are here to help you 24/7', 
-              style: TextStyle(fontSize: 12, color: Colors.white70)),
-          ],
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: VIPTheme.primaryGold),
-          onPressed: () => Navigator.pop(context),
-        ),
+        title: Text(widget.isAdmin ? 'Inquiries' : 'Support Chat', style: const TextStyle(letterSpacing: 1, fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        backgroundColor: AppColors.surface,
+        elevation: 0,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: BlocBuilder<InquiriesCubit, InquiriesState>(
-              builder: (context, state) {
-                if (state is InquiriesLoading) {
-                  return const Center(child: CircularProgressIndicator(color: VIPTheme.primaryGold));
-                } else if (state is InquiriesLoaded) {
-                  final inquiries = state.inquiries;
-                  if (inquiries.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'Start a conversation with Dynetix Admin!',
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    );
-                  }
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: inquiries.length,
-                    itemBuilder: (context, index) {
-                      final inquiry = inquiries[index];
-                      final isMe = inquiry.senderRole == widget.userRole;
-                      return _buildMessageBubble(inquiry, isMe);
-                    },
-                  );
-                }
-                return const SizedBox();
+      body: BlocBuilder<InquiriesCubit, InquiriesState>(
+        builder: (context, state) {
+          if (state is InquiriesLoading) return const Center(child: CircularProgressIndicator());
+          
+          if (state is InquiriesLoaded) {
+            // Group by item_id or unique conversations
+            // For now, just showing list
+            if (state.inquiries.isEmpty) {
+              return _buildEmptyState();
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(20),
+              itemCount: state.inquiries.length,
+              itemBuilder: (context, index) {
+                final inquiry = state.inquiries[index];
+                return _buildInquiryTile(inquiry);
               },
-            ),
-          ),
-          _buildInputArea(),
-        ],
+            );
+          }
+          
+          return _buildEmptyState();
+        },
       ),
     );
   }
 
-  Widget _buildMessageBubble(InquiryEntity inquiry, bool isMe) {
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: isMe ? VIPTheme.primaryGold : VIPTheme.cardBackground,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          inquiry.message,
-          style: TextStyle(color: isMe ? Colors.black : Colors.white),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInputArea() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      color: VIPTheme.cardBackground,
-      child: Row(
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Type your message...',
-                hintStyle: const TextStyle(color: Colors.white54),
-                filled: true,
-                fillColor: VIPTheme.darkBackground,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          InkWell(
-            onTap: () {
-              final text = _controller.text.trim();
-              if (text.isNotEmpty) {
-                final inquiry = InquiryEntity(
-                  id: '',
-                  userId: widget.userId,
-                  itemId: 'general_support',
-                  itemType: 'support',
-                  senderRole: widget.userRole,
-                  message: text,
-                  createdAt: DateTime.now(),
-                );
-                context.read<InquiriesCubit>().sendInquiry(inquiry);
-                _controller.clear();
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: VIPTheme.primaryGold,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.send_rounded, color: Colors.black, size: 20),
-            ),
-          ),
+          Icon(Icons.chat_bubble_outline_rounded, size: 64, color: AppColors.textDisabled.withOpacity(0.5)),
+          const SizedBox(height: 16),
+          const Text('No messages yet', style: TextStyle(color: AppColors.textSecondary)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInquiryTile(InquiryEntity inquiry) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: GlassPanel(
+        padding: 4,
+        child: ListTile(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => InquiryChatScreen(
+                  itemId: inquiry.itemId,
+                  itemTitle: 'Service Inquiry', // Should fetch title
+                  userRole: widget.userRole,
+                  userId: widget.userId,
+                ),
+              ),
+            );
+          },
+          leading: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.forum_rounded, color: AppColors.primary, size: 20),
+          ),
+          title: Text(inquiry.message, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+          subtitle: Text(inquiry.senderRole.toUpperCase(), style: const TextStyle(color: AppColors.textDisabled, fontSize: 11)),
+          trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.textDisabled),
+        ),
       ),
     );
   }

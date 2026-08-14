@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/vip_theme.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/dynetix_widgets.dart';
 import 'admin_login_screen.dart';
 import 'login_screen.dart';
 
@@ -9,37 +10,169 @@ class RoleSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: Stack(
+        children: [
+          // Atmospheric Background Glow
+          Positioned(
+            top: -200,
+            left: -200,
+            right: -200,
+            bottom: -200,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.center,
+                  radius: 0.8,
+                  colors: [
+                    AppColors.primary.withOpacity(0.08),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Brand / Logo Section
+                    const DynetixLogo(size: 140),
+                    const SizedBox(height: 32),
+                    Text(
+                      'DYNETIX',
+                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                        letterSpacing: 10,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'VIP ACCESS PORTAL',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        letterSpacing: 6,
+                        color: AppColors.textSecondary,
+                        fontSize: 10,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 80),
+                    
+                    // Customer Card
+                    _buildPortalOption(
+                      context,
+                      title: 'Customer Login',
+                      subtitle: 'Access premium solutions and academy.',
+                      icon: Icons.diamond_rounded,
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+                      isPrimary: true,
+                    ),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Admin Card
+                    _buildPortalOption(
+                      context,
+                      title: 'Admin Portal',
+                      subtitle: 'Secure management and oversight.',
+                      icon: Icons.shield_rounded,
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminLoginScreen())),
+                      isPrimary: false,
+                    ),
+                    
+                    const SizedBox(height: 60),
+                    
+                    // Registration Link
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Requesting access? ',
+                          style: TextStyle(color: AppColors.textDisabled),
+                        ),
+                        GestureDetector(
+                          onTap: () {},
+                          child: const Text(
+                            'Create Account',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPortalOption(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+    required bool isPrimary,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: GlassPanel(
+        padding: 24,
+        borderColor: isPrimary ? AppColors.primary.withOpacity(0.3) : AppColors.glassBorder,
+        child: Row(
           children: [
-            Image.asset('assets/images/logo.png', height: 120, errorBuilder: (context, error, stackTrace) => const Icon(Icons.business, size: 120, color: VIPTheme.primaryGold)),
-            const SizedBox(height: 30),
-            const Text(
-              "DYNETIX PORTAL",
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 2, color: VIPTheme.primaryGold),
-            ),
-            const SizedBox(height: 50),
-            ElevatedButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminLoginScreen())),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [Icon(Icons.admin_panel_settings), SizedBox(width: 10), Text("ADMIN LOGIN")],
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isPrimary ? AppColors.primary.withOpacity(0.1) : Colors.white.withOpacity(0.03),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: isPrimary ? AppColors.primary : AppColors.textSecondary,
+                size: 28,
               ),
             ),
-            const SizedBox(height: 20),
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: VIPTheme.primaryGold, width: 2),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [Icon(Icons.person, color: VIPTheme.primaryGold), SizedBox(width: 10), Text("CUSTOMER LOGIN", style: TextStyle(color: VIPTheme.primaryGold))],
-              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: AppColors.textDisabled,
             ),
           ],
         ),

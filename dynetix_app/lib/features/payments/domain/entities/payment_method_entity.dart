@@ -1,4 +1,6 @@
-class PaymentMethodEntity {
+import 'package:equatable/equatable.dart';
+
+class PaymentMethodEntity extends Equatable {
   final String id;
   final String name;
   final String accountNumber;
@@ -14,4 +16,7 @@ class PaymentMethodEntity {
     this.logoUrl,
     this.isActive = true,
   });
+
+  @override
+  List<Object?> get props => [id, name, accountNumber, isActive];
 }
