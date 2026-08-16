@@ -1,2 +1,2 @@
 ninja: Entering directory `C:\Users\Kashif Computers\AppData\Local\Pub\Cache\hosted\pub.dev\jni-1.0.3\android\.cxx\Debug\571w346y\x86'
-ninja: no work to do.
+[1/1] Linking C shared library "C:\Users\Kashif Computers\Documents\GitHub\ali-f\dynetix_app\build\jni\intermediates\cxx\Debug\571w346y\obj\x86\libdartjni.so"

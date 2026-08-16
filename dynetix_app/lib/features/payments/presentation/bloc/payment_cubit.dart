@@ -35,4 +35,13 @@ class PaymentCubit extends Cubit<PaymentState> {
       emit(PaymentError(e.toString()));
     }
   }
+
+  Future<void> deletePaymentMethod(String id) async {
+    try {
+      await methodsRepository.deletePaymentMethod(id);
+      fetchPaymentMethods();
+    } catch (e) {
+      emit(PaymentError(e.toString()));
+    }
+  }
 }

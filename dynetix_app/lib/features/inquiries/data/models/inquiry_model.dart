@@ -26,13 +26,18 @@ class InquiryModel extends InquiryEntity {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'user_id': userId,
+    final Map<String, dynamic> data = {
       'item_id': itemId,
       'item_type': itemType,
       'sender_role': senderRole,
       'message': message,
-      'created_at': createdAt.toIso8601String(),
     };
+
+    // Sirf tab user_id bhejein jab wo "anonymous" na ho aur valid UUID lagay
+    if (userId.isNotEmpty && userId != 'anonymous') {
+      data['user_id'] = userId;
+    }
+
+    return data;
   }
 }

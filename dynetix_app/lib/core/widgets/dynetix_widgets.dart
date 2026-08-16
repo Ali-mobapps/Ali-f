@@ -29,7 +29,7 @@ class GlassPanel extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
-            color: backgroundColor ?? AppColors.charcoalDepth.withOpacity(0.4),
+            color: backgroundColor ?? AppColors.charcoalDepth.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(borderRadius),
             border: Border.all(
               color: borderColor ?? AppColors.glassBorder,
@@ -102,7 +102,7 @@ class DynetixButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: (color ?? AppColors.primary).withOpacity(0.2),
+            color: (color ?? AppColors.primary).withValues(alpha: 0.2),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -150,23 +150,29 @@ class DynetixLogo extends StatelessWidget {
     return Container(
       width: size,
       height: size,
+      padding: EdgeInsets.all(size * 0.1), // Add some padding so background is visible
       decoration: BoxDecoration(
+        color: AppColors.background, // Match the dark background from your picture
         shape: BoxShape.circle,
         boxShadow: showGlow ? [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.2),
-            blurRadius: 30,
+            color: AppColors.primary.withValues(alpha: 0.15),
+            blurRadius: 40,
             spreadRadius: 5,
           ),
         ] : null,
       ),
-      child: GlassPanel(
-        borderRadius: size / 2,
-        padding: size * 0.15,
-        child: Icon(
-          Icons.rocket_launch_rounded,
-          size: size * 0.5,
-          color: AppColors.primary,
+      child: Center(
+        child: Image.asset(
+          'assets/images/logo.png',
+          width: size,
+          height: size,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => Icon(
+            Icons.rocket_launch_rounded,
+            size: size * 0.6,
+            color: AppColors.primary,
+          ),
         ),
       ),
     );

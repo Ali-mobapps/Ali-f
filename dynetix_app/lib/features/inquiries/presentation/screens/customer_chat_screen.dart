@@ -78,7 +78,7 @@ class _CustomerChatScreenState extends State<CustomerChatScreen> {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.03), borderRadius: BorderRadius.circular(30)),
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(30)),
                 child: TextField(
                   controller: _msgController,
                   style: const TextStyle(color: Colors.white, fontSize: 14),

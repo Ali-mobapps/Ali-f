@@ -8,26 +8,58 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<UserEntity> login(String email, String password) async {
-    final response = await _supabase.auth.signInWithPassword(email: email, password: password);
-    if (response.user == null) throw Exception('Login failed');
-    
-    return _fetchUserProfile(response.user!.id, email);
+    try {
+      final cleanEmail = email.trim().toLowerCase();
+      final response = await _supabase.auth.signInWithPassword(
+        email: cleanEmail, 
+        password: password
+      );
+      
+      if (response.user == null) throw Exception('Login failed');
+      
+      return _fetchUserProfile(response.user!.id, cleanEmail);
+    } on AuthException catch (e) {
+      if (e.message.toLowerCase().contains('email not confirmed')) {
+        throw 'Please verify your email or disable Email Confirmation in Supabase Dashboard.';
+      }
+      throw e.message;
+    } catch (e) {
+      throw 'An unexpected error occurred during login.';
+    }
   }
 
   @override
   Future<UserEntity> signUp(String email, String password, String name) async {
-    final response = await _supabase.auth.signUp(email: email, password: password, data: {'full_name': name});
-    if (response.user == null) throw Exception('Signup failed');
+    try {
+      final cleanEmail = email.trim().toLowerCase();
+      
+      final response = await _supabase.auth.signUp(
+        email: cleanEmail,
+        password: password,
+        data: {'name': name},
+      );
 
-    // Create profile in public.users table
-    await _supabase.from('users').insert({
-      'id': response.user!.id,
-      'email': email,
-      'name': name,
-      'role': 'customer',
-    });
+      final user = response.user;
+      if (user == null) throw Exception('Signup failed: No user returned');
 
-    return UserModel(id: response.user!.id, email: email, role: 'customer', name: name);
+      // Create profile in public.users table - Do it in background so it doesn't block
+      _supabase.from('users').upsert({
+        'id': user.id,
+        'email': cleanEmail,
+        'name': name,
+        'role': 'customer',
+      }).then((_) => print('Profile synced')).catchError((e) => print('Profile sync error: $e'));
+
+      if (response.session == null) {
+        throw 'Account created! Please confirm your email OR disable Email Confirmation in Supabase settings to login directly.';
+      }
+
+      return UserModel(id: user.id, email: cleanEmail, role: 'customer', name: name);
+    } on AuthException catch (e) {
+      throw e.message;
+    } catch (e) {
+      throw e.toString();
+    }
   }
 
   @override
@@ -48,7 +80,35 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   Future<UserEntity> _fetchUserProfile(String id, String email) async {
-    final data = await _supabase.from('users').select().eq('id', id).single();
-    return UserModel.fromJson(data);
+    try {
+      final List<dynamic> data = await _supabase.from('users').select().eq('id', id);
+      
+      if (data.isEmpty) {
+        // Automatically set 'admin' role for your specific admin email
+        final isMasterAdmin = email.toLowerCase() == 'admin@dynetix.com';
+        
+        final defaultData = {
+          'id': id,
+          'email': email,
+          'name': email.split('@').first,
+          'role': isMasterAdmin ? 'admin' : 'customer',
+        };
+        
+        // Try to save this profile in the background
+        _supabase.from('users').insert(defaultData).then((_) => print('Default profile created')).catchError((e) => print('Profile insert error: $e'));
+        
+        return UserModel.fromJson(defaultData);
+      }
+      
+      return UserModel.fromJson(data.first);
+    } catch (e) {
+      // Fallback if table doesn't exist yet
+      return UserModel(
+        id: id, 
+        email: email, 
+        role: email.toLowerCase() == 'admin@dynetix.com' ? 'admin' : 'customer',
+        name: email.split('@').first
+      );
+    }
   }
 }

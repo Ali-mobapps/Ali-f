@@ -11,6 +11,8 @@ class ServiceEntity extends Equatable {
   final String? instructor;
   final String? duration;
   final String? level;
+  final double? discountPrice;
+  final String? imageUrl;
 
   const ServiceEntity({
     required this.id,
@@ -23,6 +25,8 @@ class ServiceEntity extends Equatable {
     this.instructor,
     this.duration,
     this.level,
+    this.discountPrice,
+    this.imageUrl,
   });
 
   @override

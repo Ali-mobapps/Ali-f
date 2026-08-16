@@ -74,7 +74,7 @@ class _InquiriesScreenState extends State<InquiriesScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.chat_bubble_outline_rounded, size: 64, color: AppColors.textDisabled.withOpacity(0.5)),
+          Icon(Icons.chat_bubble_outline_rounded, size: 64, color: AppColors.textDisabled.withValues(alpha: 0.5)),
           const SizedBox(height: 16),
           const Text('No messages yet', style: TextStyle(color: AppColors.textSecondary)),
         ],
@@ -104,7 +104,7 @@ class _InquiriesScreenState extends State<InquiriesScreen> {
           leading: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.forum_rounded, color: AppColors.primary, size: 20),

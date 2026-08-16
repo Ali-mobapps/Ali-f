@@ -3,6 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/dynetix_widgets.dart';
 import 'admin_login_screen.dart';
 import 'login_screen.dart';
+import 'signup_screen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
@@ -24,7 +25,7 @@ class RoleSelectionScreen extends StatelessWidget {
                   center: Alignment.center,
                   radius: 0.8,
                   colors: [
-                    AppColors.primary.withOpacity(0.08),
+                    AppColors.primary.withValues(alpha: 0.08),
                     Colors.transparent,
                   ],
                 ),
@@ -52,11 +53,12 @@ class RoleSelectionScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'VIP ACCESS PORTAL',
+                      'Software house Veahri',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        letterSpacing: 6,
+                        letterSpacing: 2,
                         color: AppColors.textSecondary,
-                        fontSize: 10,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     
@@ -87,15 +89,16 @@ class RoleSelectionScreen extends StatelessWidget {
                     const SizedBox(height: 60),
                     
                     // Registration Link
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         const Text(
                           'Requesting access? ',
                           style: TextStyle(color: AppColors.textDisabled),
                         ),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SignUpScreen())),
                           child: const Text(
                             'Create Account',
                             style: TextStyle(
@@ -130,13 +133,13 @@ class RoleSelectionScreen extends StatelessWidget {
       borderRadius: BorderRadius.circular(24),
       child: GlassPanel(
         padding: 24,
-        borderColor: isPrimary ? AppColors.primary.withOpacity(0.3) : AppColors.glassBorder,
+        borderColor: isPrimary ? AppColors.primary.withValues(alpha: 0.3) : AppColors.glassBorder,
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isPrimary ? AppColors.primary.withOpacity(0.1) : Colors.white.withOpacity(0.03),
+                color: isPrimary ? AppColors.primary.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.03),
                 shape: BoxShape.circle,
               ),
               child: Icon(

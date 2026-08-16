@@ -9,11 +9,14 @@ class ServicesCubit extends Cubit<ServicesState> {
   ServicesCubit(this.repository) : super(ServicesInitial());
 
   Future<void> fetchServices() async {
+    print('Fetching services...');
     emit(ServicesLoading());
     try {
       final services = await repository.getServices();
+      print('Services fetched: ${services.length}');
       emit(ServicesLoaded(services));
     } catch (e) {
+      print('Fetch Services Error: $e');
       emit(ServicesError(e.toString()));
     }
   }

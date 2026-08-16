@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/dynetix_widgets.dart';
 import '../bloc/auth_cubit.dart';
+import '../bloc/auth_state.dart';
 import '../../../customer/presentation/screens/customer_dashboard_screen.dart';
 import 'signup_screen.dart';
 
@@ -30,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
               width: 400, height: 400,
               decoration: BoxDecoration(
                 shape: BoxShape.circle, 
-                gradient: RadialGradient(colors: [AppColors.primary.withOpacity(0.04), Colors.transparent]),
+                gradient: RadialGradient(colors: [AppColors.primary.withValues(alpha: 0.04), Colors.transparent]),
               ),
             ),
           ),

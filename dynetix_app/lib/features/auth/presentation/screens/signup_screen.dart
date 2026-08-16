@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/dynetix_widgets.dart';
 import '../bloc/auth_cubit.dart';
+import '../bloc/auth_state.dart';
 import '../../../customer/presentation/screens/customer_dashboard_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -77,7 +78,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         if (state is AuthAuthenticated) {
                           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const CustomerDashboardScreen()), (route) => false);
                         } else if (state is AuthError) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: AppColors.error));
+                          final isSuccessMsg = state.message.contains('successful');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(state.message),
+                              backgroundColor: isSuccessMsg ? Colors.green : AppColors.error,
+                              duration: Duration(seconds: isSuccessMsg ? 6 : 4),
+                            ),
+                          );
+                          if (isSuccessMsg) {
+                            Navigator.pop(context); // Go back to login
+                          }
                         }
                       },
                       builder: (context, state) {
@@ -88,9 +99,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             final name = nameController.text.trim();
                             final email = emailController.text.trim();
                             final password = passwordController.text.trim();
-                            if (name.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
-                              context.read<AuthCubit>().signUp(email, password, name);
+                            
+                            if (name.isEmpty || email.isEmpty || password.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Please fill all fields'), backgroundColor: Colors.orange),
+                              );
+                              return;
                             }
+
+                            if (password.length < 6) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Password must be at least 6 characters'), backgroundColor: Colors.orange),
+                              );
+                              return;
+                            }
+
+                            context.read<AuthCubit>().signUp(email, password, name);
                           },
                         );
                       },

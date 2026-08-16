@@ -27,6 +27,25 @@ class InquiriesCubit extends Cubit<InquiriesState> {
     }
   }
 
+  Future<void> clearChat(String itemId) async {
+    try {
+      await repository.deleteInquiriesByItem(itemId);
+      // If we are watching, the stream will update automatically. 
+      // If we are in fetch mode, we might need to re-fetch.
+    } catch (e) {
+      emit(InquiriesError(e.toString()));
+    }
+  }
+
+  Future<String> uploadFile(dynamic file, String fileName) async {
+    try {
+      return await repository.uploadInquiryFile(file, fileName);
+    } catch (e) {
+      emit(InquiriesError(e.toString()));
+      rethrow;
+    }
+  }
+
   Future<void> fetchInquiries(String identifier, bool isAdmin) async {
     emit(InquiriesLoading());
     try {

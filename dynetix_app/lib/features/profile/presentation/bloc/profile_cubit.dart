@@ -18,9 +18,16 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  Future<void> updateProfile(ProfileEntity profile) async {
+  Future<void> updateProfile(ProfileEntity profile, {String? localImagePath}) async {
     try {
-      await repository.updateProfile(profile);
+      String? finalImageUrl = profile.profileImageUrl;
+      
+      if (localImagePath != null) {
+        finalImageUrl = await repository.uploadProfileImage(localImagePath, profile.email);
+      }
+      
+      final updatedProfile = profile.copyWith(profileImageUrl: finalImageUrl);
+      await repository.updateProfile(updatedProfile);
       fetchProfile(profile.email);
     } catch (e) {
       emit(ProfileError(e.toString()));

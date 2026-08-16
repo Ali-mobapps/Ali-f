@@ -43,6 +43,11 @@ class PaymentMethodsRepositoryImpl implements PaymentMethodsRepository {
   }
 
   @override
+  Future<void> deletePaymentMethod(String id) async {
+    await _supabase.from('payment_methods').delete().eq('id', id);
+  }
+
+  @override
   Future<void> seedInitialMethods() async {
     final methods = [
       {'name': 'EasyPaisa', 'number': '03451495330', 'title': 'Dynetix Official'},
@@ -52,13 +57,26 @@ class PaymentMethodsRepositoryImpl implements PaymentMethodsRepository {
       {'name': 'SadaPay', 'number': '03156717093', 'title': 'Dynetix Official'},
     ];
 
-    for (var m in methods) {
-      await _supabase.from('payment_methods').insert({
-        'name': m['name'],
-        'account_number': m['number'],
-        'account_title': m['title'],
-        'is_active': true,
-      });
+    try {
+      for (var m in methods) {
+        // Check if method already exists before inserting
+        final existing = await _supabase
+            .from('payment_methods')
+            .select()
+            .eq('name', m['name']!)
+            .eq('account_number', m['number']!);
+
+        if ((existing as List).isEmpty) {
+          await _supabase.from('payment_methods').insert({
+            'name': m['name'],
+            'account_number': m['number'],
+            'account_title': m['title'],
+            'is_active': true,
+          });
+        }
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 }
