@@ -1,17 +1,3 @@
-# cyber_neon_grid
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img width="489" height="616" alt="cyber 1" src="https://github.com/user-attachments/assets/2f6dade5-3e0c-4608-b011-9f833ef8ed0d" />
+<img width="489" height="606" alt="cyber 2" src="https://github.com/user-attachments/assets/63e0f3f8-4be7-4f1f-90ea-38606362a38d" />
+<img width="490" height="600" alt="cyber 3" src="https://github.com/user-attachments/assets/9b73e5ff-e1f2-403d-aec2-c4793ddbe715" />
