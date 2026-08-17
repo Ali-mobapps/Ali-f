@@ -1,17 +1,3 @@
-# brutal_creative_card
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img width="484" height="604" alt="cyberbhunk 1" src="https://github.com/user-attachments/assets/36e553ba-b097-477a-988c-ebe94d1a120b" />
+<img width="498" height="593" alt="cyberbhunk 2" src="https://github.com/user-attachments/assets/ffc73ce5-d479-4bca-be8b-f216be99a20e" />
+<img width="496" height="598" alt="cyberbhunk 3" src="https://github.com/user-attachments/assets/57300452-e79b-4d33-b03d-dfe870824c09" />
