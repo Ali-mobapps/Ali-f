@@ -1,5 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import '../../core/constants/app_constants.dart';
 
 class DatabaseHelper {
@@ -17,13 +19,25 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'smart_pos.db');
-    return await openDatabase(
-      path,
-      version: 7,
-      onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
-    );
+    if (kIsWeb) {
+      // Web support
+      var factory = databaseFactoryFfiWeb;
+      return await factory.openDatabase('smart_pos.db',
+          options: OpenDatabaseOptions(
+            version: 7,
+            onCreate: _onCreate,
+            onUpgrade: _onUpgrade,
+          ));
+    } else {
+      // Mobile support
+      String path = join(await getDatabasesPath(), 'smart_pos.db');
+      return await openDatabase(
+        path,
+        version: 7,
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+      );
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {

@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../domain/repositories/orders_repository.dart';
@@ -64,7 +66,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       if (file is File) {
         await _supabase.storage.from('payments').upload(path, file);
       } else {
-        await _supabase.storage.from('payments').uploadBinary(path, file);
+        await _supabase.storage.from('payments').uploadBinary(path, Uint8List.fromList(file as List<int>));
       }
 
       return _supabase.storage.from('payments').getPublicUrl(path);

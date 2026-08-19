@@ -10,10 +10,10 @@ class InquiriesCubit extends Cubit<InquiriesState> {
 
   InquiriesCubit(this.repository) : super(InquiriesInitial());
 
-  void watchInquiries(String itemId) {
+  void watchInquiries(String itemId, {String? userId, required String role}) {
     emit(InquiriesLoading());
     _subscription?.cancel();
-    _subscription = repository.watchInquiriesByItem(itemId).listen(
+    _subscription = repository.watchInquiriesByItem(itemId, userId: userId, role: role).listen(
       (inquiries) => emit(InquiriesLoaded(inquiries)),
       onError: (e) => emit(InquiriesError(e.toString())),
     );
@@ -27,11 +27,9 @@ class InquiriesCubit extends Cubit<InquiriesState> {
     }
   }
 
-  Future<void> clearChat(String itemId) async {
+  Future<void> clearChat(String itemId, {String? userId, required String role}) async {
     try {
-      await repository.deleteInquiriesByItem(itemId);
-      // If we are watching, the stream will update automatically. 
-      // If we are in fetch mode, we might need to re-fetch.
+      await repository.deleteInquiriesByItem(itemId, userId: userId, role: role);
     } catch (e) {
       emit(InquiriesError(e.toString()));
     }
@@ -53,7 +51,8 @@ class InquiriesCubit extends Cubit<InquiriesState> {
         final inquiries = await repository.getAllInquiries();
         emit(InquiriesLoaded(inquiries));
       } else {
-        // Customer logic if needed, usually they see by item
+        final inquiries = await repository.getInquiriesByUser(identifier);
+        emit(InquiriesLoaded(inquiries));
       }
     } catch (e) {
       emit(InquiriesError(e.toString()));

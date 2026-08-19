@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/inquiry_entity.dart';
 import '../../domain/repositories/inquiries_repository.dart';
@@ -23,15 +25,26 @@ class InquiriesRepositoryImpl implements InquiriesRepository {
   }
 
   @override
-  Stream<List<InquiryEntity>> watchInquiriesByItem(String itemId) {
-    return _supabase
+  Stream<List<InquiryEntity>> watchInquiriesByItem(String itemId, {String? userId, required String role}) {
+    var query = _supabase
         .from('inquiries')
         .stream(primaryKey: ['id'])
-        .eq('item_id', itemId)
-        .order('created_at', ascending: true)
-        .map((data) => data
-            .map((json) => InquiryModel.fromJson(json, json['id'].toString()))
-            .toList());
+        .eq('item_id', itemId);
+    
+    if (userId != null) {
+      query = query.eq('user_id', userId);
+    }
+
+    return query.order('created_at', ascending: true).map((data) {
+      return data
+          .map((json) => InquiryModel.fromJson(json, json['id'].toString()))
+          .where((msg) {
+            if (role == 'customer') return !msg.hiddenFromCustomer;
+            if (role == 'admin') return !msg.hiddenFromAdmin;
+            return true;
+          })
+          .toList();
+    });
   }
 
   @override
@@ -87,6 +100,20 @@ class InquiriesRepositoryImpl implements InquiriesRepository {
   }
 
   @override
+  Future<List<InquiryEntity>> getInquiriesByUser(String userId) async {
+    try {
+      final List<dynamic> data = await _supabase
+          .from('inquiries')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+      return data.map((json) => InquiryModel.fromJson(json, json['id'].toString())).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  @override
   Future<void> sendInquiry(InquiryEntity inquiry) async {
     final model = InquiryModel(
       id: inquiry.id,
@@ -102,8 +129,20 @@ class InquiriesRepositoryImpl implements InquiriesRepository {
   }
 
   @override
-  Future<void> deleteInquiriesByItem(String itemId) async {
-    await _supabase.from('inquiries').delete().eq('item_id', itemId);
+  Future<void> deleteInquiriesByItem(String itemId, {String? userId, required String role}) async {
+    if (role == 'admin') {
+      // Admin deletes permanently all messages for this user (WhatsApp Thread style)
+      if (userId != null) {
+        await _supabase.from('inquiries').delete().eq('user_id', userId);
+      } else {
+        await _supabase.from('inquiries').delete().eq('item_id', itemId);
+      }
+    } else {
+      // Customer hide logic
+      if (userId != null) {
+        await _supabase.from('inquiries').update({'hidden_from_customer': true}).eq('user_id', userId);
+      }
+    }
   }
 
   @override
@@ -113,7 +152,7 @@ class InquiriesRepositoryImpl implements InquiriesRepository {
       
       if (file is List<int>) {
         // Handle bytes (Web/Mobile)
-        await _supabase.storage.from('chat').uploadBinary(path, file as dynamic);
+        await _supabase.storage.from('chat').uploadBinary(path, Uint8List.fromList(file));
       } else {
         // Handle File object (Mobile)
         await _supabase.storage.from('chat').upload(path, file);

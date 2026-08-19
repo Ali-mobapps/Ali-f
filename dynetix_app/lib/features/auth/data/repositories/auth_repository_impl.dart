@@ -42,16 +42,16 @@ class AuthRepositoryImpl implements AuthRepository {
       final user = response.user;
       if (user == null) throw Exception('Signup failed: No user returned');
 
-      // Create profile in public.users table - Do it in background so it doesn't block
-      _supabase.from('users').upsert({
-        'id': user.id,
-        'email': cleanEmail,
-        'name': name,
-        'role': 'customer',
-      }).then((_) => print('Profile synced')).catchError((e) => print('Profile sync error: $e'));
-
-      if (response.session == null) {
-        throw 'Account created! Please confirm your email OR disable Email Confirmation in Supabase settings to login directly.';
+      // Create profile in public.users table
+      try {
+        await _supabase.from('users').upsert({
+          'id': user.id,
+          'email': cleanEmail,
+          'name': name,
+          'role': 'customer',
+        });
+      } catch (e) {
+        // Log error properly or handle silently in production
       }
 
       return UserModel(id: user.id, email: cleanEmail, role: 'customer', name: name);

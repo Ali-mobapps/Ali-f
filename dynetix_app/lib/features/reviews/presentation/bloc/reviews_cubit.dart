@@ -11,8 +11,19 @@ class ReviewsCubit extends Cubit<ReviewsState> {
   Future<void> fetchReviews(String serviceId) async {
     emit(ReviewsLoading());
     try {
-      final reviews = await repository.getReviewsByService(serviceId);
+      final reviews = serviceId == 'all' 
+          ? await repository.getReviewsByService('') // Handled in repo
+          : await repository.getReviewsByService(serviceId);
       emit(ReviewsLoaded(reviews));
+    } catch (e) {
+      emit(ReviewsError(e.toString()));
+    }
+  }
+
+  Future<void> deleteReview(String reviewId) async {
+    try {
+      await repository.deleteReview(reviewId);
+      fetchReviews('all'); // Refresh for Admin
     } catch (e) {
       emit(ReviewsError(e.toString()));
     }

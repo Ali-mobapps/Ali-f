@@ -9,12 +9,14 @@ class ReviewsRepositoryImpl implements ReviewsRepository {
   @override
   Future<List<ReviewEntity>> getReviewsByService(String serviceId) async {
     try {
-      final List<dynamic> data = await _supabase
-          .from('reviews')
-          .select()
-          .eq('service_id', int.parse(serviceId))
-          .order('created_at', ascending: false);
+      var query = _supabase.from('reviews').select();
+      
+      // If serviceId is provided and not 'all', filter; otherwise get all (for Admin)
+      if (serviceId.isNotEmpty && serviceId != 'all') {
+        query = query.eq('service_id', serviceId); // Fix: Removed int.parse
+      }
           
+      final List<dynamic> data = await query.order('created_at', ascending: false);
       return data.map((json) => ReviewModel.fromJson(json)).toList();
     } catch (e) {
       return [];
@@ -34,5 +36,10 @@ class ReviewsRepositoryImpl implements ReviewsRepository {
     );
     
     await _supabase.from('reviews').insert(model.toJson());
+  }
+
+  @override
+  Future<void> deleteReview(String reviewId) async {
+    await _supabase.from('reviews').delete().eq('id', reviewId);
   }
 }

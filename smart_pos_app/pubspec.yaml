@@ -67,6 +67,7 @@ dependencies:
   # Bluetooth Printing
   blue_thermal_printer:
     path: packages/blue_thermal_printer
+  sqflite_common_ffi_web: ^1.1.2
 
 dev_dependencies:
   flutter_test:

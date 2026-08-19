@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -54,8 +53,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (image != null) {
       setState(() {
         _localImagePath = image.path;
-        // For now, we still use a dummy URL for saving, but show the local file
-        _profileImageUrl = 'https://i.pravatar.cc/150?u=${DateTime.now().millisecondsSinceEpoch}';
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -93,7 +90,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       radius: 60,
                       backgroundColor: AppColors.charcoalDepth,
                       backgroundImage: _localImagePath != null
-                          ? (kIsWeb ? NetworkImage(_localImagePath!) : FileImage(File(_localImagePath!))) as ImageProvider
+                          ? (kIsWeb ? NetworkImage(_localImagePath!) : NetworkImage(_localImagePath!)) as ImageProvider // Placeholder for web
                           : (_profileImageUrl != null && _profileImageUrl!.isNotEmpty
                               ? NetworkImage(_profileImageUrl!)
                               : const NetworkImage('https://i.pravatar.cc/150?u=user')),

@@ -8,8 +8,9 @@ import '../bloc/profile_cubit.dart';
 import '../bloc/profile_state.dart';
 import 'edit_profile_screen.dart';
 import 'settings_features_screens.dart';
+import 'package:dynetix_app/features/support/presentation/screens/ai_assistant_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final String userEmail;
   final bool showAppBar;
 
@@ -17,19 +18,25 @@ class ProfileScreen extends StatelessWidget {
       {super.key, required this.userEmail, this.showAppBar = true});
 
   @override
-  Widget build(BuildContext context) {
-    // Fetch profile data when screen opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProfileCubit>().fetchProfile(userEmail);
-    });
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProfileCubit>().fetchProfile(widget.userEmail);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final content = BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         if (state is ProfileLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        String name = userEmail.split('@').first;
+        String name = widget.userEmail.split('@').first;
         String role = 'Member';
         String? imageUrl;
 
@@ -68,6 +75,7 @@ class ProfileScreen extends StatelessWidget {
                               width: 108,
                               height: 108,
                               fit: BoxFit.cover,
+                              key: ValueKey(imageUrl),
                               loadingBuilder: (context, child, loadingProgress) {
                                 if (loadingProgress == null) return child;
                                 return const Center(child: CircularProgressIndicator(strokeWidth: 2));
@@ -102,7 +110,9 @@ class ProfileScreen extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder: (context) => EditProfileScreen(profile: state.profile),
                                 ),
-                              );
+                              ).then((_) {
+                                context.read<ProfileCubit>().fetchProfile(widget.userEmail);
+                              });
                             },
                           ),
                         ),
@@ -141,7 +151,7 @@ class ProfileScreen extends StatelessWidget {
                 context,
                 Icons.person_outline_rounded,
                 'Account Settings',
-                'Manage your profile details',
+                'Update your personal information',
                 onTap: () {
                   if (state is ProfileLoaded) {
                     Navigator.push(
@@ -156,23 +166,37 @@ class ProfileScreen extends StatelessWidget {
               ),
               _buildOption(
                 context,
+                Icons.psychology_rounded,
+                'AI Assistant',
+                'Get instant help from our AI',
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AiAssistantScreen())),
+              ),
+              _buildOption(
+                context,
+                Icons.palette_outlined,
+                'Theme Preferences',
+                'Switch between dark and light modes',
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ThemePreferencesScreen())),
+              ),
+              _buildOption(
+                context,
                 Icons.notifications_none_rounded,
                 'Notifications',
-                'App alert preferences',
+                'Manage app alerts and sounds',
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationSettingsScreen())),
               ),
               _buildOption(
                 context,
                 Icons.security_rounded,
-                'Privacy & Security',
-                'Password and data control',
+                'System Settings',
+                'App language and storage control',
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SystemSettingsScreen())),
               ),
               _buildOption(
                 context,
-                Icons.help_outline_rounded,
-                'Help & Support',
-                'Get in touch with us',
+                Icons.info_outline_rounded,
+                'About Dynetix',
+                'Version info and company details',
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutDynetixScreen())),
               ),
 
@@ -193,7 +217,7 @@ class ProfileScreen extends StatelessWidget {
       },
     );
 
-    if (!showAppBar) return content;
+    if (!widget.showAppBar) return content;
 
     return Scaffold(
       backgroundColor: AppColors.background,

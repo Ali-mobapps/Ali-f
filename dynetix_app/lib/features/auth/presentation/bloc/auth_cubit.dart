@@ -20,8 +20,8 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> signUp(String email, String password, String name) async {
     emit(AuthLoading());
     try {
-      final user = await repository.signUp(email, password, name);
-      emit(AuthAuthenticated(user));
+      await repository.signUp(email, password, name);
+      emit(AuthSignUpSuccess('Account created successfully! Please sign in to continue.'));
     } catch (e) {
       emit(AuthError(e.toString()));
     }

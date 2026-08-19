@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -54,18 +54,29 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<String> uploadProfileImage(String filePath, String email) async {
+  Future<String> uploadProfileImage(dynamic fileSource, String email) async {
     try {
-      final file = File(filePath);
-      final fileExt = filePath.split('.').last;
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
-      final path = 'avatars/$email/$fileName';
+      final String fileExt = 'jpg'; // Default or extract from path if string
+      final String fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+      // Use 'avatars' folder as per initial setup
+      final String path = 'avatars/$email/$fileName';
 
-      await _supabase.storage.from('profiles').upload(path, file);
+      if (fileSource is List<int>) {
+        await _supabase.storage.from('profiles').uploadBinary(
+          path, 
+          Uint8List.fromList(fileSource),
+          fileOptions: const FileOptions(cacheControl: '3600', upsert: true)
+        );
+      } else {
+        // This part will only run on mobile where File is supported
+        // But we handle it generically to avoid crash on web
+        await _supabase.storage.from('profiles').upload(path, fileSource,
+          fileOptions: const FileOptions(cacheControl: '3600', upsert: true));
+      }
 
-      final String imageUrl =
-          _supabase.storage.from('profiles').getPublicUrl(path);
-      return imageUrl;
+      final String imageUrl = _supabase.storage.from('profiles').getPublicUrl(path);
+      // Supabase sometimes needs a cache buster for immediate updates
+      return '$imageUrl?t=${DateTime.now().millisecondsSinceEpoch}';
     } catch (e) {
       throw Exception('Failed to upload image: $e');
     }

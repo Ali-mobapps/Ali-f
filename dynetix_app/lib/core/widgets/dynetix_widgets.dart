@@ -127,12 +127,21 @@ class DynetixButton extends StatelessWidget {
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    text,
-                    style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 14),
+                  Flexible(
+                    child: Text(
+                      text,
+                      maxLines: 1, // Fix: Ensure one line
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold, 
+                        letterSpacing: 1.2, // Slightly reduced spacing
+                        fontSize: 13, // Slightly reduced font
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
-                  if (icon != null) ...[const SizedBox(width: 10), Icon(icon, size: 18)],
+                  if (icon != null) ...[const SizedBox(width: 8), Icon(icon, size: 16)],
                 ],
               ),
       ),

@@ -381,35 +381,12 @@ class DataSeeder {
   ];
 
   Future<void> seedDefaultData({String? userId}) async {
-    await seedAdminUser();
     await seedCategories(userId: userId);
     await seedProducts(userId: userId);
   }
 
   Future<void> seedAdminUser() async {
-    try {
-      final existing = await _db.query(
-        AppConstants.usersTable,
-        where: 'email = ?',
-        whereArgs: ['admin@smartpos.com'],
-      );
-      
-      if (existing.isEmpty) {
-        await _db.insert(AppConstants.usersTable, {
-          'id': 'admin_default',
-          'email': 'admin@smartpos.com',
-          'name': 'Administrator',
-          'business_name': 'Smart POS Demo',
-          'role': 'admin',
-          'created_at': DateTime.now().toIso8601String(),
-          'sync_status': AppConstants.syncCompleted,
-          'is_active': 1,
-        });
-        debugPrint('Default admin user seeded');
-      }
-    } catch (e) {
-      debugPrint('Error seeding admin user: $e');
-    }
+    // Admin seeding removed to support custom Firebase authentication
   }
 
   Future<void> seedCategories({String? userId}) async {

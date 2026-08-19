@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +14,9 @@ import '../../../services/presentation/bloc/services_state.dart';
 import '../../../services/domain/entities/service_entity.dart';
 import '../../../payments/presentation/bloc/payment_cubit.dart';
 import '../../../payments/presentation/bloc/payment_state.dart' as pay_state;
+import '../../../inquiries/presentation/bloc/inquiries_cubit.dart';
+import '../../../inquiries/presentation/bloc/inquiries_state.dart';
+import '../../../inquiries/domain/entities/inquiry_entity.dart';
 import '../../../inquiries/presentation/screens/inquiry_chat_screen.dart';
 import '../../../orders/presentation/bloc/orders_cubit.dart';
 import '../../../orders/presentation/bloc/orders_state.dart';
@@ -24,6 +26,7 @@ import '../../../reviews/domain/entities/review_entity.dart';
 import '../../../profile/presentation/bloc/profile_cubit.dart';
 import '../../../profile/presentation/bloc/profile_state.dart' as profile_state;
 import '../../../profile/presentation/screens/profile_screen.dart';
+import 'package:dynetix_app/features/support/presentation/screens/ai_assistant_screen.dart';
 
 class CustomerDashboardScreen extends StatefulWidget {
   const CustomerDashboardScreen({super.key});
@@ -73,6 +76,7 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
       ),
       _CustomerServicesTab(searchQuery: _searchQuery),
       _CustomerAcademyTab(searchQuery: _searchQuery),
+      _CustomerMessagesTab(userId: authState is AuthAuthenticated ? authState.user.id : ''),
       _CustomerProjectsTab(userId: authState is AuthAuthenticated ? authState.user.id : ''),
       const _CustomerPaymentsTab(),
       ProfileScreen(userEmail: userEmail, showAppBar: false),
@@ -90,6 +94,9 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
           child: DynetixLogo(size: 32, showGlow: false),
         ),
         actions: [
+          IconButton(onPressed: () {
+            setState(() => _currentIndex = 3); // Switch to Chat tab
+          }, icon: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.primary)),
           IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary)),
         ],
       ),
@@ -106,12 +113,15 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
           });
         },
         type: BottomNavigationBarType.fixed,
+        selectedFontSize: 9, // Small font to fit 7 items
+        unselectedFontSize: 9,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Services'),
           BottomNavigationBarItem(icon: Icon(Icons.school_rounded), label: 'Academy'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat_rounded), label: 'Chat'),
           BottomNavigationBarItem(icon: Icon(Icons.assignment_rounded), label: 'Projects'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Assets'),
+          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Payments'),
           BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
         ],
       ),
@@ -241,7 +251,7 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
                   bottom: 0,
                   child: Opacity(
                     opacity: 0.8,
-                    child: Icon(Icons.laptop_chromebook, size: 160, color: Colors.white.withValues(alpha: 0.2)),
+                    child: Icon(Icons.psychology_rounded, size: 160, color: Colors.white.withValues(alpha: 0.2)),
                   ),
                 ),
                 Padding(
@@ -250,17 +260,17 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Empowering You with\nSkills for Tomorrow', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, height: 1.2)),
+                      const Text('Meet your Dynetix\nAI Assistant', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, height: 1.2)),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: widget.onExplore,
+                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AiAssistantScreen())),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.blue.shade900,
                           minimumSize: const Size(120, 40),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: const Text('Explore Now', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        child: const Text('Ask Now', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -365,6 +375,186 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CustomerMessagesTab extends StatelessWidget {
+  final String userId;
+  const _CustomerMessagesTab({required this.userId});
+
+  @override
+  Widget build(BuildContext context) {
+    if (userId.isEmpty) return const Center(child: Text('Please login to see messages.', style: TextStyle(color: Colors.white54)));
+
+    // Fetch inquiries for this customer
+    context.read<InquiriesCubit>().fetchInquiries(userId, false);
+
+    return BlocBuilder<InquiriesCubit, InquiriesState>(
+      builder: (context, state) {
+        if (state is InquiriesLoading) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        
+        if (state is InquiriesLoaded) {
+          if (state.inquiries.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.chat_bubble_outline_rounded, size: 64, color: AppColors.textDisabled),
+                  const SizedBox(height: 16),
+                  const Text('No conversations yet.', style: TextStyle(color: AppColors.textSecondary)),
+                  const Text('Message us from any service or course!', style: TextStyle(color: AppColors.textDisabled, fontSize: 12)),
+                ],
+              ),
+            );
+          }
+
+          // Group by itemId
+          final Map<String, List<InquiryEntity>> grouped = {};
+          for (var inquiry in state.inquiries) {
+            if (!grouped.containsKey(inquiry.itemId)) {
+              grouped[inquiry.itemId] = [];
+            }
+            grouped[inquiry.itemId]!.add(inquiry);
+          }
+
+          final conversationKeys = grouped.keys.toList();
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('My Messages', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                    IconButton(
+                      icon: const Icon(Icons.delete_sweep_rounded, color: Colors.redAccent),
+                      onPressed: () => _showClearAllChatsDialog(context, conversationKeys),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: conversationKeys.length,
+                  itemBuilder: (context, index) {
+                    final itemId = conversationKeys[index];
+                    final chatMessages = grouped[itemId]!;
+                    final lastMessage = chatMessages.first;
+                    
+                    String displayMessage = lastMessage.message;
+                    // If message contains image blob URL
+                    if (displayMessage.contains('blob:http')) {
+                      displayMessage = 'Sent an attachment 📎';
+                    }
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: GlassPanel(
+                        padding: 4,
+                        child: ListTile(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => InquiryChatScreen(
+                                  itemId: itemId,
+                                  itemTitle: 'Support Chat', // In customer view, it's chat with admin
+                                  userRole: 'customer',
+                                  userId: userId,
+                                ),
+                              ),
+                            );
+                          },
+                          leading: CircleAvatar(
+                            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                            child: const Icon(Icons.headset_mic_rounded, color: AppColors.primary),
+                          ),
+                          title: const Text('Dynetix Support', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          subtitle: Text(
+                            displayMessage, 
+                            maxLines: 1, 
+                            overflow: TextOverflow.ellipsis, 
+                            style: const TextStyle(color: AppColors.textDisabled, fontSize: 13),
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${lastMessage.createdAt.hour}:${lastMessage.createdAt.minute.toString().padLeft(2, '0')}',
+                                style: const TextStyle(color: AppColors.textDisabled, fontSize: 10),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
+                                onPressed: () => _showDeleteChatDialog(context, itemId),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        }
+        return const Center(child: Text('Error loading messages.', style: TextStyle(color: Colors.redAccent)));
+      },
+    );
+  }
+
+  void _showDeleteChatDialog(BuildContext context, String itemId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Delete Chat', style: TextStyle(color: Colors.white)),
+        content: const Text('Are you sure you want to delete this conversation?', style: TextStyle(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () {
+              context.read<InquiriesCubit>().clearChat(itemId, userId: userId, role: 'customer');
+              Navigator.pop(context);
+              context.read<InquiriesCubit>().fetchInquiries(userId, false);
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearAllChatsDialog(BuildContext context, List<String> itemIds) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Clear All Chats', style: TextStyle(color: Colors.white)),
+        content: const Text('This will permanently delete all your conversations. Proceed?', style: TextStyle(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () async {
+              Navigator.pop(context);
+              for (var id in itemIds) {
+                await context.read<InquiriesCubit>().clearChat(id, userId: userId, role: 'customer');
+              }
+              if (context.mounted) {
+                context.read<InquiriesCubit>().fetchInquiries(userId, false);
+              }
+            },
+            child: const Text('Clear All'),
           ),
         ],
       ),
@@ -621,7 +811,18 @@ class _CustomerProjectsTab extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Expanded(child: Text(order.serviceTitle, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))),
-                                _buildStatusBadge(order.status),
+                                Row(
+                                  children: [
+                                    _buildStatusBadge(order.status),
+                                    const SizedBox(width: 8),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
+                                      onPressed: () => _showDeleteOrderDialog(context, order),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                             const SizedBox(height: 12),
@@ -645,12 +846,7 @@ class _CustomerProjectsTab extends StatelessWidget {
                             ],
                             if (order.paymentStatus == 'unpaid') ...[
                               const SizedBox(height: 20),
-                              DynetixButton(
-                                text: 'PAY NOW',
-                                color: AppColors.primary,
-                                textColor: Colors.black,
-                                onPressed: () => _showPaymentInstructions(context, order),
-                              ),
+                              // Payment proof button removed per user request
                             ] else if (order.paymentStatus == 'pending_verification') ...[
                               const SizedBox(height: 20),
                               Container(
@@ -692,7 +888,8 @@ class _CustomerProjectsTab extends StatelessWidget {
       if (kIsWeb) {
         fileToUpload = await image.readAsBytes();
       } else {
-        fileToUpload = File(image.path);
+        // Use a generic dynamic way to avoid dart:io on web
+        fileToUpload = image; // Pass XFile directly
       }
       
       await context.read<OrdersCubit>().uploadPaymentProof(orderId, fileToUpload);
@@ -762,6 +959,40 @@ class _CustomerProjectsTab extends StatelessWidget {
               _pickPaymentProof(context, order.id);
             },
             child: const Text('I HAVE PAID (Upload Proof)'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteOrderDialog(BuildContext context, OrderEntity order) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Delete Project', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: Text(
+          'Are you sure you want to delete the project "${order.serviceTitle}"? This action cannot be undone.',
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () async {
+              await context.read<OrdersCubit>().deleteOrder(order.id);
+              if (context.mounted) {
+                // Customer only hides/clears for themselves
+                await context.read<InquiriesCubit>().clearChat('global_support', userId: userId, role: 'customer');
+                Navigator.pop(context);
+                // Refresh list
+                context.read<OrdersCubit>().watchCustomerOrders(userId);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Order canceled and chat cleared'), backgroundColor: AppColors.error),
+                );
+              }
+            },
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -878,94 +1109,270 @@ Widget _buildConsumerCard(BuildContext context, ServiceEntity item) {
     userId = authState.user.id;
   }
 
+  final bool hasDiscount = item.discountPrice != null && item.discountPrice! < item.price;
+  final double displayPrice = hasDiscount ? item.discountPrice! : item.price;
+  final int offPercentage = hasDiscount ? (((item.price - item.discountPrice!) / item.price) * 100).round() : 0;
+
   return Container(
     margin: const EdgeInsets.only(bottom: 16),
-    child: GlassPanel(
-      padding: 24,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    child: Stack(
+      children: [
+        GlassPanel(
+          padding: 24,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                child: Icon(_getServiceIcon(item.title, item.type), color: AppColors.primary, size: 24),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
-                    const SizedBox(height: 4),
-                    Row(
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                    child: Icon(_getServiceIcon(item.title, item.type), color: AppColors.primary, size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ...List.generate(5, (index) => const Icon(Icons.star_rounded, color: AppColors.gold, size: 14)),
-                        const SizedBox(width: 6),
-                        const Text('5.0', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-                        const Spacer(),
-                        Text('Rs. ${item.price.toStringAsFixed(2)}', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 15)),
+                        Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            ...List.generate(5, (index) => Icon(
+                              index < item.averageRating.floor() ? Icons.star_rounded : Icons.star_half_rounded, 
+                              color: AppColors.gold, 
+                              size: 14
+                            )),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${item.averageRating.toStringAsFixed(1)} (${item.totalReviews})', 
+                              style: const TextStyle(color: AppColors.textSecondary, fontSize: 10)
+                            ),
+                            const Spacer(),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Rs. ${displayPrice.toStringAsFixed(0)}', 
+                                      style: const TextStyle(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 18)
+                                    ),
+                                  ],
+                                ),
+                                if (hasDiscount)
+                                  Text(
+                                    'Rs. ${item.price.toStringAsFixed(0)}',
+                                    style: const TextStyle(
+                                      color: AppColors.textDisabled, 
+                                      fontSize: 13, 
+                                      decoration: TextDecoration.lineThrough,
+                                      height: 1.0,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+              if (item.portfolioUrls.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 80,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: item.portfolioUrls.length,
+                    itemBuilder: (context, i) => Container(
+                      width: 120,
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        image: DecorationImage(image: NetworkImage(item.portfolioUrls[i]), fit: BoxFit.cover),
+                        border: Border.all(color: Colors.white10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+              Text(item.description, style: const TextStyle(color: AppColors.textDisabled, fontSize: 12)),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: DynetixButton(
+                      text: 'BOOK NOW',
+                      onPressed: () => _showCheckoutDialog(context, item, displayPrice),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DynetixButton(
+                      text: 'MESSAGE',
+                      isOutline: true,
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => InquiryChatScreen(
+                          itemId: 'global_support',
+                          itemTitle: 'Dynetix Support',
+                          userRole: 'customer', 
+                          userId: userId
+                        )));
+                      },
+                    ),
+                  ),
+                ],
+              )
             ],
           ),
-          const SizedBox(height: 16),
-          Text(item.description, style: const TextStyle(color: AppColors.textDisabled, fontSize: 12)),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: DynetixButton(
-                  text: 'BOOK NOW',
-                  onPressed: () async {
-                    if (userId.isEmpty || userId == 'anonymous') {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please login to book a service.'), backgroundColor: Colors.orangeAccent),
-                      );
-                      return;
-                    }
-                    
-                    final order = OrderEntity(
-                      id: '', 
-                      customerId: userId,
-                      serviceId: item.id,
-                      serviceTitle: item.title,
-                      price: item.price,
-                      status: 'pending',
-                      createdAt: DateTime.now(),
-                    );
-                    
-                    await context.read<OrdersCubit>().createOrder(order);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Order request sent! Track it in Projects tab.'), backgroundColor: AppColors.success),
-                      );
-                    }
-                  },
+        ),
+        if (hasDiscount)
+          Positioned(
+            top: 0,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: const BoxDecoration(
+                color: Colors.orange,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
                 ),
+                boxShadow: [
+                  BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4)),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DynetixButton(
-                  text: 'MESSAGE',
-                  isOutline: true,
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => InquiryChatScreen(
-                      itemId: item.id, 
-                      itemTitle: item.title, 
-                      userRole: 'customer', 
-                      userId: userId
-                    )));
-                  },
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('FLAT', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                  Text('$offPercentage%', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, height: 1.1)),
+                  const Text('OFF', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+void _showCheckoutDialog(BuildContext context, ServiceEntity item, double basePrice) {
+  final authState = context.read<AuthCubit>().state;
+  final promoController = TextEditingController();
+  double finalPrice = basePrice;
+  int discountPercent = 0;
+  bool isVerifying = false;
+
+  showDialog(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setDialogState) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Checkout Summary', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(item.title, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(height: 8),
+            Text(item.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textDisabled, fontSize: 11)),
+            const Divider(height: 32, color: Colors.white10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Service Price', style: TextStyle(color: Colors.white70)),
+                Text('Rs. ${basePrice.toStringAsFixed(0)}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            if (discountPercent > 0) ...[
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Promo Discount ($discountPercent%)', style: const TextStyle(color: Colors.greenAccent)),
+                  Text('-Rs. ${(basePrice * discountPercent / 100).toStringAsFixed(0)}', style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold)),
+                ],
               ),
             ],
-          )
+            const SizedBox(height: 16),
+            TextField(
+              controller: promoController,
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+              decoration: InputDecoration(
+                hintText: 'Enter Promo Code',
+                suffixIcon: IconButton(
+                  icon: isVerifying ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.check_circle_outline, color: AppColors.primary),
+                  onPressed: () {
+                    setDialogState(() => isVerifying = true);
+                    // Simple Mock Verification for Presentation
+                    Future.delayed(const Duration(seconds: 1), () {
+                      if (context.mounted) {
+                        setDialogState(() {
+                          isVerifying = false;
+                          if (promoController.text.toUpperCase() == 'DYNETIX10') {
+                            discountPercent = 10;
+                            finalPrice = basePrice * 0.9;
+                          } else if (promoController.text.toUpperCase() == 'ELITE20') {
+                            discountPercent = 20;
+                            finalPrice = basePrice * 0.8;
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid Promo Code')));
+                          }
+                        });
+                      }
+                    });
+                  },
+                ),
+              ),
+            ),
+            const Divider(height: 32, color: Colors.white10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('TOTAL PAYABLE', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                Text('Rs. ${finalPrice.toStringAsFixed(0)}', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 22)),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () async {
+              String userId = "";
+              if (authState is AuthAuthenticated) userId = authState.user.id;
+
+              if (userId.isEmpty || userId == 'anonymous') {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please login first')));
+                return;
+              }
+
+              final order = OrderEntity(
+                id: '', 
+                customerId: userId,
+                serviceId: item.id,
+                serviceTitle: item.title,
+                price: finalPrice,
+                status: 'pending',
+                createdAt: DateTime.now(),
+              );
+              
+              await context.read<OrdersCubit>().createOrder(order);
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Order placed successfully!'), backgroundColor: AppColors.success),
+                );
+              }
+            },
+            child: const Text('CONFIRM ORDER'),
+          ),
         ],
       ),
     ),

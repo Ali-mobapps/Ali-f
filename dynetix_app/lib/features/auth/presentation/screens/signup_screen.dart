@@ -75,20 +75,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     const SizedBox(height: 48),
                     BlocConsumer<AuthCubit, AuthState>(
                       listener: (context, state) {
-                        if (state is AuthAuthenticated) {
-                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const CustomerDashboardScreen()), (route) => false);
-                        } else if (state is AuthError) {
-                          final isSuccessMsg = state.message.contains('successful');
+                        if (state is AuthSignUpSuccess) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(state.message),
-                              backgroundColor: isSuccessMsg ? Colors.green : AppColors.error,
-                              duration: Duration(seconds: isSuccessMsg ? 6 : 4),
+                              backgroundColor: Colors.green,
+                              duration: const Duration(seconds: 4),
                             ),
                           );
-                          if (isSuccessMsg) {
-                            Navigator.pop(context); // Go back to login
-                          }
+                          Navigator.pop(context); // Go back to login screen
+                        } else if (state is AuthError) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(state.message),
+                              backgroundColor: AppColors.error,
+                            ),
+                          );
                         }
                       },
                       builder: (context, state) {

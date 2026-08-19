@@ -14,6 +14,9 @@ class ServiceModel extends ServiceEntity {
     super.instructor,
     super.duration,
     super.level,
+    super.portfolioUrls = const [],
+    super.averageRating = 5.0,
+    super.totalReviews = 0,
   });
 
   factory ServiceModel.fromJson(Map<String, dynamic> json, String id) {
@@ -30,6 +33,9 @@ class ServiceModel extends ServiceEntity {
       instructor: json['instructor'],
       duration: json['duration'],
       level: json['level'],
+      portfolioUrls: List<String>.from(json['portfolio_urls'] ?? []),
+      averageRating: (json['average_rating'] as num?)?.toDouble() ?? 5.0,
+      totalReviews: json['total_reviews'] ?? 0,
     );
   }
 
@@ -39,9 +45,13 @@ class ServiceModel extends ServiceEntity {
       'title': title,
       'description': description,
       'price': price,
+      'discount_price': discountPrice,
       'category': category,
       'is_active': isActive,
       'type': type,
+      'portfolio_urls': portfolioUrls,
+      'average_rating': averageRating,
+      'total_reviews': totalReviews,
     };
   }
 }

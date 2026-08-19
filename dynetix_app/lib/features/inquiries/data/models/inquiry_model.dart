@@ -9,6 +9,8 @@ class InquiryModel extends InquiryEntity {
     required super.senderRole,
     required super.message,
     required super.createdAt,
+    super.hiddenFromCustomer = false,
+    super.hiddenFromAdmin = false,
   });
 
   factory InquiryModel.fromJson(Map<String, dynamic> json, String id) {
@@ -22,6 +24,8 @@ class InquiryModel extends InquiryEntity {
       createdAt: json['created_at'] != null 
           ? DateTime.parse(json['created_at']) 
           : DateTime.now(),
+      hiddenFromCustomer: json['hidden_from_customer'] ?? false,
+      hiddenFromAdmin: json['hidden_from_admin'] ?? false,
     );
   }
 
@@ -31,6 +35,8 @@ class InquiryModel extends InquiryEntity {
       'item_type': itemType,
       'sender_role': senderRole,
       'message': message,
+      'hidden_from_customer': hiddenFromCustomer,
+      'hidden_from_admin': hiddenFromAdmin,
     };
 
     // Sirf tab user_id bhejein jab wo "anonymous" na ho aur valid UUID lagay

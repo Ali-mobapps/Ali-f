@@ -8,6 +8,8 @@ class InquiryEntity extends Equatable {
   final String senderRole; // 'customer' or 'admin'
   final String message;
   final DateTime createdAt;
+  final bool hiddenFromCustomer;
+  final bool hiddenFromAdmin;
 
   const InquiryEntity({
     required this.id,
@@ -17,8 +19,10 @@ class InquiryEntity extends Equatable {
     required this.senderRole,
     required this.message,
     required this.createdAt,
+    this.hiddenFromCustomer = false,
+    this.hiddenFromAdmin = false,
   });
 
   @override
-  List<Object?> get props => [id, userId, itemId, senderRole, message, createdAt];
+  List<Object?> get props => [id, userId, itemId, senderRole, message, createdAt, hiddenFromCustomer, hiddenFromAdmin];
 }

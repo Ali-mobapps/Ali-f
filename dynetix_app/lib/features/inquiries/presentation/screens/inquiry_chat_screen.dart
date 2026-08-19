@@ -48,10 +48,15 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
       _inquiryStream = Supabase.instance.client
           .from('inquiries')
           .stream(primaryKey: ['id'])
-          .eq('item_id', widget.itemId)
+          .eq('user_id', widget.userId) 
           .order('created_at', ascending: true)
           .map((data) => data
               .map((json) => InquiryModel.fromJson(json, json['id'].toString()))
+              .where((msg) {
+                if (widget.userRole == 'customer') return !msg.hiddenFromCustomer;
+                if (widget.userRole == 'admin') return !msg.hiddenFromAdmin;
+                return true;
+              })
               .toList());
     });
   }
@@ -70,8 +75,8 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
     final inquiry = InquiryModel(
       id: '', 
       userId: widget.userId,
-      itemId: widget.itemId,
-      itemType: 'service',
+      itemId: 'global_support', // Standardized ID
+      itemType: 'support',
       senderRole: widget.userRole,
       message: text,
       createdAt: DateTime.now(),
@@ -79,6 +84,25 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
 
     context.read<InquiriesCubit>().sendInquiry(inquiry);
     if (message == null) _messageController.clear();
+
+    // Auto-Reply Logic for Customer Support
+    if (widget.userRole == 'customer') {
+      Future.delayed(const Duration(seconds: 2), () {
+        if (!mounted) return;
+        
+        final botInquiry = InquiryModel(
+          id: '',
+          userId: widget.userId,
+          itemId: widget.itemId,
+          itemType: 'support',
+          senderRole: 'admin', // AI acts as Admin
+          message: '🤖 [AI Auto-Reply]: Thank you for reaching out! Our team is currently offline or busy, but we have received your message. An agent will get back to you shortly.',
+          createdAt: DateTime.now(),
+        );
+        
+        context.read<InquiriesCubit>().sendInquiry(botInquiry);
+      });
+    }
   }
 
   void _clearChat() {
@@ -93,7 +117,11 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () {
-              context.read<InquiriesCubit>().clearChat(widget.itemId);
+              context.read<InquiriesCubit>().clearChat(
+                widget.itemId, 
+                userId: widget.userId,
+                role: widget.userRole,
+              );
               Navigator.pop(context);
             },
             child: const Text('Clear'),

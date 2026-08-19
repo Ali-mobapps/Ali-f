@@ -14,7 +14,7 @@ class AdminLoginScreen extends StatefulWidget {
 }
 
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
-  final emailController = TextEditingController(text: 'admin@dynetix.com');
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
@@ -67,7 +67,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                               TextField(
                                 controller: emailController,
                                 style: const TextStyle(color: Colors.white, fontSize: 15),
-                                decoration: const InputDecoration(hintText: 'admin@dynetix.com', prefixIcon: Icon(Icons.alternate_email_rounded, size: 20)),
+                                decoration: const InputDecoration(hintText: 'Enter Admin Email', prefixIcon: Icon(Icons.alternate_email_rounded, size: 20)),
                               ),
                               const SizedBox(height: 32),
                               _buildLabel('Master Password'),

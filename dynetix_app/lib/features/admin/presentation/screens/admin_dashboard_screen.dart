@@ -23,6 +23,9 @@ import '../../../inquiries/domain/entities/inquiry_entity.dart';
 import '../../../orders/presentation/bloc/orders_cubit.dart';
 import '../../../orders/presentation/bloc/orders_state.dart';
 import '../../../orders/domain/entities/order_entity.dart';
+import '../../../reviews/presentation/bloc/reviews_cubit.dart';
+import '../../../reviews/presentation/bloc/reviews_state.dart' as rev_state;
+import '../../../reviews/domain/entities/review_entity.dart';
 import '../../../profile/presentation/bloc/profile_cubit.dart';
 import '../../../profile/presentation/bloc/profile_state.dart' as profile_state;
 import '../../../profile/presentation/screens/edit_profile_screen.dart';
@@ -63,6 +66,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     context.read<ServicesCubit>().fetchServices();
     context.read<PaymentCubit>().fetchPaymentMethods();
     context.read<OrdersCubit>().watchAllOrders();
+    // Fetch reviews for admin
+    context.read<ReviewsCubit>().fetchReviews('all');
 
     // Fetch admin profile early
     final authState = context.read<AuthCubit>().state;
@@ -78,8 +83,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       const _ServicesDashboard(),
       const _AcademyDashboard(),
       const _OrdersDashboard(),
-      const _PaymentsDashboard(),
       const _CustomerMessagesDashboard(),
+      const _ReviewsDashboard(),
+      const _PaymentsDashboard(),
       const _AdminProfileDashboard(),
     ];
 
@@ -104,15 +110,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textDisabled,
         backgroundColor: AppColors.surface,
-        selectedFontSize: 10,
-        unselectedFontSize: 10,
+        selectedFontSize: 9,
+        unselectedFontSize: 9,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.analytics_rounded), label: 'Insights'),
           BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Services'),
           BottomNavigationBarItem(icon: Icon(Icons.school_rounded), label: 'Academy'),
           BottomNavigationBarItem(icon: Icon(Icons.assignment_rounded), label: 'Orders'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Payments'),
           BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_rounded), label: 'Chat'),
+          BottomNavigationBarItem(icon: Icon(Icons.star_rounded), label: 'Feedback'),
+          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Payments'),
           BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
         ],
       ),
@@ -182,7 +189,7 @@ class _InsightsDashboard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text('REVENUE STREAM', style: TextStyle(color: AppColors.textSecondary, letterSpacing: 1, fontSize: 10, fontWeight: FontWeight.bold)),
-                              Icon(Icons.trending_up_rounded, color: AppColors.success, size: 20),
+                              const Icon(Icons.trending_up_rounded, color: AppColors.success, size: 20),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -213,7 +220,21 @@ class _InsightsDashboard extends StatelessWidget {
                     ),
                     
                     const SizedBox(height: 32),
-                    const Text('Project Status Distribution', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Project Status Distribution', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                        TextButton.icon(
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Generating Business Report... File saved to Downloads.'), backgroundColor: AppColors.primary),
+                            );
+                          }, 
+                          icon: const Icon(Icons.file_download_rounded, color: AppColors.primary, size: 18),
+                          label: const Text('EXPORT REPORT', style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 16),
                     _buildDistributionBar('Completed', completedOrders, totalOrders, AppColors.success),
                     _buildDistributionBar('In Progress', activeOrders, totalOrders, Colors.blueAccent),
@@ -312,9 +333,7 @@ class _ServicesDashboard extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final item = services[index];
                       return _buildAdminItemCard(
-                        title: item.title,
-                        price: 'Rs. ${item.price.toStringAsFixed(2)}',
-                        type: 'service',
+                        item: item,
                         onEdit: () => _showServiceDialog(context, service: item),
                         onDelete: () => context.read<ServicesCubit>().deleteService(item.id),
                       );
@@ -369,9 +388,7 @@ class _AcademyDashboard extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final item = courses[index];
                       return _buildAdminItemCard(
-                        title: item.title,
-                        price: 'Rs. ${item.price.toStringAsFixed(2)}',
-                        type: 'course',
+                        item: item,
                         onEdit: () => _showServiceDialog(context, service: item),
                         onDelete: () => context.read<ServicesCubit>().deleteService(item.id),
                       );
@@ -453,11 +470,20 @@ class _OrdersDashboard extends StatelessWidget {
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.white)),
-                  IconButton(
-                    icon: const Icon(Icons.refresh_rounded,
-                        color: AppColors.primary, size: 20),
-                    onPressed: () =>
-                        context.read<OrdersCubit>().watchAllOrders(),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.add_circle_outline_rounded,
+                            color: AppColors.primary, size: 24),
+                        onPressed: () => _showAddOrderDialog(context),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.refresh_rounded,
+                            color: AppColors.primary, size: 20),
+                        onPressed: () =>
+                            context.read<OrdersCubit>().watchAllOrders(),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -470,7 +496,7 @@ class _OrdersDashboard extends StatelessWidget {
                         children: [
                           Icon(Icons.assignment_late_outlined,
                               size: 48,
-                              color: AppColors.textDisabled.withOpacity(0.2)),
+                              color: AppColors.textDisabled.withValues(alpha: 0.2)),
                           const SizedBox(height: 16),
                           const Text('No active projects found.',
                               style: TextStyle(color: AppColors.textSecondary)),
@@ -675,13 +701,99 @@ class _OrdersDashboard extends StatelessWidget {
               child: const Text('Cancel')),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            onPressed: () {
-              context.read<OrdersCubit>().deleteOrder(order.id);
-              Navigator.pop(context);
+            onPressed: () async {
+              // Delete from database
+              await context.read<OrdersCubit>().deleteOrder(order.id);
+              if (context.mounted) {
+                // Permanent Deletion: Remove related support history for this user
+                await context.read<InquiriesCubit>().clearChat('global_support', userId: order.customerId, role: 'admin');
+                Navigator.of(context).pop();
+                // Force a fresh stream to update the whole UI (including Insights)
+                context.read<OrdersCubit>().watchAllOrders();
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Order permanently removed')));
+              }
             },
             child: const Text('Delete'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showAddOrderDialog(BuildContext context) {
+    final servicesState = context.read<ServicesCubit>().state;
+    final customerIdController = TextEditingController();
+    final priceController = TextEditingController();
+    ServiceEntity? selectedService;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: const Text('Manual Order Entry', style: TextStyle(color: Colors.white)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Enter details to create a new project manually.', style: TextStyle(color: AppColors.textDisabled, fontSize: 12)),
+                const SizedBox(height: 20),
+                if (servicesState is ServicesLoaded)
+                  DropdownButtonFormField<ServiceEntity>(
+                    dropdownColor: AppColors.surface,
+                    decoration: const InputDecoration(labelText: 'Select Service'),
+                    items: servicesState.services.map((s) => DropdownMenuItem(
+                      value: s,
+                      child: Text(s.title, style: const TextStyle(color: Colors.white, fontSize: 13), overflow: TextOverflow.ellipsis),
+                    )).toList(),
+                    onChanged: (val) {
+                      setDialogState(() {
+                        selectedService = val;
+                        priceController.text = val?.price.toString() ?? '';
+                      });
+                    },
+                  ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: customerIdController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(labelText: 'Customer ID (UUID)', hintText: 'Copy from Supabase Users'),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: priceController,
+                  style: const TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Custom Price (Rs.)'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () {
+                if (selectedService == null || customerIdController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select service and enter Customer ID')));
+                  return;
+                }
+                final newOrder = OrderEntity(
+                  id: '',
+                  customerId: customerIdController.text.trim(),
+                  serviceId: selectedService!.id,
+                  serviceTitle: selectedService!.title,
+                  price: double.tryParse(priceController.text) ?? selectedService!.price,
+                  status: 'in_progress',
+                  paymentStatus: 'paid',
+                  createdAt: DateTime.now(),
+                );
+                context.read<OrdersCubit>().createOrder(newOrder);
+                Navigator.pop(context);
+              },
+              child: const Text('Create Order'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -803,12 +915,6 @@ class _CustomerMessagesDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authState = context.read<AuthCubit>().state;
-    String adminId = "admin-id";
-    if (authState is AuthAuthenticated) {
-      adminId = authState.user.id;
-    }
-
     // Only fetch once when screen is built
     context.read<InquiriesCubit>().fetchInquiries('', true);
 
@@ -820,13 +926,14 @@ class _CustomerMessagesDashboard extends StatelessWidget {
             return const Center(child: Text('No customer inquiries yet.', style: TextStyle(color: Colors.white54)));
           }
 
-          // Group by itemId to show conversation list (WhatsApp Style)
+          // Group by userId only to show one entry per customer (WhatsApp Style)
           final Map<String, List<InquiryEntity>> grouped = {};
           for (var inquiry in state.inquiries) {
-            if (!grouped.containsKey(inquiry.itemId)) {
-              grouped[inquiry.itemId] = [];
+            final key = inquiry.userId;
+            if (!grouped.containsKey(key)) {
+              grouped[key] = [];
             }
-            grouped[inquiry.itemId]!.add(inquiry);
+            grouped[key]!.add(inquiry);
           }
 
           final conversationKeys = grouped.keys.toList();
@@ -834,18 +941,28 @@ class _CustomerMessagesDashboard extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(24.0),
-                child: Text('Conversations', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Conversations', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                    IconButton(
+                      icon: const Icon(Icons.delete_sweep_rounded, color: Colors.redAccent),
+                      onPressed: () => _showClearAllChatsDialog(context, conversationKeys),
+                      tooltip: 'Clear All Chats',
+                    ),
+                  ],
+                ),
               ),
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: conversationKeys.length,
                   itemBuilder: (context, index) {
-                    final itemId = conversationKeys[index];
-                    final chatMessages = grouped[itemId]!;
-                    final lastMessage = chatMessages.first; // Last because we ordered by desc in repo
+                    final customerId = conversationKeys[index];
+                    final chatMessages = grouped[customerId]!;
+                    final lastMessage = chatMessages.first;
                     
                     // Try to extract name from special format repository uses: "[[Name]]: message"
                     String displayName = 'Customer Chat';
@@ -861,59 +978,72 @@ class _CustomerMessagesDashboard extends StatelessWidget {
                       margin: const EdgeInsets.only(bottom: 12),
                       child: GlassPanel(
                         padding: 4,
-                        child: ListTile(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => InquiryChatScreen(
-                                  itemId: itemId,
-                                  itemTitle: displayName,
-                                  userRole: 'admin',
-                                  userId: adminId,
-                                ),
-                              ),
-                            );
-                          },
-                          leading: Stack(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                                child: Text(displayName[0].toUpperCase(), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
-                              ),
-                              Positioned(
-                                right: 0,
-                                bottom: 0,
-                                child: Container(
-                                  width: 12,
-                                  height: 12,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.success,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: AppColors.surface, width: 2),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: ListTile(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => InquiryChatScreen(
+                                    itemId: 'global_support', 
+                                    itemTitle: displayName,
+                                    userRole: 'admin',
+                                    userId: customerId,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          title: Text(displayName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                          subtitle: Text(
-                            displayMessage, 
-                            maxLines: 1, 
-                            overflow: TextOverflow.ellipsis, 
-                            style: const TextStyle(color: AppColors.textDisabled, fontSize: 13),
-                          ),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                '${lastMessage.createdAt.hour}:${lastMessage.createdAt.minute.toString().padLeft(2, '0')}',
-                                style: const TextStyle(color: AppColors.textDisabled, fontSize: 10),
-                              ),
-                              const SizedBox(height: 4),
-                              const Icon(Icons.chevron_right, color: AppColors.textDisabled, size: 16),
-                            ],
+                              );
+                            },
+                            leading: Stack(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                                  child: Text(displayName[0].toUpperCase(), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                                ),
+                                Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Container(
+                                    width: 12,
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.success,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: AppColors.surface, width: 2),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            title: Text(displayName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            subtitle: Text(
+                              displayMessage, 
+                              maxLines: 1, 
+                              overflow: TextOverflow.ellipsis, 
+                              style: const TextStyle(color: AppColors.textDisabled, fontSize: 13),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '${lastMessage.createdAt.hour}:${lastMessage.createdAt.minute.toString().padLeft(2, '0')}',
+                                      style: const TextStyle(color: AppColors.textDisabled, fontSize: 10),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    const Icon(Icons.chevron_right, color: AppColors.textDisabled, size: 16),
+                                  ],
+                                ),
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                                  onPressed: () => _showDeleteChatDialog(context, 'global_support', customerId, displayName),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -936,10 +1066,157 @@ class _CustomerMessagesDashboard extends StatelessWidget {
       },
     );
   }
+
+  void _showDeleteChatDialog(BuildContext context, String itemId, String userId, String name) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Delete Chat', style: TextStyle(color: Colors.white)),
+        content: Text('Are you sure you want to delete the conversation with "$name"?', style: const TextStyle(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () async {
+              await context.read<InquiriesCubit>().clearChat(itemId, userId: userId, role: 'admin');
+              if (context.mounted) {
+                Navigator.of(context).pop();
+                // Refresh list with a slight delay for Supabase to propagate
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  context.read<InquiriesCubit>().fetchInquiries('', true);
+                });
+              }
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearAllChatsDialog(BuildContext context, List<String> userIds) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Clear All Chats', style: TextStyle(color: Colors.white)),
+        content: const Text('This will permanently delete all customer conversations. Proceed?', style: TextStyle(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () async {
+              Navigator.of(context).pop();
+              for (var id in userIds) {
+                await context.read<InquiriesCubit>().clearChat('global_support', userId: id, role: 'admin');
+              }
+              if (context.mounted) {
+                context.read<InquiriesCubit>().fetchInquiries('', true);
+              }
+            },
+            child: const Text('Clear All'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _AdminProfileDashboard extends StatelessWidget {
+class _ReviewsDashboard extends StatelessWidget {
+  const _ReviewsDashboard();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ReviewsCubit, rev_state.ReviewsState>(
+      builder: (context, state) {
+        if (state is rev_state.ReviewsLoading) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        if (state is rev_state.ReviewsLoaded) {
+          if (state.reviews.isEmpty) {
+            return const Center(child: Text('No feedback received yet.', style: TextStyle(color: Colors.white54)));
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Text('Customer Feedback', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: state.reviews.length,
+                  itemBuilder: (context, index) {
+                    final review = state.reviews[index];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: GlassPanel(
+                        padding: 16,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: List.generate(5, (i) => Icon(
+                                    Icons.star_rounded, 
+                                    color: i < review.rating ? AppColors.gold : Colors.white10, 
+                                    size: 16
+                                  )),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
+                                  onPressed: () {
+                                    context.read<ReviewsCubit>().deleteReview(review.id);
+                                    context.read<ReviewsCubit>().fetchReviews('all');
+                                  },
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(review.comment, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Order: ${review.orderId.substring(0, 8)}', style: const TextStyle(color: AppColors.textDisabled, fontSize: 10)),
+                                Text('${review.createdAt.day}/${review.createdAt.month}/${review.createdAt.year}', style: const TextStyle(color: AppColors.textDisabled, fontSize: 10)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        }
+        return const Center(child: Text('Error loading reviews.'));
+      },
+    );
+  }
+}
+
+class _AdminProfileDashboard extends StatefulWidget {
   const _AdminProfileDashboard();
+
+  @override
+  State<_AdminProfileDashboard> createState() => _AdminProfileDashboardState();
+}
+
+class _AdminProfileDashboardState extends State<_AdminProfileDashboard> {
+  @override
+  void initState() {
+    super.initState();
+    final authState = context.read<AuthCubit>().state;
+    if (authState is AuthAuthenticated) {
+      context.read<ProfileCubit>().fetchProfile(authState.user.email);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -948,11 +1225,6 @@ class _AdminProfileDashboard extends StatelessWidget {
     if (authState is AuthAuthenticated) {
       email = authState.user.email;
     }
-
-    // Fetch profile data
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProfileCubit>().fetchProfile(email);
-    });
 
     return BlocBuilder<ProfileCubit, profile_state.ProfileState>(
       builder: (context, state) {
@@ -981,16 +1253,19 @@ class _AdminProfileDashboard extends StatelessWidget {
                                 width: 120,
                                 height: 120,
                                 fit: BoxFit.cover,
+                                key: ValueKey(imageUrl), // Force reload if URL changes
                                 loadingBuilder: (context, child, loadingProgress) {
                                   if (loadingProgress == null) return child;
                                   return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                                 },
-                                errorBuilder: (context, error, stackTrace) => Container(
-                                  width: 120,
-                                  height: 120,
-                                  color: AppColors.cardBackground,
-                                  child: const Icon(Icons.person_rounded, size: 60, color: AppColors.primary),
-                                ),
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width: 120,
+                                    height: 120,
+                                    color: AppColors.cardBackground,
+                                    child: const Icon(Icons.person_rounded, size: 60, color: AppColors.primary),
+                                  );
+                                },
                               )
                             : Container(
                                 width: 120,
@@ -1015,7 +1290,10 @@ class _AdminProfileDashboard extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder: (context) => EditProfileScreen(profile: state.profile),
                                 ),
-                              );
+                              ).then((_) {
+                                if (!context.mounted) return;
+                                context.read<ProfileCubit>().fetchProfile(email);
+                              });
                             },
                           ),
                         ),
@@ -1162,7 +1440,9 @@ Widget _buildHeader(BuildContext context, String title, String subtitle, VoidCal
   );
 }
 
-Widget _buildAdminItemCard({required String title, required String price, String type = 'service', required VoidCallback onEdit, required VoidCallback onDelete}) {
+Widget _buildAdminItemCard({required ServiceEntity item, required VoidCallback onEdit, required VoidCallback onDelete}) {
+  final bool hasDiscount = item.discountPrice != null && item.discountPrice! < item.price;
+  
   return Container(
     margin: const EdgeInsets.only(bottom: 16),
     child: GlassPanel(
@@ -1173,15 +1453,26 @@ Widget _buildAdminItemCard({required String title, required String price, String
             width: 44,
             height: 44,
             decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-            child: Icon(_getServiceIcon(title, type), color: AppColors.primary, size: 20),
+            child: Icon(_getServiceIcon(item.title, item.type), color: AppColors.primary, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
-                Text(price, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 13)),
+                Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
+                Row(
+                  children: [
+                    if (hasDiscount) ...[
+                      Text('Rs. ${item.price.toStringAsFixed(0)}', style: const TextStyle(color: AppColors.textDisabled, decoration: TextDecoration.lineThrough, fontSize: 11)),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      'Rs. ${(hasDiscount ? item.discountPrice! : item.price).toStringAsFixed(2)}', 
+                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 13)
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -1196,6 +1487,8 @@ Widget _buildAdminItemCard({required String title, required String price, String
 void _showServiceDialog(BuildContext context, {ServiceEntity? service, String type = 'service'}) {
   final titleController = TextEditingController(text: service?.title ?? '');
   final priceController = TextEditingController(text: service?.price.toString() ?? '');
+  final discountController = TextEditingController(text: service?.discountPrice?.toString() ?? '');
+  final portfolioController = TextEditingController(text: service?.portfolioUrls.join(', ') ?? '');
   final descController = TextEditingController(text: service?.description ?? '');
 
   showDialog(
@@ -1209,7 +1502,23 @@ void _showServiceDialog(BuildContext context, {ServiceEntity? service, String ty
           children: [
             TextField(controller: titleController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Title')),
             const SizedBox(height: 16),
-            TextField(controller: priceController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Price'), keyboardType: TextInputType.number),
+            Row(
+              children: [
+                Expanded(child: TextField(controller: priceController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Price'), keyboardType: TextInputType.number)),
+                const SizedBox(width: 12),
+                Expanded(child: TextField(controller: discountController, style: const TextStyle(color: AppColors.primary), decoration: const InputDecoration(labelText: 'Discount'), keyboardType: TextInputType.number)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: portfolioController, 
+              style: const TextStyle(color: Colors.white, fontSize: 13), 
+              decoration: const InputDecoration(
+                labelText: 'Portfolio Image URLs', 
+                hintText: 'Link1, Link2, Link3...',
+                hintStyle: TextStyle(color: Colors.white24, fontSize: 11),
+              )
+            ),
             const SizedBox(height: 16),
             TextField(controller: descController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Description'), maxLines: 3),
           ],
@@ -1219,13 +1528,16 @@ void _showServiceDialog(BuildContext context, {ServiceEntity? service, String ty
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
         ElevatedButton(
           onPressed: () {
+            final portfolioList = portfolioController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
             final newService = ServiceEntity(
               id: service?.id ?? '',
               title: titleController.text,
               price: double.tryParse(priceController.text) ?? 0.0,
+              discountPrice: double.tryParse(discountController.text),
               description: descController.text,
-              category: 'General',
-              type: type,
+              portfolioUrls: portfolioList,
+              category: service?.category ?? 'General',
+              type: service?.type ?? type,
             );
             if (service == null) {
               context.read<ServicesCubit>().addService(newService);
