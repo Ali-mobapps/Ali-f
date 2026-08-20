@@ -1,17 +1,5 @@
-# smart_traders_app
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img width="495" height="607" alt="1" src="https://github.com/user-attachments/assets/465da05f-086c-4dd6-8d26-06964c6e3b99" />
+<img width="503" height="617" alt="2" src="https://github.com/user-attachments/assets/bfa6efc7-5fc4-4273-bdea-bcf04804721d" />
+<img width="501" height="600" alt="3" src="https://github.com/user-attachments/assets/885044c8-c15c-4af1-8e98-0305a01f8612" />
+<img width="499" height="615" alt="4" src="https://github.com/user-attachments/assets/7d4aad85-3dd3-4626-9dc8-05bd578cd36b" />
+<img width="503" height="627" alt="5" src="https://github.com/user-attachments/assets/a3aeb79a-fce3-4e6b-a801-536b6eab1e11" />
