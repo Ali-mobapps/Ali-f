@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Financial Reports &amp; Business Insights - BookStock Manager</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#476083",
+                        "tertiary": "#02060a",
+                        "surface-container-high": "#dee8ff",
+                        "outline": "#74777f",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#d8e3fb",
+                        "primary-fixed": "#d4e3ff",
+                        "tertiary-fixed": "#dde3eb",
+                        "secondary-container": "#ffbf00",
+                        "on-secondary-container": "#6d5000",
+                        "on-primary-container": "#6f88ad",
+                        "on-background": "#111c2d",
+                        "inverse-on-surface": "#ecf1ff",
+                        "primary": "#000613",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#cfdaf2",
+                        "on-primary-fixed": "#001c3a",
+                        "surface": "#f9f9ff",
+                        "background": "#f9f9ff",
+                        "inverse-primary": "#afc8f0",
+                        "error": "#ba1a1a",
+                        "surface-container": "#e7eeff",
+                        "tertiary-fixed-dim": "#c1c7cf",
+                        "outline-variant": "#c4c6cf",
+                        "primary-fixed-dim": "#afc8f0",
+                        "on-tertiary-fixed": "#161c22",
+                        "surface-container-low": "#f0f3ff",
+                        "inverse-surface": "#263143",
+                        "on-secondary-fixed": "#261a00",
+                        "secondary-fixed": "#ffdfa0",
+                        "tertiary-container": "#191f25",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#80878e",
+                        "secondary-fixed-dim": "#fbbc00",
+                        "on-primary-fixed-variant": "#2f486a",
+                        "on-surface-variant": "#43474e",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#001f3f",
+                        "surface-bright": "#f9f9ff",
+                        "on-secondary-fixed-variant": "#5c4300",
+                        "on-error": "#ffffff",
+                        "secondary": "#795900",
+                        "on-surface": "#111c2d",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#d8e3fb",
+                        "on-tertiary-fixed-variant": "#41474e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-padding": "24px",
+                        "stack-comfortable": "16px",
+                        "stack-dense": "8px",
+                        "gutter": "16px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter", "sans-serif"],
+                        "body-sm": ["Inter", "sans-serif"],
+                        "data-table-header": ["Inter", "sans-serif"],
+                        "label-mono": ["JetBrains Mono", "monospace"],
+                        "headline-md": ["Hanken Grotesk", "sans-serif"],
+                        "display-lg": ["Hanken Grotesk", "sans-serif"],
+                        "title-sm": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "data-table-header": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "label-mono": ["11px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&amp;family=Inter:wght@400;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col md:flex-row">
+<!-- Mobile Top App Bar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-surface border-b border-outline-variant md:hidden">
+<button class="text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+</button>
+<h1 class="text-title-sm font-title-sm font-bold text-primary">BookStock Manager</h1>
+<button class="text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</header>
+<!-- Desktop Side Navigation Drawer -->
+<aside class="hidden md:flex flex-col py-6 space-y-stack-dense h-full w-80 rounded-r-xl border-r border-outline-variant shadow-lg bg-surface-container fixed top-0 left-0 z-40">
+<div class="px-6 mb-8 flex items-center space-x-4">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A small, professional headshot photo of an administrator, well-lit against a neutral background. The lighting is crisp and the composition is tight, fitting for a premium business dashboard application. The style is modern realism." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkVz_ooBwZ7tFQns6-YeeEG3wkiri5nvFFXsQAGPJefjI50Q6a5uYi8KdC1AQ-V9hqMgaNQF1MMrlgfdXLJZW6iKm2beJmuAuTpj93Cq3ODPZV0AEMb_R2Tue-6VNRTriG7CLU9__T2tjiBptwGYjL7coQVz8c4mkAa3IdMSGdWnXTh2gxusuyZUrMXBlQ2DnjeGjkEDWv62hJXlDlDjaWM12a-MRTneyQYoyx30DaAioLgaYPYuI"/>
+<div>
+<h2 class="text-headline-md font-headline-md font-bold text-primary">Admin Portal</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Main Street Books</p>
+<p class="text-label-mono font-label-mono text-outline">v2.4.0</p>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-unit">
+<a class="flex items-center space-x-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest mx-2 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+<span class="text-body-md font-body-md">Inventory Management</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest mx-2 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="text-body-md font-body-md">POS Terminal</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest mx-2 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="text-body-md font-body-md">Sales Ledger</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest mx-2 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person_search">person_search</span>
+<span class="text-body-md font-body-md">Customer Credit</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold rounded-full mx-2 brightness-95" href="#">
+<span class="material-symbols-outlined" data-icon="trending_up" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+<span class="text-body-md font-body-md">Business Reports</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest mx-2 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-body-md font-body-md">Settings</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 pt-20 md:pt-8 pb-24 md:pb-8 px-container-padding md:ml-80">
+<!-- Header & Controls -->
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+<div>
+<h1 class="text-display-lg font-display-lg text-primary">Financial Reports</h1>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1">Review your business insights and performance metrics.</p>
+</div>
+<div class="flex items-center space-x-4">
+<div class="relative group">
+<button class="flex items-center space-x-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg hover:border-primary transition-colors focus:border-primary focus:border-2 outline-none">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">calendar_today</span>
+<span class="text-body-sm font-body-sm text-on-surface font-semibold">Last 30 Days</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">arrow_drop_down</span>
+</button>
+</div>
+<button class="flex items-center space-x-2 px-4 py-2 bg-primary text-on-primary rounded-lg font-title-sm text-title-sm hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[20px]">download</span>
+<span>Export CSV</span>
+</button>
+</div>
+</div>
+<!-- KPI Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-8">
+<!-- Total Revenue -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-4">
+<span class="text-label-mono font-label-mono text-on-surface-variant uppercase tracking-wider">Total Revenue</span>
+<div class="p-2 bg-surface-container rounded-full">
+<span class="material-symbols-outlined text-primary text-[20px]">payments</span>
+</div>
+</div>
+<div class="flex items-baseline space-x-2">
+<h3 class="text-headline-md font-headline-md text-primary">$45,231.89</h3>
+</div>
+<div class="flex items-center mt-2 text-body-sm font-body-sm">
+<span class="material-symbols-outlined text-[#006874] text-[16px] mr-1">arrow_upward</span>
+<span class="text-[#006874] font-semibold">+12.5%</span>
+<span class="text-on-surface-variant ml-2">vs last period</span>
+</div>
+</div>
+<!-- Net Profit -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-4">
+<span class="text-label-mono font-label-mono text-on-surface-variant uppercase tracking-wider">Net Profit</span>
+<div class="p-2 bg-secondary-container rounded-full">
+<span class="material-symbols-outlined text-on-secondary-container text-[20px]">account_balance_wallet</span>
+</div>
+</div>
+<div class="flex items-baseline space-x-2">
+<h3 class="text-headline-md font-headline-md text-primary">$18,450.00</h3>
+</div>
+<div class="flex items-center mt-2 text-body-sm font-body-sm">
+<span class="material-symbols-outlined text-[#006874] text-[16px] mr-1">arrow_upward</span>
+<span class="text-[#006874] font-semibold">+8.2%</span>
+<span class="text-on-surface-variant ml-2">vs last period</span>
+</div>
+</div>
+<!-- Inventory Value -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-4">
+<span class="text-label-mono font-label-mono text-on-surface-variant uppercase tracking-wider">Inventory Value</span>
+<div class="p-2 bg-surface-container rounded-full">
+<span class="material-symbols-outlined text-primary text-[20px]">inventory</span>
+</div>
+</div>
+<div class="flex items-baseline space-x-2">
+<h3 class="text-headline-md font-headline-md text-primary">$124,500.50</h3>
+</div>
+<div class="flex items-center mt-2 text-body-sm font-body-sm">
+<span class="material-symbols-outlined text-error text-[16px] mr-1">arrow_downward</span>
+<span class="text-error font-semibold">-2.1%</span>
+<span class="text-on-surface-variant ml-2">vs last period</span>
+</div>
+</div>
+<!-- Total Transactions -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-4">
+<span class="text-label-mono font-label-mono text-on-surface-variant uppercase tracking-wider">Transactions</span>
+<div class="p-2 bg-surface-container rounded-full">
+<span class="material-symbols-outlined text-primary text-[20px]">receipt</span>
+</div>
+</div>
+<div class="flex items-baseline space-x-2">
+<h3 class="text-headline-md font-headline-md text-primary">1,432</h3>
+</div>
+<div class="flex items-center mt-2 text-body-sm font-body-sm">
+<span class="material-symbols-outlined text-[#006874] text-[16px] mr-1">arrow_upward</span>
+<span class="text-[#006874] font-semibold">+15.4%</span>
+<span class="text-on-surface-variant ml-2">vs last period</span>
+</div>
+</div>
+</div>
+<!-- Main Analytics Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Chart Card -->
+<div class="lg:col-span-2 bg-surface-container-lowest rounded-xl border border-outline-variant flex flex-col p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-title-sm font-title-sm text-primary">Daily Sales vs Profit</h3>
+<div class="flex space-x-4 text-label-mono font-label-mono">
+<div class="flex items-center"><span class="w-3 h-3 bg-primary rounded-sm mr-2"></span>Revenue</div>
+<div class="flex items-center"><span class="w-3 h-3 bg-secondary-container rounded-sm mr-2"></span>Profit</div>
+</div>
+</div>
+<!-- Conceptual Bar Chart -->
+<div class="flex-1 flex items-end space-x-2 h-64 border-b border-l border-outline-variant pl-2 pb-2 relative">
+<!-- Y Axis Labels -->
+<div class="absolute left-0 bottom-0 h-full -ml-8 flex flex-col justify-between text-label-mono text-on-surface-variant py-2">
+<span>$2k</span>
+<span>$1.5k</span>
+<span>$1k</span>
+<span>$500</span>
+<span>$0</span>
+</div>
+<!-- Bars (Generated data logic for visual) -->
+<div class="flex-1 flex justify-around items-end h-full pt-4 group">
+<div class="w-1/4 h-[80%] bg-primary rounded-t-sm mx-1 relative"><div class="absolute bottom-0 w-full h-[40%] bg-secondary-container rounded-t-sm"></div></div>
+<div class="w-1/4 h-[65%] bg-primary rounded-t-sm mx-1 relative"><div class="absolute bottom-0 w-full h-[30%] bg-secondary-container rounded-t-sm"></div></div>
+<div class="w-1/4 h-[90%] bg-primary rounded-t-sm mx-1 relative"><div class="absolute bottom-0 w-full h-[45%] bg-secondary-container rounded-t-sm"></div></div>
+<div class="w-1/4 h-[70%] bg-primary rounded-t-sm mx-1 relative"><div class="absolute bottom-0 w-full h-[35%] bg-secondary-container rounded-t-sm"></div></div>
+<div class="w-1/4 h-[100%] bg-primary rounded-t-sm mx-1 relative"><div class="absolute bottom-0 w-full h-[55%] bg-secondary-container rounded-t-sm"></div></div>
+<div class="w-1/4 h-[85%] bg-primary rounded-t-sm mx-1 relative"><div class="absolute bottom-0 w-full h-[42%] bg-secondary-container rounded-t-sm"></div></div>
+<div class="w-1/4 h-[60%] bg-primary rounded-t-sm mx-1 relative"><div class="absolute bottom-0 w-full h-[25%] bg-secondary-container rounded-t-sm"></div></div>
+</div>
+<!-- X Axis Labels -->
+<div class="absolute -bottom-6 left-0 w-full flex justify-around pl-4 text-label-mono text-on-surface-variant">
+<span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+</div>
+</div>
+</div>
+<!-- Top Categories List -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 flex flex-col">
+<h3 class="text-title-sm font-title-sm text-primary mb-4 border-b border-outline-variant pb-2">Top Selling Categories</h3>
+<div class="flex-1 space-y-4">
+<!-- Category Item -->
+<div class="flex items-center justify-between group">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+</div>
+<div>
+<p class="text-body-md font-body-md font-semibold text-primary">Fiction</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">450 units</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-body-md font-body-md font-semibold text-primary">$12,450</p>
+<p class="text-label-mono font-label-mono text-[#006874]">+5%</p>
+</div>
+</div>
+<!-- Category Item -->
+<div class="flex items-center justify-between group">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">science</span>
+</div>
+<div>
+<p class="text-body-md font-body-md font-semibold text-primary">Academic</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">320 units</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-body-md font-body-md font-semibold text-primary">$8,900</p>
+<p class="text-label-mono font-label-mono text-[#006874]">+12%</p>
+</div>
+</div>
+<!-- Category Item -->
+<div class="flex items-center justify-between group">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</div>
+<div>
+<p class="text-body-md font-body-md font-semibold text-primary">Stationery</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">890 units</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-body-md font-body-md font-semibold text-primary">$4,200</p>
+<p class="text-label-mono font-label-mono text-error">-2%</p>
+</div>
+</div>
+<!-- Category Item -->
+<div class="flex items-center justify-between group">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">child_care</span>
+</div>
+<div>
+<p class="text-body-md font-body-md font-semibold text-primary">Children's</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">210 units</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-body-md font-body-md font-semibold text-primary">$3,150</p>
+<p class="text-label-mono font-label-mono text-[#006874]">+8%</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-4 py-2 border border-outline-variant text-primary font-title-sm text-title-sm rounded-lg hover:bg-surface-container transition-colors">View Full Report</button>
+</div>
+</div>
+</main>
+<!-- Mobile Bottom Nav Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-surface border-t border-outline-variant md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="text-label-mono font-label-mono mt-1">Inventory</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="point_of_sale">point_of_sale</span>
+<span class="text-label-mono font-label-mono mt-1">POS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-label-mono font-label-mono mt-1">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="text-label-mono font-label-mono mt-1">Khata</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats" style="font-variation-settings: 'FILL' 1;">query_stats</span>
+<span class="text-label-mono font-label-mono mt-1 font-bold">Insights</span>
+</a>
+</nav>
+</body></html>
