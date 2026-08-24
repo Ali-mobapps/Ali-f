@@ -1,17 +1,2 @@
-# luxury_e_commerce
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img width="497" height="616" alt="CRYPTO 1" src="https://github.com/user-attachments/assets/9ae8518f-e0f4-4b85-8f0d-24ad2913b021" />
+<img width="502" height="605" alt="CRYPTO 2" src="https://github.com/user-attachments/assets/64e6bf3f-ae28-4eb9-ad9b-119528320197" />

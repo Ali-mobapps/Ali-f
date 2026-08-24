@@ -1,17 +1,2 @@
-# fitness_gym
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img width="502" height="608" alt="FITNES 1" src="https://github.com/user-attachments/assets/4a90b090-155b-4791-8a1b-9b85a32bde8e" />
+<img width="495" height="630" alt="FITNES 2" src="https://github.com/user-attachments/assets/87722088-1442-436b-9b5b-0a5e23970801" />
