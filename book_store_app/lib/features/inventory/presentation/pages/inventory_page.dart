@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import '../../../../core/widgets/dashboard_layout.dart';
-import '../../domain/models/inventory_item.dart';
-import '../../domain/repositories/inventory_repository.dart';
-import '../../data/repositories/mock_inventory_repository.dart';
-import '../../data/repositories/sqflite_inventory_repository.dart';
+import '../../../../core/database/supabase_helper.dart';
+import '../../models/product_model.dart';
+import '../widgets/add_product_dialog.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -14,26 +12,18 @@ class InventoryPage extends StatefulWidget {
 }
 
 class _InventoryPageState extends State<InventoryPage> {
-  late final InventoryRepository _repository;
-  List<InventoryItem> _items = [];
-  bool _isLoading = true;
+  final SupabaseHelper _db = SupabaseHelper();
+  late Future<List<Product>> _productsFuture;
 
   @override
   void initState() {
     super.initState();
-    if (kIsWeb) {
-      _repository = MockInventoryRepository();
-    } else {
-      _repository = SqfliteInventoryRepository();
-    }
-    _loadItems();
+    _loadProducts();
   }
 
-  Future<void> _loadItems() async {
-    final items = await _repository.getInventoryItems();
+  void _loadProducts() {
     setState(() {
-      _items = items;
-      _isLoading = false;
+      _productsFuture = _db.getProducts().then((data) => data.map((e) => Product.fromMap(e)).toList());
     });
   }
 
@@ -46,168 +36,170 @@ class _InventoryPageState extends State<InventoryPage> {
       selectedIndex: 0,
       child: Column(
         children: [
-          // Header with search and actions
           Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                bottom: BorderSide(color: colorScheme.outlineVariant),
-              ),
-            ),
+            padding: const EdgeInsets.all(16),
+            color: Colors.white,
             child: Row(
               children: [
                 Expanded(
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search SKU, title, or barcode...',
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: colorScheme.outlineVariant),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      ),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search...',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: colorScheme.surface,
                     ),
                   ),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => showDialog(context: context, builder: (_) => AddProductDialog(type: 'book', onAdded: _loadProducts)),
                   icon: const Icon(Icons.add_circle_outline),
-                  label: const Text('Add Stationery'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.secondaryContainer,
-                    foregroundColor: colorScheme.onSecondaryContainer,
-                  ),
+                  label: const Text('Add Book'),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.library_add_outlined),
-                  label: const Text('Add Book'),
+                  onPressed: () => showDialog(context: context, builder: (_) => AddProductDialog(type: 'stationery', onAdded: _loadProducts)),
+                  icon: const Icon(Icons.add_box_outlined),
+                  label: const Text('Add Stationery'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: colorScheme.onPrimary,
+                    backgroundColor: colorScheme.secondary,
+                    foregroundColor: colorScheme.onSecondary,
                   ),
                 ),
               ],
             ),
           ),
-          // Filter Chips
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            color: Colors.white,
-            child: Row(
-              children: [
-                FilterChip(
-                  label: const Text('All Stock'),
-                  selected: true,
-                  onSelected: (val) {},
-                  backgroundColor: colorScheme.surface,
-                  selectedColor: colorScheme.primary,
-                  labelStyle: const TextStyle(color: Colors.white),
-                ),
-                const SizedBox(width: 8),
-                FilterChip(
-                  label: const Text('Books'),
-                  onSelected: (val) {},
-                ),
-                const SizedBox(width: 8),
-                FilterChip(
-                  label: const Text('Stationery'),
-                  onSelected: (val) {},
-                ),
-                const SizedBox(width: 8),
-                FilterChip(
-                  label: Row(
-                    children: [
-                      Icon(Icons.warning_amber_rounded, size: 16, color: colorScheme.error),
-                      const SizedBox(width: 4),
-                      const Text('Low Stock'),
-                    ],
-                  ),
-                  onSelected: (val) {},
-                ),
-              ],
-            ),
-          ),
-          // Table
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: colorScheme.outlineVariant),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: DataTable(
-                        columnSpacing: 24,
-                        columns: const [
-                          DataColumn(label: Text('Item Details')),
-                          DataColumn(label: Text('Location')),
-                          DataColumn(label: Text('Pricing')),
-                          DataColumn(label: Text('Stock Level')),
-                          DataColumn(label: Text('Action')),
-                        ],
-                        rows: _items.map((item) {
-                          return DataRow(cells: [
-                            DataCell(
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  Text(item.author, style: theme.textTheme.bodySmall),
-                                ],
-                              ),
-                            ),
-                            DataCell(Text(item.location)),
-                            DataCell(
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('Sell: Rs. ${item.salePrice}'),
-                                  Text('Cost: Rs. ${item.costPrice}', style: theme.textTheme.bodySmall),
-                                ],
-                              ),
-                            ),
-                            DataCell(
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: item.isLowStock ? colorScheme.errorContainer : Colors.green.shade50,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  '${item.stockLevel} units',
-                                  style: TextStyle(
-                                    color: item.isLowStock ? colorScheme.onErrorContainer : Colors.green.shade900,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            DataCell(
-                              IconButton(
-                                icon: const Icon(Icons.edit_outlined),
-                                onPressed: () {},
-                              ),
-                            ),
-                          ]);
-                        }).toList(),
-                      ),
-                    ),
-                  ),
+            child: FutureBuilder<List<Product>>(
+              future: _productsFuture,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                final products = snapshot.data!;
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return _ProductCard(
+                      product: product,
+                      onUpdate: _loadProducts,
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ProductCard extends StatelessWidget {
+  final Product product;
+  final VoidCallback onUpdate;
+  const _ProductCard({required this.product, required this.onUpdate});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(product.name, style: theme.textTheme.titleSmall),
+                    if (product.courseOrCategory != null && product.courseOrCategory!.isNotEmpty)
+                      Text(product.courseOrCategory!, style: theme.textTheme.bodySmall),
+                  ],
+                ),
+                _StockCounter(product: product, onUpdate: onUpdate),
+              ],
+            ),
+            const Divider(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _InfoItem(label: 'Location', value: product.rackLocation ?? '-'),
+                _InfoItem(label: 'Sale Price', value: 'Rs. ${product.salePrice}', isBold: true),
+                _InfoItem(label: 'Cost', value: 'Rs. ${product.costPrice}'),
+                IconButton(icon: const Icon(Icons.delete_outline, color: Colors.red), onPressed: () async {
+                  await SupabaseHelper().deleteProduct(product.id);
+                  onUpdate();
+                }),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StockCounter extends StatelessWidget {
+  final Product product;
+  final VoidCallback onUpdate;
+  const _StockCounter({required this.product, required this.onUpdate});
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isLow = product.stockQuantity <= product.minStockThreshold;
+    return Row(
+      children: [
+        if (isLow)
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(4)),
+            child: const Text('Low Stock', style: TextStyle(color: Colors.white, fontSize: 10)),
+          ),
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(4)),
+          child: Row(
+            children: [
+              IconButton(icon: const Icon(Icons.remove, size: 16), onPressed: () async {
+                  if (product.stockQuantity > 0) {
+                    await SupabaseHelper().updateProduct({...product.toMap(), 'stock_quantity': product.stockQuantity - 1});
+                    onUpdate();
+                  }
+              }),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0), child: Text('${product.stockQuantity}', style: const TextStyle(fontWeight: FontWeight.bold))),
+              IconButton(icon: const Icon(Icons.add, size: 16), onPressed: () async {
+                  await SupabaseHelper().updateProduct({...product.toMap(), 'stock_quantity': product.stockQuantity + 1});
+                  onUpdate();
+              }),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoItem extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool isBold;
+  const _InfoItem({required this.label, required this.value, this.isBold = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+        Text(value, style: TextStyle(fontSize: 12, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+      ],
     );
   }
 }

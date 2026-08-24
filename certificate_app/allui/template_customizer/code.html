@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Template Customizer - CertifyPro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#b6c7eb",
+                        "on-secondary-fixed": "#261900",
+                        "surface-bright": "#f8f9ff",
+                        "inverse-surface": "#213145",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#101721",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffdea5",
+                        "surface-tint": "#4e5f7e",
+                        "secondary": "#775a19",
+                        "primary-fixed": "#d7e2ff",
+                        "primary-fixed-dim": "#b6c7eb",
+                        "on-secondary-fixed-variant": "#5d4201",
+                        "background": "#f8f9ff",
+                        "surface-dim": "#cbdbf5",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#252c36",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#8c93a0",
+                        "on-error-container": "#93000a",
+                        "primary": "#031632",
+                        "on-tertiary-fixed": "#151c26",
+                        "on-background": "#0b1c30",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#44474d",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed": "#dce3f1",
+                        "on-primary-fixed": "#081b38",
+                        "surface-container-highest": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "outline": "#75777e",
+                        "on-primary-container": "#8293b5",
+                        "on-secondary-container": "#785a1a",
+                        "on-primary-fixed-variant": "#374765",
+                        "surface-variant": "#d3e4fe",
+                        "tertiary-fixed-dim": "#c0c7d4",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#fed488",
+                        "on-tertiary-fixed-variant": "#404752",
+                        "primary-container": "#1a2b48",
+                        "surface": "#f8f9ff",
+                        "secondary-fixed-dim": "#e9c176",
+                        "outline-variant": "#c5c6ce",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#eff4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "xs": "4px",
+                        "margin-mobile": "16px",
+                        "sm": "8px",
+                        "xl": "40px",
+                        "md": "16px",
+                        "max-width": "1440px",
+                        "unit": "4px",
+                        "margin-desktop": "48px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row antialiased">
+<!-- NavigationDrawer (Web) -->
+<nav class="hidden md:flex flex-col p-md gap-sm bg-surface dark:bg-surface-container-low border-r border-outline-variant dark:border-outline fixed left-0 top-0 h-full w-[280px] z-40 transition-all duration-200 ease-in-out">
+<div class="mb-lg px-md pt-lg">
+<h1 class="font-headline-lg text-headline-lg font-black text-primary">CertifyPro Admin</h1>
+</div>
+<ul class="flex flex-col gap-sm">
+<li>
+<a class="flex items-center gap-md px-lg py-sm text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container-high dark:hover:bg-tertiary-container transition-colors rounded-full" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-lg py-sm bg-primary-fixed dark:bg-primary-container text-on-primary-fixed dark:text-on-primary-container hover:bg-surface-container-high dark:hover:bg-tertiary-container transition-colors rounded-full" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard_customize</span>
+<span class="font-label-md text-label-md">Templates</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-lg py-sm text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container-high dark:hover:bg-tertiary-container transition-colors rounded-full" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">verified_user</span>
+<span class="font-label-md text-label-md">Issue New</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-lg py-sm text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container-high dark:hover:bg-tertiary-container transition-colors rounded-full" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">fact_check</span>
+<span class="font-label-md text-label-md">Verification</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 md:ml-[280px] flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 md:left-[280px] w-full md:w-[calc(100%-280px)] z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-surface dark:bg-surface-container border-b border-outline-variant dark:border-outline">
+<div class="flex items-center gap-md">
+<!-- Mobile Menu Button (Hidden on Desktop) -->
+<button class="md:hidden text-on-surface-variant p-sm hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="flex items-center gap-sm">
+<button class="text-on-surface-variant hover:bg-surface-container-low rounded-full p-sm transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="font-title-lg text-title-lg text-primary dark:text-primary-fixed-dim font-bold">Edit Template</h2>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="hidden md:flex items-center justify-center px-lg py-sm bg-surface text-primary border border-primary rounded-full hover:bg-surface-container-low transition-colors font-label-md text-label-md">
+                    Discard Changes
+                </button>
+<button class="flex items-center justify-center px-lg py-sm bg-primary-container text-on-primary rounded-full hover:opacity-90 transition-opacity font-label-md text-label-md shadow-[0_4px_14px_rgba(26,43,72,0.1)]">
+                    Save Template
+                </button>
+<button class="ml-sm text-on-surface-variant hover:bg-surface-container-low rounded-full p-sm transition-colors md:hidden">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="hidden md:block w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden ml-md">
+<span class="material-symbols-outlined text-primary-container p-1">waves</span>
+</div>
+</div>
+</header>
+<!-- Main Scrollable Content -->
+<main class="flex-1 mt-16 md:mt-16 pb-24 md:pb-lg p-margin-mobile md:p-margin-desktop overflow-y-auto">
+<div class="max-w-[1440px] mx-auto flex flex-col xl:flex-row gap-gutter">
+<!-- Left Column: Settings -->
+<div class="flex-1 flex flex-col gap-lg order-2 xl:order-1">
+<!-- Branding Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg">
+<h3 class="font-title-lg text-title-lg text-primary mb-md border-b border-outline-variant pb-sm">Branding</h3>
+<div class="flex flex-col gap-md">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm">Institution Logo</label>
+<div class="border border-dashed border-outline-variant rounded-lg p-lg flex flex-col items-center justify-center bg-surface-bright hover:bg-surface-container-low transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-4xl mb-sm">cloud_upload</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-center">Click to upload or drag and drop<br/><span class="text-xs">SVG, PNG, JPG (max. 2MB)</span></span>
+</div>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm">Digital Signature</label>
+<div class="border border-dashed border-outline-variant rounded-lg p-md flex items-center gap-md bg-surface-bright hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-outline">draw</span>
+</div>
+<div>
+<span class="font-body-md text-body-md text-on-surface block">Upload Signature Image</span>
+<span class="font-label-md text-label-md text-outline font-normal">Transparent PNG recommended</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Layout & Style Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg">
+<h3 class="font-title-lg text-title-lg text-primary mb-md border-b border-outline-variant pb-sm">Layout &amp; Style</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm">Orientation</label>
+<div class="flex rounded-lg border border-outline-variant overflow-hidden">
+<button class="flex-1 py-sm bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">landscape</span> Landscape
+                                     </button>
+<button class="flex-1 py-sm bg-surface-bright text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">portrait</span> Portrait
+                                     </button>
+</div>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm">Color Scheme</label>
+<select class="w-full bg-surface-bright border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+<option value="classic">Classic Navy &amp; Gold</option>
+<option value="modern">Modern Minimalist</option>
+<option value="formal">Formal Academic</option>
+</select>
+</div>
+<div class="md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm">Typography Paired Font</label>
+<div class="grid grid-cols-2 gap-md">
+<div class="border border-primary bg-primary-fixed/20 rounded-lg p-md cursor-pointer flex flex-col items-center justify-center text-center">
+<span class="font-headline-md text-headline-md font-bold mb-xs" style="font-family: serif;">Serif</span>
+<span class="font-label-md text-label-md text-on-surface-variant font-normal">Traditional &amp; Formal</span>
+</div>
+<div class="border border-outline-variant bg-surface-bright hover:bg-surface-container-low rounded-lg p-md cursor-pointer flex flex-col items-center justify-center text-center transition-colors">
+<span class="font-headline-md text-headline-md font-bold mb-xs" style="font-family: sans-serif;">Sans-Serif</span>
+<span class="font-label-md text-label-md text-on-surface-variant font-normal">Clean &amp; Modern</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Content Details -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg">
+<h3 class="font-title-lg text-title-lg text-primary mb-md border-b border-outline-variant pb-sm">Static Content</h3>
+<div class="flex flex-col gap-md">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs">Primary Heading</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" type="text" value="Certificate of Achievement"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs">Sub-Heading / Introductory Text</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" type="text" value="This is to certify that"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs">Signatory Title</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" type="text" value="Director of Certification"/>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Live Preview (Sticky on Desktop) -->
+<div class="xl:w-2/3 order-1 xl:order-2">
+<div class="sticky top-[88px] flex flex-col gap-sm">
+<div class="flex justify-between items-center px-sm">
+<span class="font-label-md text-label-md text-on-surface-variant">Live Preview</span>
+<div class="flex gap-sm">
+<button class="text-outline hover:text-primary transition-colors p-xs"><span class="material-symbols-outlined text-sm">zoom_in</span></button>
+<button class="text-outline hover:text-primary transition-colors p-xs"><span class="material-symbols-outlined text-sm">zoom_out</span></button>
+</div>
+</div>
+<!-- Certificate Canvas Wrapper -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-lg flex items-center justify-center overflow-x-auto">
+<!-- The Certificate Card -->
+<div class="w-[800px] h-[565px] bg-white border border-outline-variant shadow-[0_10px_30px_rgba(26,43,72,0.08)] relative flex flex-col items-center p-xl shrink-0" style="font-family: serif;">
+<!-- Decorative Border -->
+<div class="absolute inset-4 border-[3px] border-secondary border-double opacity-80 pointer-events-none"></div>
+<div class="absolute inset-8 border border-secondary/30 pointer-events-none"></div>
+<!-- Content -->
+<div class="w-full h-full flex flex-col items-center justify-between z-10 text-center pt-lg pb-md">
+<!-- Header -->
+<div class="flex flex-col items-center gap-md w-full">
+<div class="w-24 h-24 bg-surface-bright border border-outline-variant rounded-full flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-3xl">image</span>
+</div>
+<div class="w-full">
+<h1 class="font-display-lg text-display-lg text-primary mt-md tracking-wider uppercase" style="font-family: serif;">Certificate of Achievement</h1>
+<div class="h-px w-3/4 mx-auto bg-gradient-to-r from-transparent via-secondary to-transparent my-md"></div>
+<p class="font-title-lg text-title-lg text-on-surface-variant italic" style="font-family: serif;">This is to certify that</p>
+</div>
+</div>
+<!-- Recipient (Placeholder) -->
+<div class="my-lg w-full">
+<div class="font-display-lg text-display-lg text-on-surface border-b border-outline-variant pb-xs mx-auto w-1/2 inline-block">
+                                            [Recipient Name]
+                                        </div>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-md max-w-lg mx-auto" style="font-family: serif;">
+                                            has successfully completed the requirements for [Course/Program Name] and is hereby awarded this credential.
+                                        </p>
+</div>
+<!-- Footer -->
+<div class="flex justify-between items-end w-full px-xl mt-auto">
+<div class="flex flex-col items-center">
+<div class="w-40 border-b border-outline-variant mb-sm text-center">
+<span class="font-body-md text-body-md text-on-surface-variant">[Date Issued]</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Date</span>
+</div>
+<!-- Seal Placeholder -->
+<div class="w-24 h-24 rounded-full bg-secondary-fixed-dim/20 border-2 border-secondary border-dashed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-3xl">workspace_premium</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-40 border-b border-outline-variant h-10 mb-sm flex items-end justify-center pb-xs">
+<span class="font-body-md text-body-md text-on-surface-variant text-sm italic">[Signature]</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Director of Certification</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface dark:bg-surface-container-highest border-t border-outline-variant dark:border-outline shadow-lg rounded-t-xl scale-95 transition-transform duration-100 pb-safe">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container active:bg-surface-container-highest p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md text-[10px] mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">edit_document</span>
+<span class="font-label-md text-label-md text-[10px] mt-1">Templates</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container active:bg-surface-container-highest p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="font-label-md text-label-md text-[10px] mt-1">Issue</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container active:bg-surface-container-highest p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+<span class="font-label-md text-label-md text-[10px] mt-1">Verify</span>
+</a>
+</nav>
+<style>
+        /* Ensures safe area padding on mobile devices for bottom nav */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
+    </style>
+</body></html>

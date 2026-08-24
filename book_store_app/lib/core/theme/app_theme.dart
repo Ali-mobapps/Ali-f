@@ -1,74 +1,65 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
+  // Sophisticated Color Palette
+  static const Color primaryColor = Color(0xFF2D3436); // Deep Charcoal
+  static const Color secondaryColor = Color(0xFF6C5CE7); // Soft Purple
+  static const Color accentColor = Color(0xFF00B894); // Teal Green
+  static const Color backgroundColor = Color(0xFFF9FAFB); // Light Gray
+  static const Color cardBackground = Colors.white;
+  static const Color textColor = Color(0xFF2D3436);
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: const ColorScheme(
-        brightness: Brightness.light,
-        primary: Color(0xFF000613),
-        onPrimary: Color(0xFFFFFFFF),
-        primaryContainer: Color(0xFF001F3F),
-        onPrimaryContainer: Color(0xFF6F88AD),
-        secondary: Color(0xFF795900),
-        onSecondary: Color(0xFFFFFFFF),
-        secondaryContainer: Color(0xFFFFBF00),
-        onSecondaryContainer: Color(0xFF6D5000),
-        tertiary: Color(0xFF02060A),
-        onTertiary: Color(0xFFFFFFFF),
-        tertiaryContainer: Color(0xFF191F25),
-        onTertiaryContainer: Color(0xFF80878E),
-        error: Color(0xFFBA1A1A),
-        onError: Color(0xFFFFFFFF),
-        errorContainer: Color(0xFFFFDAD6),
-        onErrorContainer: Color(0xFF93000A),
-        outline: Color(0xFF74777F),
-        outlineVariant: Color(0xFFC4C6CF),
-        background: Color(0xFFF9F9FF),
-        onBackground: Color(0xFF111C2D),
-        surface: Color(0xFFF9F9FF),
-        onSurface: Color(0xFF111C2D),
-        surfaceVariant: Color(0xFFD8E3FB),
-        onSurfaceVariant: Color(0xFF43474E),
-        inverseSurface: Color(0xFF263143),
-        onInverseSurface: Color(0xFFECF1FF),
-        inversePrimary: Color(0xFFAFC8F0),
-        shadow: Color(0xFF000000),
-        surfaceTint: Color(0xFF476083),
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primaryColor,
+        primary: primaryColor,
+        secondary: secondaryColor,
+        surface: cardBackground,
       ),
-      fontFamily: 'Inter',
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(
-          fontFamily: 'Hanken Grotesk',
-          fontSize: 32,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.64,
+      scaffoldBackgroundColor: backgroundColor,
+      cardTheme: const CardThemeData(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+          side: BorderSide(color: Color(0xFFE0E0E0)),
         ),
-        headlineMedium: TextStyle(
-          fontFamily: 'Hanken Grotesk',
-          fontSize: 24,
-          fontWeight: FontWeight.w600,
+        color: cardBackground,
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          color: primaryColor,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
         ),
-        titleSmall: TextStyle(
-          fontFamily: 'Inter',
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: secondaryColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        bodyLarge: TextStyle(
-          fontFamily: 'Inter',
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
-        bodySmall: TextStyle(
-          fontFamily: 'Inter',
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
-        labelSmall: TextStyle(
-          fontFamily: 'JetBrains Mono',
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.55,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: secondaryColor, width: 2),
         ),
       ),
     );

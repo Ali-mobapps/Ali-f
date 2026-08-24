@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/dashboard_layout.dart';
+import '../../../../core/database/supabase_helper.dart';
+import '../../../inventory/models/product_model.dart';
+import '../../models/sale_model.dart';
+import 'package:uuid/uuid.dart';
+import '../../../../core/utils/pdf_generator.dart';
 
 class POSPage extends StatefulWidget {
   const POSPage({super.key});
@@ -9,103 +14,62 @@ class POSPage extends StatefulWidget {
 }
 
 class _POSPageState extends State<POSPage> {
+  final SupabaseHelper _db = SupabaseHelper();
+  final List<Map<String, dynamic>> _cart = [];
+  List<Product> _allProducts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  void _loadProducts() async {
+    final data = await _db.getProducts();
+    setState(() {
+      _allProducts = data.map((e) => Product.fromMap(e)).toList();
+    });
+  }
+
+  void _addToCart(Product product) {
+    setState(() {
+      final existing = _cart.firstWhere((item) => item['product'].id == product.id, orElse: () => {});
+      if (existing.isNotEmpty) {
+        existing['quantity']++;
+      } else {
+        _cart.add({'product': product, 'quantity': 1});
+      }
+    });
+  }
+
+  double get _total => _cart.fold(0, (sum, item) => sum + (item['product'].salePrice * item['quantity']));
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return DashboardLayout(
       selectedIndex: 1,
       child: Row(
         children: [
-          // Left Side: Item Selection
           Expanded(
             flex: 2,
             child: Column(
               children: [
-                // Search Bar
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Scan barcode or type book name...',
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: const Icon(Icons.qr_code_scanner),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ),
-                // Categories
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      ActionChip(label: const Text('All'), onPressed: () {}),
-                      const SizedBox(width: 8),
-                      ActionChip(label: const Text('Fiction'), onPressed: () {}),
-                      const SizedBox(width: 8),
-                      ActionChip(label: const Text('Academic'), onPressed: () {}),
-                      const SizedBox(width: 8),
-                      ActionChip(label: const Text('Children'), onPressed: () {}),
-                      const SizedBox(width: 8),
-                      ActionChip(label: const Text('Stationery'), onPressed: () {}),
-                    ],
-                  ),
-                ),
-                // Items Grid
                 Expanded(
                   child: GridView.builder(
                     padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
-                    itemCount: 12,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, childAspectRatio: 0.8),
+                    itemCount: _allProducts.length,
                     itemBuilder: (context, index) {
+                      final product = _allProducts[index];
                       return Card(
-                        clipBehavior: Clip.antiAlias,
                         child: InkWell(
-                          onTap: () {},
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  color: colorScheme.surfaceVariant,
-                                  width: double.infinity,
-                                  child: const Icon(Icons.book, size: 48),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Book Title $index',
-                                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text('Author Name', style: theme.textTheme.bodySmall),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Rs. 500',
-                                      style: TextStyle(
-                                        color: colorScheme.primary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                          onTap: () => _addToCart(product),
+                          child: Column(children: [
+                            Expanded(child: Icon(product.type == 'book' ? Icons.book : Icons.edit, size: 40)),
+                            Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text('Rs. ${product.salePrice}'),
+                          ]),
                         ),
                       );
                     },
@@ -114,91 +78,51 @@ class _POSPageState extends State<POSPage> {
               ],
             ),
           ),
-          // Right Side: Cart/Bill
           Container(
             width: 350,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                left: BorderSide(color: colorScheme.outlineVariant),
-              ),
-            ),
+            decoration: BoxDecoration(border: Border(left: BorderSide(color: Colors.grey.shade300))),
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Current Bill', style: theme.textTheme.titleSmall),
-                      IconButton(icon: const Icon(Icons.delete_outline), onPressed: () {}),
-                    ],
-                  ),
-                ),
-                const Divider(),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: 3,
+                    itemCount: _cart.length,
                     itemBuilder: (context, index) {
+                      final item = _cart[index];
                       return ListTile(
-                        title: Text('Book Title $index'),
-                        subtitle: const Text('Rs. 500 x 1'),
-                        trailing: Text('Rs. 500', style: TextStyle(fontWeight: FontWeight.bold)),
+                        title: Text(item['product'].name),
+                        subtitle: Text('${item['quantity']} x ${item['product'].salePrice}'),
+                        trailing: Text('Rs. ${item['product'].salePrice * item['quantity']}'),
                       );
                     },
                   ),
                 ),
-                const Divider(),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Subtotal'),
-                          const Text('Rs. 1500'),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Tax (5%)'),
-                          const Text('Rs. 75'),
-                        ],
-                      ),
-                      const Divider(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Total',
-                            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Rs. 1575',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.primary,
-                          foregroundColor: colorScheme.onPrimary,
-                          minimumSize: const Size(double.infinity, 56),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text('PROCEED TO PAYMENT'),
-                      ),
-                    ],
+                  child: ElevatedButton(
+                    onPressed: _cart.isEmpty ? null : () async {
+                      final saleId = const Uuid().v4();
+                      final sale = {
+                        'id': saleId,
+                        'timestamp': DateTime.now().toIso8601String(),
+                        'total_amount': _total,
+                        'discount': 0.0,
+                        'final_amount': _total,
+                      };
+                      final items = _cart.map((c) => {
+                        'id': const Uuid().v4(),
+                        'sale_id': saleId,
+                        'product_id': c['product'].id,
+                        'quantity': c['quantity'],
+                        'price_at_sale': c['product'].salePrice
+                      }).toList();
+
+                      await _db.createSale(sale, items);
+                      await PdfGenerator.generateAndPrintBill(_total, _cart);
+                      setState(() => _cart.clear());
+                      _loadProducts();
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sale Complete!')));
+                    },
+                    child: Text('Pay Rs. $_total'),
                   ),
                 ),
               ],

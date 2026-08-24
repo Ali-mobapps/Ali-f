@@ -1,7 +1,7 @@
-import '../../inventory/domain/models/inventory_item.dart';
+import '../../../inventory/models/product_model.dart';
 
 class CartItem {
-  final InventoryItem item;
+  final Product item;
   int quantity;
 
   CartItem({

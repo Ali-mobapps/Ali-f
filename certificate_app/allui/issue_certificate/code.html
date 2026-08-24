@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Issue Certificate - CertifyPro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#0b1c30",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "inverse-primary": "#b6c7eb",
+                        "primary-fixed": "#d7e2ff",
+                        "on-tertiary-fixed-variant": "#404752",
+                        "outline": "#75777e",
+                        "on-tertiary-fixed": "#151c26",
+                        "tertiary-fixed": "#dce3f1",
+                        "on-primary-container": "#8293b5",
+                        "on-tertiary-container": "#8c93a0",
+                        "on-primary": "#ffffff",
+                        "primary": "#031632",
+                        "surface-tint": "#4e5f7e",
+                        "on-secondary-fixed": "#261900",
+                        "secondary-fixed": "#ffdea5",
+                        "on-secondary-fixed-variant": "#5d4201",
+                        "surface-container": "#e5eeff",
+                        "surface-dim": "#cbdbf5",
+                        "primary-container": "#1a2b48",
+                        "secondary": "#775a19",
+                        "secondary-fixed-dim": "#e9c176",
+                        "secondary-container": "#fed488",
+                        "surface-container-highest": "#d3e4fe",
+                        "error": "#ba1a1a",
+                        "background": "#f8f9ff",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#d3e4fe",
+                        "on-background": "#0b1c30",
+                        "outline-variant": "#c5c6ce",
+                        "tertiary": "#101721",
+                        "surface-bright": "#f8f9ff",
+                        "primary-fixed-dim": "#b6c7eb",
+                        "tertiary-fixed-dim": "#c0c7d4",
+                        "tertiary-container": "#252c36",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "on-primary-fixed": "#081b38",
+                        "surface-container-low": "#eff4ff",
+                        "surface": "#f8f9ff",
+                        "on-primary-fixed-variant": "#374765",
+                        "on-secondary-container": "#785a1a",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#44474d",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "xl": "40px",
+                        "gutter": "24px",
+                        "max-width": "1440px",
+                        "unit": "4px",
+                        "margin-desktop": "48px",
+                        "xs": "4px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col md:flex-row">
+<!-- TopAppBar (Mobile) -->
+<header class="md:hidden fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-[28px]" data-icon="verified_user">verified_user</span>
+<span class="font-headline-md text-headline-md font-bold text-primary">CertifyPro</span>
+</div>
+<button class="w-8 h-8 rounded-full overflow-hidden bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="administrator_profile">account_circle</span>
+</button>
+</header>
+<!-- NavigationDrawer (Desktop) -->
+<aside class="hidden md:flex flex-col p-md gap-sm bg-surface w-[280px] h-screen fixed left-0 top-0 border-r border-outline-variant z-40">
+<div class="px-md py-lg mb-4 flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-[32px]" data-icon="verified_user">verified_user</span>
+<h1 class="font-headline-lg text-headline-lg font-black text-primary tracking-tight">CertifyPro Admin</h1>
+</div>
+<nav class="flex-1 flex flex-col gap-xs px-sm">
+<a class="flex items-center gap-md px-lg py-sm rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-md px-lg py-sm rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard_customize">dashboard_customize</span>
+                Templates
+            </a>
+<a class="flex items-center gap-md px-lg py-sm rounded-full bg-primary-fixed text-on-primary-fixed font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+                Issue New
+            </a>
+<a class="flex items-center gap-md px-lg py-sm rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="fact_check">fact_check</span>
+                Verification
+            </a>
+</nav>
+<div class="mt-auto px-sm pb-lg">
+<a class="flex items-center gap-md px-lg py-sm rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 pt-20 md:pt-0 md:ml-[280px] min-h-screen relative">
+<!-- Top App Bar Desktop (Empty structural spacer if needed, or search bar) -->
+<div class="hidden md:flex h-20 px-margin-desktop items-center justify-between border-b border-outline-variant bg-surface sticky top-0 z-30">
+<h2 class="font-headline-md text-headline-md text-primary">Issue Certificate</h2>
+<div class="flex items-center gap-md">
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full overflow-hidden bg-surface-container border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="administrator_profile">account_circle</span>
+</button>
+</div>
+</div>
+<div class="p-margin-mobile md:p-margin-desktop max-w-[1200px] mx-auto pb-32 md:pb-lg">
+<div class="md:hidden mb-lg">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold">Issue New Certificate</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Complete the details below to generate a new credential.</p>
+</div>
+<div class="hidden md:block mb-xl">
+<p class="font-body-lg text-body-lg text-on-surface-variant">Complete the details below to generate a new credential.</p>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg">
+<!-- Form Section -->
+<div class="lg:col-span-7 flex flex-col gap-lg">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<h3 class="font-title-lg text-title-lg mb-md text-primary">Recipient Details</h3>
+<div class="space-y-md">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="recipientName">Recipient Full Name</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-md px-sm py-xs font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="recipientName" placeholder="Jane Doe" type="text"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="recipientEmail">Recipient Email (Optional)</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-md px-sm py-xs font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="recipientEmail" placeholder="jane.doe@example.com" type="email"/>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<h3 class="font-title-lg text-title-lg mb-md text-primary">Credential Details</h3>
+<div class="space-y-md">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="courseTitle">Course / Event Title</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-md px-sm py-xs font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="courseTitle" placeholder="Advanced UI/UX Masterclass" type="text"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="description">Description / Achievement</label>
+<textarea class="w-full bg-surface-bright border border-outline-variant rounded-md px-sm py-xs font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors resize-none" id="description" placeholder="For successful completion of the comprehensive curriculum..." rows="3"></textarea>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="issueDate">Date of Issue</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-md px-sm py-xs font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="issueDate" type="date"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="expiryDate">Expiry Date (Optional)</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-md px-sm py-xs font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="expiryDate" type="date"/>
+</div>
+</div>
+<div class="flex items-center justify-between pt-sm border-t border-outline-variant">
+<div>
+<label class="font-label-md text-label-md text-primary block">Auto-generate Certificate ID</label>
+<span class="font-body-md text-[12px] text-on-surface-variant">System will assign a unique secure hash.</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Preview & Action Section -->
+<div class="lg:col-span-5 flex flex-col gap-lg">
+<!-- Certificate Preview Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg flex flex-col h-full">
+<h3 class="font-title-lg text-title-lg mb-md text-primary flex items-center justify-between">
+                            Live Preview
+                            <span class="material-symbols-outlined text-outline text-[20px]" data-icon="visibility">visibility</span>
+</h3>
+<div class="flex-1 bg-surface-container rounded-lg border border-outline-variant flex items-center justify-center p-md min-h-[300px] relative overflow-hidden group">
+<!-- Placeholder for actual certificate rendering -->
+<div class="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
+<span class="material-symbols-outlined text-[120px]" data-icon="workspace_premium">workspace_premium</span>
+</div>
+<div class="text-center z-10 p-lg bg-surface-container-lowest/80 backdrop-blur-sm rounded-lg border border-outline-variant/50 w-full max-w-[80%] shadow-sm">
+<h4 class="font-title-lg text-title-lg text-primary mb-xs uppercase tracking-widest text-[14px]">Certificate of Completion</h4>
+<div class="h-[1px] w-12 bg-secondary mx-auto mb-md"></div>
+<p class="font-body-md text-[12px] text-on-surface-variant mb-xs">This is to certify that</p>
+<p class="font-headline-md text-headline-md text-primary font-bold mb-xs truncate" id="previewName">Recipient Name</p>
+<p class="font-body-md text-[12px] text-on-surface-variant mb-xs">has successfully completed</p>
+<p class="font-title-lg text-[16px] text-primary truncate" id="previewCourse">Course Title</p>
+</div>
+</div>
+<div class="mt-lg flex flex-col gap-sm">
+<button class="w-full py-md px-lg bg-primary-container text-on-primary-fixed rounded-lg font-label-md text-label-md hover:bg-primary transition-colors flex items-center justify-center gap-xs shadow-[0_4px_14px_0_rgba(26,43,72,0.1)]">
+<span class="material-symbols-outlined text-[18px]" data-icon="workspace_premium">workspace_premium</span>
+                                Issue Certificate
+                            </button>
+<button class="w-full py-md px-lg bg-transparent border border-primary text-primary rounded-lg font-label-md text-label-md hover:bg-surface-container-low transition-colors">
+                                Save as Draft
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface-container-highest rounded-t-xl border-t border-outline-variant shadow-lg pb-safe">
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-container-highest scale-95 transition-transform duration-100 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-[10px] mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-container-highest scale-95 transition-transform duration-100 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="edit_document">edit_document</span>
+<span class="font-label-md text-[10px] mt-1">Drafts</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:bg-surface-container-highest scale-95 transition-transform duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="font-label-md text-[10px] mt-1">Issue</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-container-highest scale-95 transition-transform duration-100 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner">qr_code_scanner</span>
+<span class="font-label-md text-[10px] mt-1">Verify</span>
+</a>
+</nav>
+<script>
+        // Simple script to update preview text
+        const nameInput = document.getElementById('recipientName');
+        const courseInput = document.getElementById('courseTitle');
+        const previewName = document.getElementById('previewName');
+        const previewCourse = document.getElementById('previewCourse');
+
+        nameInput.addEventListener('input', (e) => {
+            previewName.textContent = e.target.value || 'Recipient Name';
+        });
+
+        courseInput.addEventListener('input', (e) => {
+            previewCourse.textContent = e.target.value || 'Course Title';
+        });
+    </script>
+</body></html>

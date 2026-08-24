@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Public Verification Portal - CertifyPro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#0b1c30",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "inverse-primary": "#b6c7eb",
+                        "primary-fixed": "#d7e2ff",
+                        "on-tertiary-fixed-variant": "#404752",
+                        "outline": "#75777e",
+                        "on-tertiary-fixed": "#151c26",
+                        "tertiary-fixed": "#dce3f1",
+                        "on-primary-container": "#8293b5",
+                        "on-tertiary-container": "#8c93a0",
+                        "on-primary": "#ffffff",
+                        "primary": "#031632",
+                        "surface-tint": "#4e5f7e",
+                        "on-secondary-fixed": "#261900",
+                        "secondary-fixed": "#ffdea5",
+                        "on-secondary-fixed-variant": "#5d4201",
+                        "surface-container": "#e5eeff",
+                        "surface-dim": "#cbdbf5",
+                        "primary-container": "#1a2b48",
+                        "secondary": "#775a19",
+                        "secondary-fixed-dim": "#e9c176",
+                        "secondary-container": "#fed488",
+                        "surface-container-highest": "#d3e4fe",
+                        "error": "#ba1a1a",
+                        "background": "#f8f9ff",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#d3e4fe",
+                        "on-background": "#0b1c30",
+                        "outline-variant": "#c5c6ce",
+                        "tertiary": "#101721",
+                        "surface-bright": "#f8f9ff",
+                        "primary-fixed-dim": "#b6c7eb",
+                        "tertiary-fixed-dim": "#c0c7d4",
+                        "tertiary-container": "#252c36",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "on-primary-fixed": "#081b38",
+                        "surface-container-low": "#eff4ff",
+                        "surface": "#f8f9ff",
+                        "on-primary-fixed-variant": "#374765",
+                        "on-secondary-container": "#785a1a",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#44474d",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "xl": "40px",
+                        "gutter": "24px",
+                        "max-width": "1440px",
+                        "unit": "4px",
+                        "margin-desktop": "48px",
+                        "xs": "4px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-container fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop h-16 border-b border-outline-variant dark:border-outline flat no shadows">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">CertifyPro</span>
+</div>
+<div class="flex items-center gap-md hidden md:flex">
+<a class="text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary font-title-lg text-title-lg hover:bg-surface-container-low dark:hover:bg-tertiary-container transition-colors px-2 py-4" href="#">Verification</a>
+</div>
+<div class="flex items-center">
+<button class="hover:bg-surface-container-low dark:hover:bg-tertiary-container transition-colors rounded-full p-2 text-primary dark:text-primary-fixed-dim">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="ml-4 w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow pt-16 flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop">
+<!-- Verification Container -->
+<div class="w-full max-w-2xl bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden flex flex-col items-center justify-center p-xl relative transition-all duration-300 hover:border-outline">
+<!-- Default State -->
+<div class="w-full text-center flex flex-col items-center transition-opacity duration-300" id="default-state">
+<span class="material-symbols-outlined text-6xl text-primary mb-4" style="font-variation-settings: 'FILL' 0;">fact_check</span>
+<h1 class="font-headline-lg text-headline-lg md:font-display-lg md:text-display-lg text-primary mb-2">Verify a Certificate</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8 max-w-md">Enter the unique certificate ID or scan the QR code to confirm authenticity.</p>
+<div class="w-full max-w-md flex flex-col gap-4">
+<div class="relative w-full">
+<label class="absolute -top-2 left-2 bg-surface-container-lowest px-1 font-label-md text-label-md text-on-surface-variant z-10" for="certificate-id">Certificate ID</label>
+<input class="w-full border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-lg px-4 py-3 font-body-lg text-body-lg text-on-surface bg-transparent transition-colors" id="certificate-id" placeholder="e.g. CERT-2024-8F92A" type="text"/>
+</div>
+<button class="w-full bg-primary-container text-on-primary py-3 rounded-lg font-title-lg text-title-lg hover:opacity-90 transition-opacity flex justify-center items-center gap-2 relative overflow-hidden group" onclick="verifyCertificate()">
+<span class="relative z-10">Verify Certificate</span>
+<div class="absolute inset-0 bg-secondary opacity-0 group-hover:opacity-10 transition-opacity"></div>
+</button>
+<div class="flex items-center justify-center gap-4 my-2">
+<div class="h-px bg-outline-variant flex-grow"></div>
+<span class="font-label-md text-label-md text-on-surface-variant">OR</span>
+<div class="h-px bg-outline-variant flex-grow"></div>
+</div>
+<button class="w-full border border-primary text-primary py-3 rounded-lg font-title-lg text-title-lg hover:bg-surface-container-low transition-colors flex justify-center items-center gap-2">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+                        Scan QR Code
+                    </button>
+</div>
+</div>
+<!-- Verified State (Hidden by default) -->
+<div class="w-full hidden flex-col items-start text-left transition-opacity duration-300 opacity-0 absolute inset-0 bg-surface-container-lowest p-xl z-20 overflow-y-auto" id="verified-state">
+<button class="mb-6 flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors" onclick="resetVerification()">
+<span class="material-symbols-outlined">arrow_back</span>
+<span class="font-label-md text-label-md">Verify Another</span>
+</button>
+<div class="flex items-center gap-4 mb-8">
+<div class="w-16 h-16 rounded-full bg-[#E8F5E9] flex items-center justify-center">
+<span class="material-symbols-outlined text-[#2E7D32] text-4xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-primary">Certificate Verified</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Authentic record found in system.</p>
+</div>
+</div>
+<div class="w-full border border-outline-variant rounded-lg p-lg bg-surface relative shadow-[0_4px_24px_rgba(26,43,72,0.05)]">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Recipient Name</p>
+<p class="font-title-lg text-title-lg text-on-surface">Eleanor Vance</p>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Certificate Title</p>
+<p class="font-title-lg text-title-lg text-on-surface">Advanced Cloud Architecture</p>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Issue Date</p>
+<p class="font-body-lg text-body-lg text-on-surface">October 24, 2023</p>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Certificate ID</p>
+<p class="font-body-lg text-body-lg text-on-surface font-mono">CERT-2024-8F92A</p>
+</div>
+<div class="col-span-1 md:col-span-2">
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Issuer</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">assured_workload</span>
+<p class="font-body-lg text-body-lg text-on-surface font-semibold">Global Tech Institute</p>
+</div>
+</div>
+</div>
+<div class="mt-8 flex justify-end">
+<button class="bg-secondary text-on-secondary px-6 py-2 rounded font-label-md text-label-md flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">download</span>
+                            Download PDF
+                        </button>
+</div>
+</div>
+</div>
+<!-- Loading State -->
+<div class="absolute inset-0 bg-surface-container-lowest/80 backdrop-blur-sm z-30 hidden flex-col items-center justify-center" id="loading-state">
+<span class="material-symbols-outlined text-primary text-4xl animate-spin">autorenew</span>
+<p class="mt-4 font-body-md text-body-md text-on-surface-variant">Verifying against ledger...</p>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface dark:bg-surface-container-highest border-t border-outline-variant dark:border-outline shadow-lg rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container-highest scale-95 transition-transform duration-100 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container-highest scale-95 transition-transform duration-100 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="edit_document">edit_document</span>
+<span class="font-label-md text-label-md mt-1">Drafts</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container-highest scale-95 transition-transform duration-100 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="font-label-md text-label-md mt-1">Issue</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 scale-95 transition-transform duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner" style="font-variation-settings: 'FILL' 1;">qr_code_scanner</span>
+<span class="font-label-md text-label-md mt-1">Verify</span>
+</a>
+</nav>
+<script>
+        function verifyCertificate() {
+            const defaultState = document.getElementById('default-state');
+            const loadingState = document.getElementById('loading-state');
+            const verifiedState = document.getElementById('verified-state');
+            
+            // Show loading
+            loadingState.classList.remove('hidden');
+            loadingState.classList.add('flex');
+            
+            // Simulate API call
+            setTimeout(() => {
+                loadingState.classList.add('hidden');
+                loadingState.classList.remove('flex');
+                
+                defaultState.classList.add('opacity-0');
+                setTimeout(() => {
+                    defaultState.classList.add('hidden');
+                    verifiedState.classList.remove('hidden');
+                    // slight delay to allow display:block to apply before animating opacity
+                    setTimeout(() => {
+                        verifiedState.classList.remove('opacity-0');
+                    }, 10);
+                }, 300);
+            }, 1500);
+        }
+
+        function resetVerification() {
+            const defaultState = document.getElementById('default-state');
+            const verifiedState = document.getElementById('verified-state');
+            
+            verifiedState.classList.add('opacity-0');
+            setTimeout(() => {
+                verifiedState.classList.add('hidden');
+                defaultState.classList.remove('hidden');
+                document.getElementById('certificate-id').value = '';
+                setTimeout(() => {
+                    defaultState.classList.remove('opacity-0');
+                }, 10);
+            }, 300);
+        }
+    </script>
+</body></html>

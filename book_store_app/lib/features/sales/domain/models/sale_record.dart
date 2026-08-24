@@ -1,4 +1,4 @@
-import '../../pos/domain/models/cart_item.dart';
+import '../../../pos/domain/models/cart_item.dart';
 
 class SaleRecord {
   final String id;
