@@ -1,17 +1,2 @@
-# obotic_swarm
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img width="491" height="625" alt="swam 2" src="https://github.com/user-attachments/assets/8cc9bc89-1936-40ca-9acb-267bba90cc76" />
+<img width="495" height="625" alt="swram 3" src="https://github.com/user-attachments/assets/71eca857-d9e4-414e-9cfa-f7dc8aa71617" />
