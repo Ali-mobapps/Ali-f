@@ -2,28 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CertifyProTheme {
-  // Brand Colors
-  static const Color primary = Color(0xFF0F172A); // Deep Slate
-  static const Color secondary = Color(0xFFC5A059); // Gold
-  static const Color accentGold = Color(0xFFC5A059);
+  // Brand Colors - Premium Navy & Gold
+  static const Color primary = Color(0xFF1E293B); // Deep Navy Slate
+  static const Color secondary = Color(0xFFB4975A); // Premium Muted Gold
+  static const Color accentGold = Color(0xFFB4975A);
   
-  static const Color background = Color(0xFFF8FAFC);
+  static const Color background = Color(0xFFF1F5F9);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color outline = Color(0xFFE2E8F0);
-  static const Color outlineVariant = Color(0xFFF1F5F9);
+  static const Color outline = Color(0xFFCBD5E1);
+  static const Color outlineVariant = Color(0xFFE2E8F0);
   
-  static const Color success = Color(0xFF10B981);
-  static const Color error = Color(0xFFEF4444);
-  static const Color onSurfaceVariant = Color(0xFF64748B);
+  static const Color success = Color(0xFF059669);
+  static const Color error = Color(0xFFDC2626);
+  static const Color onSurfaceVariant = Color(0xFF475569);
 
-  static const Color primaryContainer = Color(0xFFF1F5F9); 
-  static const Color surfaceContainerLow = Color(0xFFF8FAFC);
-  static const Color surfaceContainer = Color(0xFFF1F5F9);
-  static const Color surfaceContainerHigh = Color(0xFFE2E8F0);
-  static const Color surfaceContainerHighest = Color(0xFFCBD5E1);
+  static const Color primaryContainer = Color(0xFFF8FAFC); 
+  static const Color surfaceContainerLow = Color(0xFFF1F5F9);
+  static const Color surfaceContainer = Color(0xFFE2E8F0);
+  static const Color surfaceContainerHigh = Color(0xFFCBD5E1);
+  static const Color surfaceContainerHighest = Color(0xFF94A3B8);
   static const Color surfaceContainerLowest = Color(0xFFFFFFFF);
   
-  static const Color surfaceBright = Color(0xFFF8FAFC);
+  static const Color surfaceBright = Color(0xFFFFFFFF);
 
   static ThemeData get lightTheme {
     final base = ThemeData.light(useMaterial3: true);
@@ -40,14 +40,14 @@ class CertifyProTheme {
       ),
       scaffoldBackgroundColor: background,
       
-      // Clear & Readable Typography
-      textTheme: GoogleFonts.interTextTheme(base.textTheme).copyWith(
-        headlineLarge: GoogleFonts.inter(fontSize: 26, fontWeight: FontWeight.w800, color: primary),
-        headlineMedium: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: primary),
-        titleLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: primary),
-        bodyLarge: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400, color: primary),
-        bodyMedium: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w400, color: onSurfaceVariant),
-        labelMedium: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: onSurfaceVariant),
+      // Professional Typography
+      textTheme: GoogleFonts.montserratTextTheme(base.textTheme).copyWith(
+        headlineLarge: GoogleFonts.playfairDisplay(fontSize: 32, fontWeight: FontWeight.w900, color: primary),
+        headlineMedium: GoogleFonts.playfairDisplay(fontSize: 24, fontWeight: FontWeight.w700, color: primary),
+        titleLarge: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.w700, color: primary),
+        bodyLarge: GoogleFonts.montserrat(fontSize: 15, fontWeight: FontWeight.w500, color: primary),
+        bodyMedium: GoogleFonts.montserrat(fontSize: 14, fontWeight: FontWeight.w400, color: onSurfaceVariant),
+        labelMedium: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: onSurfaceVariant),
       ),
 
       // Modern Inputs

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -8,112 +10,137 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  bool _obscurePassword = true;
+  final TextEditingController _pinController = TextEditingController();
+  String _errorMessage = '';
+
+  void _verifyPin() {
+    if (_pinController.text == '1212') {
+      Get.offAllNamed('/inventory');
+    } else {
+      setState(() {
+        _errorMessage = 'Invalid PIN. Access Denied.';
+        _pinController.clear();
+      });
+      Get.snackbar(
+        'Access Denied', 
+        'Incorrect PIN entered',
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: const Color(0xFF0F172A),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 400),
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo/Branding
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.amber.withValues(alpha: 0.3),
+                      blurRadius: 30,
+                    ),
+                  ],
                 ),
-              ],
-              border: Border.all(color: colorScheme.outlineVariant),
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Branding
-                  const Icon(Icons.menu_book, size: 48, color: Color(0xFF001F3F)),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Local Shop Store Manager',
-                    style: theme.textTheme.headlineMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  
-                  // Username
-                  Text('Username or Email', style: theme.textTheme.labelSmall),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'admin@store.local',
-                      prefixIcon: Icon(Icons.person_outline),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Password
-                  Text('Password', style: theme.textTheme.labelSmall),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      hintText: '••••••••',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                          size: 20,
-                        ),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Remember Me
-                  Row(
-                    children: [
-                      Checkbox(value: false, onChanged: (v) {}, visualDensity: VisualDensity.compact),
-                      Text('Remember Me', style: theme.textTheme.bodySmall),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                  
-                  // Login Button
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/inventory');
-                    },
-                    child: const Text('Login to Dashboard'),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Reset Password
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Reset PIN/Password',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
+                child: const Icon(Icons.lock_person_rounded, size: 50, color: Color(0xFF0F172A)),
               ),
-            ),
+              const SizedBox(height: 24),
+              Text(
+                'app_name'.tr,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 48),
+
+              // PIN Card
+              Container(
+                width: size.width > 400 ? 380 : double.infinity,
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Enter Security PIN',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 18, 
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Only authorized staff can access this dashboard',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                    const SizedBox(height: 32),
+                    TextField(
+                      controller: _pinController,
+                      obscureText: true,
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.number,
+                      maxLength: 4,
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 10),
+                      decoration: InputDecoration(
+                        counterText: "",
+                        hintText: '••••',
+                        hintStyle: TextStyle(color: Colors.grey.withValues(alpha: 0.3)),
+                        filled: true,
+                        fillColor: const Color(0xFFF8FAFC),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      ),
+                      onChanged: (val) {
+                        if (val.length == 4) _verifyPin();
+                      },
+                    ),
+                    if (_errorMessage.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: Text(_errorMessage, style: const TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _verifyPin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0F172A),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: const Text('Unlock Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 48),
+              const Text(
+                'Forgot PIN? Contact Admin',
+                style: TextStyle(color: Colors.white38, fontSize: 12),
+              ),
+            ],
           ),
         ),
       ),

@@ -8,6 +8,7 @@ class Certificate {
   final DateTime? expiryDate;
   final String status; // 'Issued', 'Revoked', 'Pending'
   final String templateId;
+  final String? signatureBase64;
 
   Certificate({
     required this.id,
@@ -19,6 +20,7 @@ class Certificate {
     this.expiryDate,
     required this.status,
     required this.templateId,
+    this.signatureBase64,
   });
 
   Map<String, dynamic> toMap() {
@@ -32,6 +34,7 @@ class Certificate {
       'expiryDate': expiryDate?.toIso8601String(),
       'status': status,
       'templateId': templateId,
+      'signatureBase64': signatureBase64,
     };
   }
 
@@ -46,6 +49,7 @@ class Certificate {
       expiryDate: map['expiryDate'] != null ? DateTime.parse(map['expiryDate']) : null,
       status: map['status'] ?? 'Issued',
       templateId: map['templateId'] ?? 'default',
+      signatureBase64: map['signatureBase64'],
     );
   }
 }

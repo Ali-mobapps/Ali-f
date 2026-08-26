@@ -86,14 +86,15 @@ class _RecordsScreenState extends State<RecordsScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: CertifyProTheme.outline),
+                border: Border.all(color: CertifyProTheme.outlineVariant),
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
               ),
               child: Column(
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                     decoration: const BoxDecoration(
-                      color: CertifyProTheme.background,
+                      color: CertifyProTheme.primaryContainer,
                       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                     ),
                     child: Row(
@@ -177,8 +178,8 @@ class _RecordRow extends StatelessWidget {
             child: Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: CertifyProTheme.primaryContainer,
-                  child: Text(cert.recipientName.isNotEmpty ? cert.recipientName[0] : '?', style: const TextStyle(color: Colors.white, fontSize: 14)),
+                  backgroundColor: CertifyProTheme.primary,
+                  child: Text(cert.recipientName.isNotEmpty ? cert.recipientName[0] : '?', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

@@ -13,13 +13,12 @@ class PdfService {
   }) async {
     final pdf = pw.Document();
     
-    final String style = templateConfig?['style'] ?? 'Classic';
+    final String style = templateConfig?['style'] ?? 'Professional';
     final String heading = templateConfig?['heading'] ?? "CERTIFICATE OF ACHIEVEMENT";
-    final String intro = templateConfig?['intro'] ?? "This is to certify that";
-    final String signatory = templateConfig?['signatory'] ?? "DIRECTOR";
-    final PdfColor primaryColor = templateConfig?['primaryColor'] != null 
-        ? PdfColor.fromInt(templateConfig!['primaryColor']) 
-        : PdfColors.blueGrey900;
+    final String intro = templateConfig?['intro'] ?? "THIS IS TO CERTIFY THAT";
+    final String signatory = templateConfig?['signatory'] ?? "AUTHORIZED SIGNATURE";
+    final PdfColor primaryColor = PdfColor.fromInt(0xFF1E293B); // Deep Navy
+    final PdfColor accentColor = PdfColor.fromInt(0xFFB4975A); // Gold
     
     pw.MemoryImage? logo;
     if (templateConfig?['logoBase64'] != null) {
@@ -27,11 +26,11 @@ class PdfService {
     }
     
     pw.MemoryImage? signature;
-    if (templateConfig?['signatureBase64'] != null) {
-      signature = pw.MemoryImage(base64Decode(templateConfig!['signatureBase64']));
+    final String? sigBase64 = cert.signatureBase64 ?? templateConfig?['signatureBase64'];
+    if (sigBase64 != null) {
+      signature = pw.MemoryImage(base64Decode(sigBase64));
     }
 
-    // Load custom background image if provided
     pw.MemoryImage? backgroundImage;
     if (customBackground != null) {
       backgroundImage = pw.MemoryImage(customBackground);
@@ -46,115 +45,162 @@ class PdfService {
             ignoreMargins: true,
             child: pw.Stack(
               children: [
-                // --- 1. Background Image Layer ---
+                // 1. Background
                 if (backgroundImage != null)
-                  pw.Positioned.fill(child: pw.Image(backgroundImage, fit: pw.BoxFit.cover)),
+                  pw.Positioned.fill(child: pw.Image(backgroundImage, fit: pw.BoxFit.cover))
+                else
+                  pw.Positioned.fill(child: pw.Container(color: PdfColors.white)),
 
-                // --- 2. Programmatic Border Layer (Only if no custom background) ---
+                // 2. Decorative Borders (Only if no custom background)
                 if (backgroundImage == null) ...[
-                  if (style == 'Classic') ...[
-                    pw.Positioned.fill(
-                      child: pw.Container(
-                        margin: const pw.EdgeInsets.all(20),
-                        decoration: pw.BoxDecoration(
-                          border: pw.Border.all(color: PdfColors.amber, width: 6),
-                        ),
+                  // Outer Gold Frame
+                  pw.Positioned.fill(
+                    child: pw.Container(
+                      margin: const pw.EdgeInsets.all(15),
+                      decoration: pw.BoxDecoration(
+                        border: pw.Border.all(color: accentColor, width: 2),
                       ),
                     ),
-                    pw.Positioned.fill(
-                      child: pw.Container(
-                        margin: const pw.EdgeInsets.all(30),
-                        decoration: pw.BoxDecoration(
-                          border: pw.Border.all(color: PdfColors.amber, width: 1),
-                        ),
+                  ),
+                  // Inner Navy Frame
+                  pw.Positioned.fill(
+                    child: pw.Container(
+                      margin: const pw.EdgeInsets.all(25),
+                      decoration: pw.BoxDecoration(
+                        border: pw.Border.all(color: primaryColor, width: 8),
                       ),
                     ),
-                  ] else if (style == 'Modern') ...[
-                    pw.Positioned(
-                      left: 0, top: 0, bottom: 0,
-                      child: pw.Container(width: 50, color: primaryColor),
-                    ),
-                    pw.Positioned(
-                      right: 0, top: 0, bottom: 0,
-                      child: pw.Container(width: 10, color: PdfColors.amber),
-                    ),
-                  ],
+                  ),
+                  // Corner Decorations
+                  pw.Positioned(left: 20, top: 20, child: pw.Container(width: 60, height: 60, decoration: pw.BoxDecoration(border: pw.Border(left: pw.BorderSide(color: accentColor, width: 4), top: pw.BorderSide(color: accentColor, width: 4))))),
+                  pw.Positioned(right: 20, top: 20, child: pw.Container(width: 60, height: 60, decoration: pw.BoxDecoration(border: pw.Border(right: pw.BorderSide(color: accentColor, width: 4), top: pw.BorderSide(color: accentColor, width: 4))))),
+                  pw.Positioned(left: 20, bottom: 20, child: pw.Container(width: 60, height: 60, decoration: pw.BoxDecoration(border: pw.Border(left: pw.BorderSide(color: accentColor, width: 4), bottom: pw.BorderSide(color: accentColor, width: 4))))),
+                  pw.Positioned(right: 20, bottom: 20, child: pw.Container(width: 60, height: 60, decoration: pw.BoxDecoration(border: pw.Border(right: pw.BorderSide(color: accentColor, width: 4), bottom: pw.BorderSide(color: accentColor, width: 4))))),
                 ],
 
-                // --- 3. Dynamic Text Content Overlay ---
+                // 3. Content
                 pw.Padding(
-                  padding: const pw.EdgeInsets.all(60),
+                  padding: const pw.EdgeInsets.all(80),
                   child: pw.Column(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
+                      // Header Section
                       pw.Column(
                         children: [
-                          if (logo != null && backgroundImage == null) 
-                            pw.Image(logo, height: 90)
-                          else if (backgroundImage == null)
-                            pw.SizedBox(height: 90),
-                            
-                          pw.SizedBox(height: 24),
+                          if (logo != null) 
+                            pw.Image(logo, height: 70)
+                          else
+                            pw.Icon(pw.IconData(0xe8d3), color: accentColor, size: 60), // Verified Badge Placeholder
+                          
+                          pw.SizedBox(height: 20),
                           pw.Text(
                             heading.toUpperCase(),
                             textAlign: pw.TextAlign.center,
                             style: pw.TextStyle(
-                              fontSize: 28, 
+                              fontSize: 32, 
                               fontWeight: pw.FontWeight.bold, 
-                              color: backgroundImage != null ? PdfColors.black : primaryColor, 
-                              letterSpacing: 2
+                              color: primaryColor, 
+                              letterSpacing: 3
                             ),
                           ),
-                          pw.Container(width: 150, height: 1.5, color: PdfColors.amber, margin: const pw.EdgeInsets.symmetric(vertical: 12)),
-                          pw.Text(intro, style: pw.TextStyle(fontSize: 16, fontStyle: pw.FontStyle.italic)),
+                          pw.Container(
+                            margin: const pw.EdgeInsets.symmetric(vertical: 10),
+                            height: 2, 
+                            width: 200, 
+                            color: accentColor
+                          ),
+                          pw.Text(
+                            intro,
+                            style: pw.TextStyle(
+                              fontSize: 14, 
+                              fontWeight: pw.FontWeight.normal,
+                              letterSpacing: 1.5,
+                              color: PdfColors.grey700
+                            ),
+                          ),
                         ],
                       ),
+
+                      // Recipient Section
                       pw.Text(
                         cert.recipientName.toUpperCase(),
+                        textAlign: pw.TextAlign.center,
                         style: pw.TextStyle(
-                          fontSize: 42, 
+                          fontSize: 48, 
                           fontWeight: pw.FontWeight.bold, 
-                          color: backgroundImage != null ? PdfColors.black : primaryColor
+                          color: primaryColor,
                         ),
                       ),
-                      pw.Text(
-                        "has successfully completed the requirements for",
-                        textAlign: pw.TextAlign.center,
-                        style: const pw.TextStyle(fontSize: 14),
+
+                      // Achievement Section
+                      pw.Column(
+                        children: [
+                          pw.Text(
+                            "FOR SUCCESSFUL COMPLETION OF",
+                            style: pw.TextStyle(fontSize: 12, color: PdfColors.grey600, letterSpacing: 1),
+                          ),
+                          pw.SizedBox(height: 8),
+                          pw.Text(
+                            cert.courseTitle.toUpperCase(),
+                            style: pw.TextStyle(
+                              fontSize: 24, 
+                              fontWeight: pw.FontWeight.bold,
+                              color: primaryColor
+                            ),
+                          ),
+                          if (cert.description.isNotEmpty) ...[
+                            pw.SizedBox(height: 10),
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.symmetric(horizontal: 40),
+                              child: pw.Text(
+                                cert.description,
+                                textAlign: pw.TextAlign.center,
+                                style: pw.TextStyle(fontSize: 11, color: PdfColors.grey700),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                      pw.Text(
-                        cert.courseTitle,
-                        style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
-                      ),
+
+                      // Footer Section (Date & Signature)
                       pw.Row(
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: pw.CrossAxisAlignment.end,
                         children: [
+                          // Date
                           pw.Column(
                             children: [
-                              pw.Container(width: 120, height: 1, color: PdfColors.grey400),
-                              pw.Text("DATE"),
-                              pw.Text(cert.issueDate.toString().split(' ')[0], style: const pw.TextStyle(fontSize: 10)),
-                            ],
-                          ),
-                          pw.Column(
-                            children: [
-                              pw.BarcodeWidget(
-                                barcode: pw.Barcode.qrCode(),
-                                data: cert.id,
-                                width: 55,
-                                height: 55,
+                              pw.Text(
+                                cert.issueDate.toString().split(' ')[0],
+                                style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: primaryColor),
                               ),
-                              pw.SizedBox(height: 4),
-                              pw.Text("ID: ${cert.id.substring(0,8)}...", style: const pw.TextStyle(fontSize: 5)),
+                              pw.Container(width: 120, height: 1, color: PdfColors.grey400, margin: const pw.EdgeInsets.symmetric(vertical: 4)),
+                              pw.Text("DATE", style: pw.TextStyle(fontSize: 10, color: PdfColors.grey600)),
                             ],
                           ),
+                          
+                          // Seal/Badge
+                          pw.Container(
+                            height: 80,
+                            width: 80,
+                            decoration: pw.BoxDecoration(
+                              shape: pw.BoxShape.circle,
+                              border: pw.Border.all(color: accentColor, width: 2),
+                            ),
+                            child: pw.Center(
+                              child: pw.Text("VALID", style: pw.TextStyle(color: accentColor, fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                            ),
+                          ),
+
+                          // Signature
                           pw.Column(
                             children: [
                               if (signature != null)
-                                pw.Image(signature, height: 45)
+                                pw.Image(signature, height: 50)
                               else
-                                pw.Container(width: 120, height: 1, color: PdfColors.grey400),
-                              pw.Text(signatory.toUpperCase(), style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                                pw.SizedBox(height: 50, child: pw.Center(child: pw.Text("SIGN HERE", style: pw.TextStyle(color: PdfColors.grey300, fontSize: 8)))),
+                              pw.Container(width: 150, height: 1, color: PdfColors.grey400, margin: const pw.EdgeInsets.symmetric(vertical: 4)),
+                              pw.Text(signatory.toUpperCase(), style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: primaryColor)),
                             ],
                           ),
                         ],

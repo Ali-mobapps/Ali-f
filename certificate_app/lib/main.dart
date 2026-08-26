@@ -4,7 +4,6 @@ import 'core/widgets/navigation_rail.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/certificates/records_screen.dart';
 import 'features/certificates/issue_screen.dart';
-import 'features/certificates/verify_screen.dart';
 import 'features/templates/customizer_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/auth/login_screen.dart';
@@ -76,7 +75,7 @@ class _RootNavigationState extends State<RootNavigation> {
             CertifyProNavigationRail(
               selectedIndex: _selectedIndex,
               onDestinationSelected: (index) {
-                if (index == 6) {
+                if (index == 5) {
                    AuthService().signOut();
                 } else {
                   _onNavigate(index);
@@ -102,7 +101,7 @@ class _RootNavigationState extends State<RootNavigation> {
           ? BottomNavigationBar(
               currentIndex: _selectedIndex,
               onTap: (index) {
-                if (index == 5) {
+                if (index == 4) {
                    AuthService().signOut();
                 } else {
                   _onNavigate(index);
@@ -114,7 +113,6 @@ class _RootNavigationState extends State<RootNavigation> {
                 BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), activeIcon: Icon(Icons.dashboard), label: 'Console'),
                 BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Logs'),
                 BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), activeIcon: Icon(Icons.add_circle), label: 'Issue'),
-                BottomNavigationBarItem(icon: Icon(Icons.qr_code_scanner), label: 'Verify'),
                 BottomNavigationBarItem(icon: Icon(Icons.palette), label: 'Branding'),
                 BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Exit'),
               ],
@@ -128,9 +126,8 @@ class _RootNavigationState extends State<RootNavigation> {
       case 0: return DashboardScreen(key: const ValueKey(0), onQuickIssue: () => _onNavigate(2));
       case 1: return const RecordsScreen(key: ValueKey(1));
       case 2: return const IssueCertificateScreen(key: ValueKey(2));
-      case 3: return const VerifyScreen(key: ValueKey(3));
-      case 4: return const TemplateCustomizerScreen(key: ValueKey(4));
-      case 5: return const SettingsScreen(key: ValueKey(5));
+      case 3: return const TemplateCustomizerScreen(key: ValueKey(3));
+      case 4: return const SettingsScreen(key: ValueKey(4));
       default: return DashboardScreen(onQuickIssue: () => _onNavigate(2));
     }
   }

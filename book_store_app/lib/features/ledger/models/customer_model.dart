@@ -3,12 +3,14 @@ class Customer {
   final String name;
   final String phone;
   final String address;
+  final double totalBalance;
 
   Customer({
     required this.id,
     required this.name,
     required this.phone,
     required this.address,
+    this.totalBalance = 0.0,
   });
 
   Map<String, dynamic> toMap() {
@@ -17,6 +19,7 @@ class Customer {
       'name': name,
       'phone': phone,
       'address': address,
+      'total_balance': totalBalance,
     };
   }
 
@@ -26,6 +29,7 @@ class Customer {
       name: map['name'],
       phone: map['phone'],
       address: map['address'],
+      totalBalance: (map['total_balance'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

@@ -1,176 +1,136 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
 
 class DashboardLayout extends StatelessWidget {
   final Widget child;
   final String title;
   final int selectedIndex;
+  final List<Widget>? actions;
 
   const DashboardLayout({
     super.key,
     required this.child,
-    this.title = 'BookStock Manager',
+    this.title = 'Local Shop Store',
     this.selectedIndex = 0,
+    this.actions,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDesktop = MediaQuery.of(context).size.width > 600;
+    final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Row(
-          children: [
-            const Icon(Icons.menu_book),
-            const SizedBox(width: 16),
-            Text(
-              title,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () {},
-          ),
-        ],
+        title: Text(title, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 18)),
+        backgroundColor: const Color(0xFF0F172A),
+        foregroundColor: Colors.white,
         elevation: 0,
-        backgroundColor: colorScheme.surface,
-        surfaceTintColor: Colors.transparent,
-        shape: Border(
-          bottom: BorderSide(color: colorScheme.outlineVariant),
-        ),
-      ),
-      drawer: !isDesktop
-          ? Drawer(
-              child: _NavigationContent(selectedIndex: selectedIndex),
-            )
-          : null,
-      body: Row(
-        children: [
-          if (isDesktop)
-            Container(
-              width: 280,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE7EEFF),
-                border: Border(
-                  right: BorderSide(color: colorScheme.outlineVariant),
+        actions: actions ?? [
+          IconButton(icon: const Icon(Icons.notifications_none_rounded, size: 22), onPressed: () {}),
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: InkWell(
+              onTap: () => Get.toNamed('/profile'),
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white24),
+                ),
+                child: const CircleAvatar(
+                  radius: 14,
+                  backgroundColor: Color(0xFF334155),
+                  child: Icon(Icons.person_rounded, size: 16, color: Colors.white),
                 ),
               ),
-              child: _NavigationContent(selectedIndex: selectedIndex),
-            ),
-          Expanded(
-            child: Container(
-              color: const Color(0xFFF9F9FF),
-              child: child,
             ),
           ),
         ],
       ),
+      body: Row(
+        children: [
+          if (!isMobile)
+            _Sidebar(selectedIndex: selectedIndex),
+          Expanded(
+            child: child,
+          ),
+        ],
+      ),
+      bottomNavigationBar: isMobile
+          ? _BottomNav(selectedIndex: selectedIndex)
+          : null,
     );
   }
 }
 
-class _NavigationContent extends StatelessWidget {
+class _Sidebar extends StatelessWidget {
   final int selectedIndex;
-
-  const _NavigationContent({required this.selectedIndex});
+  const _Sidebar({required this.selectedIndex});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Admin Portal',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.primary,
-                ),
-              ),
-              Text(
-                'Main Street Books',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'v2.4.0',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: colorScheme.outline,
-                ),
-              ),
-            ],
+    return Container(
+      width: 280,
+      decoration: const BoxDecoration(
+        color: Color(0xFF0F172A),
+        border: Border(right: BorderSide(color: Color(0xFF1E293B))),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 32),
+          _SidebarTile(
+            icon: Icons.grid_view_rounded,
+            label: 'inventory'.tr,
+            isActive: selectedIndex == 0,
+            onTap: () => Get.offAllNamed('/inventory'),
           ),
-        ),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: [
-              _NavTile(
-                icon: Icons.list_alt,
-                label: 'Inventory Management',
-                isActive: selectedIndex == 0,
-                onTap: () => Navigator.pushReplacementNamed(context, '/inventory'),
-              ),
-              _NavTile(
-                icon: Icons.shopping_cart_outlined,
-                label: 'POS Terminal',
-                isActive: selectedIndex == 1,
-                onTap: () => Navigator.pushReplacementNamed(context, '/pos'),
-              ),
-              _NavTile(
-                icon: Icons.history,
-                label: 'Sales Ledger',
-                isActive: selectedIndex == 2,
-                onTap: () => Navigator.pushReplacementNamed(context, '/history'),
-              ),
-              _NavTile(
-                icon: Icons.person_search_outlined,
-                label: 'Customer Credit',
-                isActive: selectedIndex == 3,
-                onTap: () => Navigator.pushReplacementNamed(context, '/ledger'),
-              ),
-              _NavTile(
-                icon: Icons.trending_up,
-                label: 'Business Reports',
-                isActive: selectedIndex == 4,
-                onTap: () => Navigator.pushReplacementNamed(context, '/insights'),
-              ),
-              _NavTile(
-                icon: Icons.settings_outlined,
-                label: 'Settings',
-                isActive: selectedIndex == 5,
-                onTap: () => Navigator.pushReplacementNamed(context, '/settings'),
-              ),
-            ],
+          _SidebarTile(
+            icon: Icons.point_of_sale_rounded,
+            label: 'pos'.tr,
+            isActive: selectedIndex == 1,
+            onTap: () => Get.offAllNamed('/pos'),
           ),
-        ),
-      ],
+          _SidebarTile(
+            icon: Icons.receipt_long_rounded,
+            label: 'bills'.tr,
+            isActive: selectedIndex == 2,
+            onTap: () => Get.offAllNamed('/history'),
+          ),
+          _SidebarTile(
+            icon: Icons.people_alt_rounded,
+            label: 'ledger'.tr,
+            isActive: selectedIndex == 3,
+            onTap: () => Get.offAllNamed('/ledger'),
+          ),
+          _SidebarTile(
+            icon: Icons.analytics_rounded,
+            label: 'insights'.tr,
+            isActive: selectedIndex == 4,
+            onTap: () => Get.offAllNamed('/insights'),
+          ),
+          const Spacer(),
+          _SidebarTile(
+            icon: Icons.settings_rounded,
+            label: 'settings'.tr,
+            isActive: selectedIndex == 5,
+            onTap: () => Get.offAllNamed('/settings'),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
     );
   }
 }
 
-class _NavTile extends StatelessWidget {
+class _SidebarTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool isActive;
   final VoidCallback onTap;
 
-  const _NavTile({
+  const _SidebarTile({
     required this.icon,
     required this.label,
     required this.isActive,
@@ -179,31 +139,63 @@ class _NavTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      decoration: BoxDecoration(
-        color: isActive ? colorScheme.secondaryContainer : Colors.transparent,
-        borderRadius: BorderRadius.circular(24),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
+        onTap: onTap,
+        dense: true,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        tileColor: isActive ? const Color(0xFF1E293B) : Colors.transparent,
         leading: Icon(
-          icon,
-          color: isActive ? colorScheme.onSecondaryContainer : colorScheme.onSurfaceVariant,
+          icon, 
+          color: isActive ? Colors.white : const Color(0xFF94A3B8), 
+          size: 20
         ),
         title: Text(
           label,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-            color: isActive ? colorScheme.onSecondaryContainer : colorScheme.onSurfaceVariant,
+          style: GoogleFonts.plusJakartaSans(
+            color: isActive ? Colors.white : const Color(0xFF94A3B8),
+            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+            fontSize: 14,
           ),
         ),
-        onTap: onTap,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+      ),
+    );
+  }
+}
+
+class _BottomNav extends StatelessWidget {
+  final int selectedIndex;
+  const _BottomNav({required this.selectedIndex});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey.shade200)),
+      ),
+      child: BottomNavigationBar(
+        currentIndex: selectedIndex > 4 ? (selectedIndex == 5 ? 5 : 0) : selectedIndex,
+        onTap: (index) {
+          final routes = ['/inventory', '/pos', '/history', '/ledger', '/insights', '/settings'];
+          Get.offAllNamed(routes[index]);
+        },
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: const Color(0xFF3B82F6),
+        unselectedItemColor: const Color(0xFF94A3B8),
+        selectedLabelStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 10),
+        unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600, fontSize: 10),
+        elevation: 0,
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.grid_view_rounded, size: 22), label: 'inventory'.tr),
+          BottomNavigationBarItem(icon: const Icon(Icons.point_of_sale_rounded, size: 22), label: 'pos'.tr),
+          BottomNavigationBarItem(icon: const Icon(Icons.receipt_long_rounded, size: 22), label: 'bills'.tr),
+          BottomNavigationBarItem(icon: const Icon(Icons.people_alt_rounded, size: 22), label: 'ledger'.tr),
+          BottomNavigationBarItem(icon: const Icon(Icons.analytics_rounded, size: 22), label: 'insights'.tr),
+          BottomNavigationBarItem(icon: const Icon(Icons.settings_rounded, size: 22), label: 'settings'.tr),
+        ],
       ),
     );
   }
