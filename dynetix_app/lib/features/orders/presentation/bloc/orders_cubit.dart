@@ -81,6 +81,25 @@ class OrdersCubit extends Cubit<OrdersState> {
     }
   }
 
+  Future<void> uploadDeliverable(String orderId, dynamic file, String fileName, List<String> currentDeliverables) async {
+    try {
+      final url = await repository.uploadDeliverable(file, orderId, fileName);
+      final updatedList = List<String>.from(currentDeliverables)..add(url);
+      await repository.updateDeliverables(orderId, updatedList);
+    } catch (e) {
+      emit(OrdersError('File upload failed: $e'));
+    }
+  }
+
+  Future<void> removeDeliverable(String orderId, String url, List<String> currentDeliverables) async {
+    try {
+      final updatedList = List<String>.from(currentDeliverables)..remove(url);
+      await repository.updateDeliverables(orderId, updatedList);
+    } catch (e) {
+      emit(OrdersError('File removal failed: $e'));
+    }
+  }
+
   @override
   Future<void> close() {
     _subscription?.cancel();

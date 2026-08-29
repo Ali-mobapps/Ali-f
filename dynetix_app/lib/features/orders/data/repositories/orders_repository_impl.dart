@@ -76,6 +76,28 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
+  Future<String> uploadDeliverable(dynamic file, String orderId, String fileName) async {
+    try {
+      final String path = '$orderId/files/$fileName';
+      
+      if (file is File) {
+        await _supabase.storage.from('deliverables').upload(path, file);
+      } else {
+        await _supabase.storage.from('deliverables').uploadBinary(path, Uint8List.fromList(file as List<int>));
+      }
+
+      return _supabase.storage.from('deliverables').getPublicUrl(path);
+    } catch (e) {
+      throw Exception('Failed to upload deliverable: $e');
+    }
+  }
+
+  @override
+  Future<void> updateDeliverables(String orderId, List<String> urls) async {
+    await _supabase.from('orders').update({'deliverables': urls}).eq('id', orderId);
+  }
+
+  @override
   Future<void> deleteOrder(String orderId) async {
     await _supabase.from('orders').delete().eq('id', orderId);
   }

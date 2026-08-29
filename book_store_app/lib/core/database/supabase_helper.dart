@@ -71,7 +71,9 @@ class SupabaseHelper {
 
   // Insights / Reports
   Future<List<Map<String, dynamic>>> getSalesWithItems() async {
-    return await _client.from('sales').select('*, sale_items(*, products(*))').order('timestamp', ascending: false);
+    return await _client.from('sales')
+        .select('*, customers(*), sale_items(*, products(*))')
+        .order('timestamp', ascending: false);
   }
 
   Future<double> getTotalStockValue() async {

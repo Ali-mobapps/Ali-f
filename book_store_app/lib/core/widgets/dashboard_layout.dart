@@ -105,16 +105,22 @@ class _Sidebar extends StatelessWidget {
             onTap: () => Get.offAllNamed('/ledger'),
           ),
           _SidebarTile(
+            icon: Icons.public_rounded,
+            label: 'Online',
+            isActive: selectedIndex == 4,
+            onTap: () => Get.offAllNamed('/online_customers'),
+          ),
+          _SidebarTile(
             icon: Icons.analytics_rounded,
             label: 'insights'.tr,
-            isActive: selectedIndex == 4,
+            isActive: selectedIndex == 5,
             onTap: () => Get.offAllNamed('/insights'),
           ),
           const Spacer(),
           _SidebarTile(
             icon: Icons.settings_rounded,
             label: 'settings'.tr,
-            isActive: selectedIndex == 5,
+            isActive: selectedIndex == 6,
             onTap: () => Get.offAllNamed('/settings'),
           ),
           const SizedBox(height: 24),
@@ -176,25 +182,34 @@ class _BottomNav extends StatelessWidget {
         border: Border(top: BorderSide(color: Colors.grey.shade200)),
       ),
       child: BottomNavigationBar(
-        currentIndex: selectedIndex > 4 ? (selectedIndex == 5 ? 5 : 0) : selectedIndex,
+        currentIndex: selectedIndex,
         onTap: (index) {
-          final routes = ['/inventory', '/pos', '/history', '/ledger', '/insights', '/settings'];
+          final routes = [
+            '/inventory', 
+            '/pos', 
+            '/history', 
+            '/ledger', 
+            '/online_customers', 
+            '/insights', 
+            '/settings'
+          ];
           Get.offAllNamed(routes[index]);
         },
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
         selectedItemColor: const Color(0xFF3B82F6),
         unselectedItemColor: const Color(0xFF94A3B8),
-        selectedLabelStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 10),
-        unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600, fontSize: 10),
+        selectedLabelStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 8),
+        unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600, fontSize: 8),
         elevation: 0,
         items: [
-          BottomNavigationBarItem(icon: const Icon(Icons.grid_view_rounded, size: 22), label: 'inventory'.tr),
-          BottomNavigationBarItem(icon: const Icon(Icons.point_of_sale_rounded, size: 22), label: 'pos'.tr),
-          BottomNavigationBarItem(icon: const Icon(Icons.receipt_long_rounded, size: 22), label: 'bills'.tr),
-          BottomNavigationBarItem(icon: const Icon(Icons.people_alt_rounded, size: 22), label: 'ledger'.tr),
-          BottomNavigationBarItem(icon: const Icon(Icons.analytics_rounded, size: 22), label: 'insights'.tr),
-          BottomNavigationBarItem(icon: const Icon(Icons.settings_rounded, size: 22), label: 'settings'.tr),
+          BottomNavigationBarItem(icon: const Icon(Icons.grid_view_rounded, size: 18), label: 'inventory'.tr),
+          BottomNavigationBarItem(icon: const Icon(Icons.point_of_sale_rounded, size: 18), label: 'pos'.tr),
+          BottomNavigationBarItem(icon: const Icon(Icons.receipt_long_rounded, size: 18), label: 'bills'.tr),
+          BottomNavigationBarItem(icon: const Icon(Icons.people_alt_rounded, size: 18), label: 'ledger'.tr),
+          const BottomNavigationBarItem(icon: Icon(Icons.public_rounded, size: 18), label: 'Online'),
+          BottomNavigationBarItem(icon: const Icon(Icons.analytics_rounded, size: 18), label: 'insights'.tr),
+          BottomNavigationBarItem(icon: const Icon(Icons.settings_rounded, size: 18), label: 'settings'.tr),
         ],
       ),
     );

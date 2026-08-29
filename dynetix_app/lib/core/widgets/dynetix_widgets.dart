@@ -159,28 +159,29 @@ class DynetixLogo extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      padding: EdgeInsets.all(size * 0.1), // Add some padding so background is visible
       decoration: BoxDecoration(
-        color: AppColors.background, // Match the dark background from your picture
+        color: AppColors.background, // Exact match with the app background
         shape: BoxShape.circle,
         boxShadow: showGlow ? [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.15),
+            color: AppColors.primary.withValues(alpha: 0.1),
             blurRadius: 40,
-            spreadRadius: 5,
+            spreadRadius: 2,
           ),
         ] : null,
       ),
       child: Center(
-        child: Image.asset(
-          'assets/images/logo.png',
-          width: size,
-          height: size,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) => Icon(
-            Icons.rocket_launch_rounded,
-            size: size * 0.6,
-            color: AppColors.primary,
+        child: ClipOval(
+          child: Image.asset(
+            'assets/images/logo.png',
+            width: size * 0.9,
+            height: size * 0.9,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Icon(
+              Icons.rocket_launch_rounded,
+              size: size * 0.6,
+              color: AppColors.primary,
+            ),
           ),
         ),
       ),

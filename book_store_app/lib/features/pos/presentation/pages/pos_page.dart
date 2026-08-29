@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'dart:async';
 import '../../../../core/widgets/dashboard_layout.dart';
 import '../../../../core/database/supabase_helper.dart';
 import '../../../inventory/models/product_model.dart';
@@ -23,17 +25,37 @@ class _POSPageState extends State<POSPage> {
   List<Product> _filteredProducts = [];
   List<Customer> _customers = [];
   Customer? _selectedCustomer;
+  String _manualCustomerName = '';
   
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _customerNameController = TextEditingController();
+  
+  late Timer _timer;
+  DateTime _now = DateTime.now();
 
   double _discount = 0.0;
   double _received = 0.0;
-  String _paymentMethod = 'Cash'; // 'Cash' or 'Khata'
+  String _paymentMethod = 'Cash'; // 'Cash', 'Khata', or 'Online'
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _now = DateTime.now();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    _searchController.dispose();
+    _customerNameController.dispose();
+    super.dispose();
   }
 
   void _loadData() async {
@@ -69,6 +91,15 @@ class _POSPageState extends State<POSPage> {
     });
   }
 
+  // Helper to get remaining stock for display in the grid
+  int _getDisplayStock(Product product) {
+    final cartItem = _cart.firstWhereOrNull((item) => item['product'].id == product.id);
+    if (cartItem != null) {
+      return product.stockQuantity - (cartItem['quantity'] as int);
+    }
+    return product.stockQuantity;
+  }
+
   void _updateQuantity(int index, int delta) {
     setState(() {
       final newQty = _cart[index]['quantity'] + delta;
@@ -77,6 +108,12 @@ class _POSPageState extends State<POSPage> {
       } else if (newQty == 0) {
         _cart.removeAt(index);
       }
+    });
+  }
+
+  void _removeItem(int index) {
+    setState(() {
+      _cart.removeAt(index);
     });
   }
 
@@ -156,16 +193,18 @@ class _POSPageState extends State<POSPage> {
                     padding: const EdgeInsets.all(16),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: size.width > 1200 ? 5 : (size.width > 800 ? 3 : 2),
-                      childAspectRatio: 0.75, // Adjusted for more vertical space
+                      childAspectRatio: 0.75,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),
                     itemCount: _filteredProducts.length,
                     itemBuilder: (context, index) {
                       final product = _filteredProducts[index];
-                      final bool isOutOfStock = product.stockQuantity <= 0;
+                      final displayStock = _getDisplayStock(product);
+                      final bool isOutOfStock = displayStock <= 0;
                       return _CatalogItemCard(
                         product: product,
+                        displayStock: displayStock,
                         isOutOfStock: isOutOfStock,
                         onTap: () => _addToCart(product),
                       );
@@ -186,8 +225,18 @@ class _POSPageState extends State<POSPage> {
                 cart: _cart,
                 customers: _customers,
                 selectedCustomer: _selectedCustomer,
-                onCustomerChanged: (val) => setState(() => _selectedCustomer = val),
+                customerNameController: _customerNameController,
+                currentTime: _now,
+                onCustomerChanged: (val) {
+                  setState(() {
+                    _selectedCustomer = val;
+                    if (val != null) {
+                      _customerNameController.text = val.name;
+                    }
+                  });
+                },
                 onUpdateQuantity: _updateQuantity,
+                onDeleteItem: _removeItem,
                 paymentMethod: _paymentMethod,
                 onPaymentMethodChanged: (val) => setState(() => _paymentMethod = val),
                 subtotal: _subtotal,
@@ -223,12 +272,23 @@ class _POSPageState extends State<POSPage> {
             cart: _cart,
             customers: _customers,
             selectedCustomer: _selectedCustomer,
+            customerNameController: _customerNameController,
+            currentTime: _now,
             onCustomerChanged: (val) {
-              setState(() => _selectedCustomer = val);
+              setState(() {
+                _selectedCustomer = val;
+                if (val != null) {
+                  _customerNameController.text = val.name;
+                }
+              });
               setModalState(() {});
             },
             onUpdateQuantity: (idx, delta) {
               _updateQuantity(idx, delta);
+              setModalState(() {});
+            },
+            onDeleteItem: (idx) {
+              _removeItem(idx);
               setModalState(() {});
             },
             paymentMethod: _paymentMethod,
@@ -310,6 +370,12 @@ class _POSPageState extends State<POSPage> {
       _showNewCustomerDialog();
       return;
     }
+
+    if (_paymentMethod == 'Online' && _selectedCustomer == null) {
+      Get.snackbar('Online Order', 'Please select or add a customer to record the shipping address',
+          backgroundColor: Colors.purple, colorText: Colors.white);
+      return;
+    }
     
     _processCheckout();
   }
@@ -364,6 +430,10 @@ class _POSPageState extends State<POSPage> {
 
   void _processCheckout() async {
     final saleId = const Uuid().v4();
+    final String customerName = _customerNameController.text.isNotEmpty 
+        ? _customerNameController.text 
+        : (_selectedCustomer?.name ?? 'Walk-in');
+
     final sale = {
       'id': saleId,
       'customer_id': _selectedCustomer?.id,
@@ -407,7 +477,20 @@ class _POSPageState extends State<POSPage> {
     }
 
     if (!mounted) return;
-    await PdfGenerator.generateAndPrintBill(_total, _cart);
+    
+    // Create a temporary customer object if one isn't selected but a name is typed
+    final displayCustomer = _selectedCustomer ?? (_customerNameController.text.isNotEmpty 
+        ? Customer(id: '', name: _customerNameController.text, phone: '', address: '', totalBalance: 0) 
+        : null);
+
+    await PdfGenerator.generateAndPrintBill(
+      billId: saleId,
+      subtotal: _subtotal,
+      discount: _discount,
+      total: _total,
+      cart: _cart,
+      customer: displayCustomer,
+    );
     
     if (!mounted) return;
     setState(() {
@@ -415,6 +498,7 @@ class _POSPageState extends State<POSPage> {
       _discount = 0;
       _received = 0;
       _selectedCustomer = null;
+      _customerNameController.clear();
       _paymentMethod = 'Cash';
     });
     _loadData();
@@ -426,8 +510,25 @@ class _POSPageState extends State<POSPage> {
 
   void _shareReceipt() async {
     if (_cart.isEmpty) return;
-    final billText = _cart.map((i) => "${i['product'].name} x ${i['quantity']} = Rs. ${i['product'].salePrice * i['quantity']}").join("\n");
-    final shareText = "*Local Shop Store - Receipt*\n\n$billText\n\n*Total:* Rs. $_total\n\nThank you for shopping!";
+    final itemsText = _cart.map((i) => "• ${i['product'].name}\n  ${i['quantity']} x Rs. ${i['product'].salePrice} = Rs. ${i['product'].salePrice * i['quantity']}").join("\n\n");
+    
+    final String customerName = _customerNameController.text.isNotEmpty 
+        ? _customerNameController.text 
+        : (_selectedCustomer?.name ?? 'Walk-in');
+
+    final shareText = "✨ *LOCAL SHOP STORE* ✨\n"
+        "----------------------------\n"
+        "🧾 *SALES RECEIPT*\n"
+        "📅 Date: ${DateFormat('dd MMM yyyy').format(DateTime.now())}\n"
+        "👤 Customer: $customerName\n"
+        "----------------------------\n"
+        "$itemsText\n"
+        "----------------------------\n"
+        "💰 *Total Amount: Rs. $_total*\n"
+        "💳 Payment: $_paymentMethod\n"
+        "----------------------------\n"
+        "🙏 Thank you for your business!";
+        
     await Share.share(shareText);
   }
 }
@@ -436,8 +537,11 @@ class _CartPanel extends StatelessWidget {
   final List<Map<String, dynamic>> cart;
   final List<Customer> customers;
   final Customer? selectedCustomer;
+  final TextEditingController customerNameController;
+  final DateTime currentTime;
   final Function(Customer?) onCustomerChanged;
   final Function(int, int) onUpdateQuantity;
+  final Function(int) onDeleteItem;
   final String paymentMethod;
   final Function(String) onPaymentMethodChanged;
   final double subtotal;
@@ -452,11 +556,15 @@ class _CartPanel extends StatelessWidget {
   final VoidCallback onClear;
 
   const _CartPanel({
+    super.key,
     required this.cart,
     required this.customers,
     required this.selectedCustomer,
+    required this.customerNameController,
+    required this.currentTime,
     required this.onCustomerChanged,
     required this.onUpdateQuantity,
+    required this.onDeleteItem,
     required this.paymentMethod,
     required this.onPaymentMethodChanged,
     required this.subtotal,
@@ -476,75 +584,136 @@ class _CartPanel extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(20),
-          color: const Color(0xFF0A1931),
-          child: Row(
+          padding: const EdgeInsets.all(16),
+          color: const Color(0xFF0F172A),
+          child: Column(
             children: [
-              const Icon(Icons.shopping_bag_outlined, color: Colors.white),
-              const SizedBox(width: 12),
-              Text(
-                'Active Checkout',
-                style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+              Row(
+                children: [
+                  const Icon(Icons.store_rounded, color: Colors.amber, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'LOCAL SHOP STORE',
+                    style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14),
+                  ),
+                  const Spacer(),
+                  Text(
+                    DateFormat('HH:mm:ss').format(currentTime),
+                    style: GoogleFonts.jetBrainsMono(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.delete_sweep_outlined, color: Colors.redAccent, size: 22),
+                    onPressed: onClear,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    tooltip: 'Clear Cart',
+                  ),
+                ],
               ),
-              const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.delete_sweep_outlined, color: Colors.white70),
-                onPressed: onClear,
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      height: 40,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<Customer>(
+                          isExpanded: true,
+                          dropdownColor: const Color(0xFF1E293B),
+                          iconEnabledColor: Colors.white70,
+                          hint: const Text('Select Customer', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                          value: selectedCustomer,
+                          items: [
+                            const DropdownMenuItem<Customer>(value: null, child: Text('New/Walk-in', style: TextStyle(color: Colors.white))),
+                            ...customers.map((c) => DropdownMenuItem(value: c, child: Text(c.name, style: const TextStyle(color: Colors.white)))),
+                          ],
+                          onChanged: onCustomerChanged,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 3,
+                    child: SizedBox(
+                      height: 40,
+                      child: TextField(
+                        controller: customerNameController,
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        decoration: InputDecoration(
+                          hintText: 'Customer Name',
+                          hintStyle: const TextStyle(color: Colors.white38, fontSize: 12),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                          filled: true,
+                          fillColor: Colors.white.withValues(alpha: 0.1),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                DateFormat('EEEE, dd MMMM yyyy').format(currentTime),
+                style: const TextStyle(color: Colors.white54, fontSize: 10),
               ),
             ],
           ),
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: const BoxDecoration(
-            color: Color(0xFFF8FAFC),
-            border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<Customer>(
-              isExpanded: true,
-              hint: const Text('Walk-in Customer'),
-              value: selectedCustomer,
-              items: [
-                const DropdownMenuItem<Customer>(value: null, child: Text('Walk-in Customer')),
-                ...customers.map((c) => DropdownMenuItem(value: c, child: Text(c.name))),
-              ],
-              onChanged: onCustomerChanged,
-            ),
-          ),
-        ),
         Expanded(
           child: cart.isEmpty 
-            ? const Center(child: Text('Cart is empty'))
-            : Scrollbar(
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: cart.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final item = cart[index];
-                    return _CartItemRow(
-                      item: item,
-                      onRemove: () => onUpdateQuantity(index, -1),
-                      onAdd: () => onUpdateQuantity(index, 1),
-                    );
-                  },
-                ),
+            ? const Center(child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.shopping_basket_outlined, size: 48, color: Colors.grey),
+                  SizedBox(height: 8),
+                  Text('Cart is empty', style: TextStyle(color: Colors.grey)),
+                ],
+              ))
+            : ListView.separated(
+                padding: const EdgeInsets.all(12),
+                itemCount: cart.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final item = cart[index];
+                  return _CartItemRow(
+                    item: item,
+                    onRemove: () => onUpdateQuantity(index, -1),
+                    onAdd: () => onUpdateQuantity(index, 1),
+                    onDelete: () => onDeleteItem(index),
+                  );
+                },
               ),
         ),
-        SingleChildScrollView(
-          child: _BillingSummary(
-            paymentMethod: paymentMethod,
-            onPaymentMethodChanged: onPaymentMethodChanged,
-            subtotal: subtotal,
-            discount: discount,
-            total: total,
-            received: received,
-            change: change,
-            onDiscountChanged: onDiscountChanged,
-            onReceivedChanged: onReceivedChanged,
-            onCheckout: onCheckout,
-            onShare: onShare,
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -5))
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: _BillingSummary(
+              paymentMethod: paymentMethod,
+              onPaymentMethodChanged: onPaymentMethodChanged,
+              subtotal: subtotal,
+              discount: discount,
+              total: total,
+              received: received,
+              change: change,
+              onDiscountChanged: onDiscountChanged,
+              onReceivedChanged: onReceivedChanged,
+              onCheckout: onCheckout,
+              onShare: onShare,
+            ),
           ),
         ),
       ],
@@ -554,10 +723,16 @@ class _CartPanel extends StatelessWidget {
 
 class _CatalogItemCard extends StatelessWidget {
   final Product product;
+  final int displayStock;
   final bool isOutOfStock;
   final VoidCallback onTap;
 
-  const _CatalogItemCard({required this.product, required this.isOutOfStock, required this.onTap});
+  const _CatalogItemCard({
+    required this.product, 
+    required this.displayStock,
+    required this.isOutOfStock, 
+    required this.onTap
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -599,7 +774,7 @@ class _CatalogItemCard extends StatelessWidget {
                   if (isOutOfStock)
                     const Text('OUT', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 10))
                   else
-                    Text('QTY: ${product.stockQuantity}', style: const TextStyle(color: Colors.grey, fontSize: 10)),
+                    Text('QTY: $displayStock', style: const TextStyle(color: Colors.grey, fontSize: 10)),
                 ],
               ),
               const SizedBox(height: 12),
@@ -666,8 +841,14 @@ class _CartItemRow extends StatelessWidget {
   final Map<String, dynamic> item;
   final VoidCallback onRemove;
   final VoidCallback onAdd;
+  final VoidCallback onDelete;
 
-  const _CartItemRow({required this.item, required this.onRemove, required this.onAdd});
+  const _CartItemRow({
+    required this.item, 
+    required this.onRemove, 
+    required this.onAdd,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -676,34 +857,95 @@ class _CartItemRow extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name, 
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (product.courseOrCategory != null)
+                      Text(
+                        product.courseOrCategory!,
+                        style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
+                  ],
+                ),
               ),
-              Text('Rs. ${product.salePrice * item['quantity']}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                onPressed: onDelete,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
             ],
           ),
+          const SizedBox(height: 12),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Rs. ${product.salePrice} / unit', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-              const Spacer(),
-              IconButton(icon: const Icon(Icons.remove_circle_outline, size: 18), onPressed: onRemove),
-              Text('${item['quantity']}', style: const TextStyle(fontWeight: FontWeight.bold)),
-              IconButton(icon: const Icon(Icons.add_circle_outline, size: 18), onPressed: onAdd),
+              Row(
+                children: [
+                  _QtyBtn(icon: Icons.remove, onTap: onRemove),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      '${item['quantity']}', 
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)
+                    ),
+                  ),
+                  _QtyBtn(icon: Icons.add, onTap: onAdd),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Rs. ${product.salePrice} / unit', 
+                    style: const TextStyle(fontSize: 10, color: Colors.grey)
+                  ),
+                  Text(
+                    'Rs. ${product.salePrice * item['quantity']}', 
+                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF0F172A))
+                  ),
+                ],
+              ),
             ],
           ),
         ],
       ),
     );
   }
+
+  Widget _QtyBtn({required IconData icon, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Icon(icon, size: 16, color: const Color(0xFF0F172A)),
+      ),
+    );
+  }
 }
 
-class _BillingSummary extends StatelessWidget {
+class _BillingSummary extends StatefulWidget {
   final String paymentMethod;
   final Function(String) onPaymentMethodChanged;
   final double subtotal;
@@ -717,6 +959,7 @@ class _BillingSummary extends StatelessWidget {
   final VoidCallback onShare;
 
   const _BillingSummary({
+    super.key,
     required this.paymentMethod,
     required this.onPaymentMethodChanged,
     required this.subtotal,
@@ -731,113 +974,133 @@ class _BillingSummary extends StatelessWidget {
   });
 
   @override
+  State<_BillingSummary> createState() => _BillingSummaryState();
+}
+
+class _BillingSummaryState extends State<_BillingSummary> {
+  final TextEditingController _receivedCtrl = TextEditingController();
+  final TextEditingController _discountCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _receivedCtrl.text = widget.received > 0 ? widget.received.toStringAsFixed(0) : '';
+    _discountCtrl.text = widget.discount > 0 ? widget.discount.toStringAsFixed(0) : '';
+  }
+
+  @override
+  void didUpdateWidget(_BillingSummary oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.received == 0 && _receivedCtrl.text.isNotEmpty) _receivedCtrl.clear();
+    if (widget.discount == 0 && _discountCtrl.text.isNotEmpty) _discountCtrl.clear();
+  }
+
+  @override
+  void dispose() {
+    _receivedCtrl.dispose();
+    _discountCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Payment Method Selector
           Row(
             children: [
-              Expanded(
-                child: ChoiceChip(
-                  label: const Center(child: Text('Cash Sale')),
-                  selected: paymentMethod == 'Cash',
-                  onSelected: (val) {
-                    if (val) onPaymentMethodChanged('Cash');
-                  },
-                  selectedColor: const Color(0xFF185ADB).withValues(alpha: 0.1),
-                  labelStyle: TextStyle(
-                    color: paymentMethod == 'Cash' ? const Color(0xFF185ADB) : Colors.grey,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ChoiceChip(
-                  label: const Center(child: Text('Khata (Credit)')),
-                  selected: paymentMethod == 'Khata',
-                  onSelected: (val) {
-                    if (val) onPaymentMethodChanged('Khata');
-                  },
-                  selectedColor: Colors.red.withValues(alpha: 0.1),
-                  labelStyle: TextStyle(
-                    color: paymentMethod == 'Khata' ? Colors.red : Colors.grey,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              _MethodChip(label: 'Cash', method: 'Cash', current: widget.paymentMethod, color: const Color(0xFF185ADB), onSelected: widget.onPaymentMethodChanged),
+              const SizedBox(width: 4),
+              _MethodChip(label: 'Khata', method: 'Khata', current: widget.paymentMethod, color: Colors.red, onSelected: widget.onPaymentMethodChanged),
+              const SizedBox(width: 4),
+              _MethodChip(label: 'Online', method: 'Online', current: widget.paymentMethod, color: Colors.purple, onSelected: widget.onPaymentMethodChanged),
             ],
           ),
-          const SizedBox(height: 16),
-          _rowSummary('Subtotal', 'Rs. $subtotal'),
           const SizedBox(height: 8),
+          _rowSummary('Subtotal', 'Rs. ${widget.subtotal.toStringAsFixed(0)}'),
+          const SizedBox(height: 4),
           Row(
             children: [
-              const Text('Discount', style: TextStyle(fontSize: 12)),
-              const SizedBox(width: 8),
+              const Text('Discount', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w600)),
+              const SizedBox(width: 12),
               Expanded(
                 child: SizedBox(
                   height: 32,
                   child: TextField(
+                    controller: _discountCtrl,
                     keyboardType: TextInputType.number,
-                    onChanged: (v) => onDiscountChanged(double.tryParse(v) ?? 0),
+                    style: const TextStyle(fontSize: 13),
+                    onChanged: (v) => widget.onDiscountChanged(double.tryParse(v) ?? 0),
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+                      hintText: '0',
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                      filled: true,
+                      fillColor: const Color(0xFFF8FAFC),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
                     ),
                   ),
                 ),
               ),
             ],
           ),
-          const Divider(height: 24),
-          _rowSummary('Total Pay', 'Rs. $total', isBold: true, fontSize: 18),
-          const SizedBox(height: 12),
+          const Divider(height: 12),
+          _rowSummary('Total Payable', 'Rs. ${widget.total.toStringAsFixed(0)}', isBold: true, fontSize: 14),
+          const SizedBox(height: 4),
           Row(
             children: [
-              const Text('Received', style: TextStyle(fontSize: 12)),
-              const SizedBox(width: 8),
+              const Text('Received', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w600)),
+              const SizedBox(width: 12),
               Expanded(
                 child: SizedBox(
                   height: 32,
                   child: TextField(
+                    controller: _receivedCtrl,
                     keyboardType: TextInputType.number,
-                    onChanged: (v) => onReceivedChanged(double.tryParse(v) ?? 0),
+                    style: const TextStyle(fontSize: 13),
+                    onChanged: (v) => widget.onReceivedChanged(double.tryParse(v) ?? 0),
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+                      hintText: 'Cash Paid',
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                      filled: true,
+                      fillColor: const Color(0xFFF8FAFC),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
                     ),
                   ),
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 4),
+          _rowSummary('Change Due', 'Rs. ${widget.change.toStringAsFixed(0)}', color: Colors.green, isBold: true, fontSize: 13),
           const SizedBox(height: 8),
-          _rowSummary('Change Due', 'Rs. $change', color: Colors.green),
-          const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
-            height: 50,
+            height: 44,
             child: ElevatedButton(
-              onPressed: subtotal > 0 ? onCheckout : null,
-              child: const Text('Complete & Print'),
+              onPressed: widget.subtotal > 0 ? widget.onCheckout : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0F172A),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: const Text('Complete & Print', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           SizedBox(
             width: double.infinity,
+            height: 36,
             child: OutlinedButton.icon(
-              onPressed: subtotal > 0 ? onShare : null,
-              icon: const Icon(Icons.share, size: 16),
-              label: const Text('Share Receipt'),
+              onPressed: widget.subtotal > 0 ? widget.onShare : null,
+              icon: const Icon(Icons.share_outlined, size: 14),
+              label: const Text('Share Receipt', style: TextStyle(fontSize: 11)),
               style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
           ),
@@ -846,12 +1109,26 @@ class _BillingSummary extends StatelessWidget {
     );
   }
 
-  Widget _rowSummary(String label, String val, {bool isBold = false, double fontSize = 14, Color? color}) {
+  Widget _MethodChip({required String label, required String method, required String current, required Color color, required Function(String) onSelected}) {
+    final bool isSelected = current == method;
+    return Expanded(
+      child: ChoiceChip(
+        label: Center(child: Text(label, style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal))),
+        selected: isSelected,
+        onSelected: (val) { if (val) onSelected(method); },
+        selectedColor: color.withValues(alpha: 0.1),
+        labelStyle: TextStyle(color: isSelected ? color : Colors.grey),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  Widget _rowSummary(String label, String val, {bool isBold = false, double fontSize = 13, Color? color}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.inter(fontSize: fontSize, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
-        Text(val, style: GoogleFonts.inter(fontSize: fontSize, fontWeight: isBold ? FontWeight.bold : FontWeight.normal, color: color)),
+        Text(label, style: GoogleFonts.plusJakartaSans(fontSize: fontSize, fontWeight: isBold ? FontWeight.bold : FontWeight.w500, color: isBold ? const Color(0xFF0F172A) : Colors.grey)),
+        Text(val, style: GoogleFonts.plusJakartaSans(fontSize: fontSize, fontWeight: isBold ? FontWeight.w900 : FontWeight.bold, color: color ?? const Color(0xFF0F172A))),
       ],
     );
   }

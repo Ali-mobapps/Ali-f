@@ -79,8 +79,8 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
     if (input.contains('service') || input.contains('work') || input.contains('kaam') || input.contains('offer')) {
       return "Dynetix offers premium 3D Modeling, Web Development, SEO, and Graphic Design. Check the 'Services' tab for the full list and FLAT OFF deals!";
     }
-    if (input.contains('course') || input.contains('academy') || input.contains('learn') || input.contains('parhna')) {
-      return "Our Academy provides professional courses in AI (Python), Data Analytics, and Business Strategy. Visit the 'Academy' tab to start learning.";
+    if (input.contains('course') || input.contains('skill') || input.contains('learn') || input.contains('parhna')) {
+      return "Our Skills section provides professional courses in AI (Python), Data Analytics, and Business Strategy. Visit the 'Skills' tab to start learning.";
     }
     if (input.contains('status') || input.contains('order') || input.contains('project') || input.contains('progress')) {
       return "You can track your projects in real-time under the 'Projects' tab. It shows if your work is 'In Progress' or 'Completed'.";

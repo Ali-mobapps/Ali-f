@@ -11,6 +11,7 @@ import 'features/ledger/presentation/pages/ledger_page.dart';
 import 'features/insights/presentation/pages/insights_page.dart';
 import 'features/settings/presentation/pages/settings_page.dart';
 import 'features/auth/presentation/pages/profile_page.dart';
+import 'features/orders/presentation/pages/online_orders_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +45,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/insights', page: () => const InsightsPage()),
         GetPage(name: '/settings', page: () => const SettingsPage()),
         GetPage(name: '/profile', page: () => const ProfilePage()),
+        GetPage(name: '/online_customers', page: () => const OnlineOrdersPage()),
       ],
       debugShowCheckedModeBanner: false,
     );

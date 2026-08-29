@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import '../../../../core/widgets/dashboard_layout.dart';
 import '../../../../core/database/supabase_helper.dart';
+import '../../../../core/utils/pdf_generator.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SalesHistoryPage extends StatefulWidget {
   const SalesHistoryPage({super.key});
@@ -122,90 +124,209 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
   void _showBillDetail(Map<String, dynamic> sale) {
     final customer = sale['customers'];
     final items = sale['sale_items'] as List;
+    final date = DateTime.parse(sale['timestamp']);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.85,
+        height: MediaQuery.of(context).size.height * 0.9,
         decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          color: Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         ),
-        padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Detailed Bill', style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.bold)),
-                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
-              ],
-            ),
-            const Divider(height: 32),
-            // Customer Info
-            const Text('CUSTOMER DETAILS', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(customer?['name'] ?? 'Walk-in Customer', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            if (customer != null) ...[
-              Text('Phone: ${customer['phone']}', style: const TextStyle(fontSize: 13)),
-              Text('Address: ${customer['address']}', style: const TextStyle(fontSize: 13)),
-            ],
-            const SizedBox(height: 24),
-            // Items List
-            const Text('ITEMS SOLD', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            Expanded(
-              child: ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, i) {
-                  final item = items[i];
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(item['products']['name']),
-                    subtitle: Text('${item['quantity']} x Rs. ${item['price_at_sale']}'),
-                    trailing: Text('Rs. ${item['quantity'] * item['price_at_sale']}', style: const TextStyle(fontWeight: FontWeight.w600)),
-                  );
-                },
+            // Handle Bar
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
               ),
             ),
-            const Divider(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Payment Mode', style: TextStyle(color: Colors.grey)),
-                Text(sale['payment_method'], style: const TextStyle(fontWeight: FontWeight.bold)),
-              ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Transaction Details', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
+                      Text(DateFormat('EEEE, dd MMM yyyy • hh:mm a').format(date), style: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.grey[600])),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: sale['payment_method'] == 'Cash' ? Colors.green[50] : (sale['payment_method'] == 'Khata' ? Colors.red[50] : Colors.purple[50]),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      sale['payment_method'].toUpperCase(),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, color: sale['payment_method'] == 'Cash' ? Colors.green : (sale['payment_method'] == 'Khata' ? Colors.red : Colors.purple)),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Total Bill', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text('Rs. ${sale['final_amount']}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF0F172A))),
-              ],
+            const SizedBox(height: 24),
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 20, offset: const Offset(0, 10))],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Store Header (Internal View)
+                        Center(
+                          child: Column(
+                            children: [
+                              Text('LOCAL SHOP STORE', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.2)),
+                              const SizedBox(height: 4),
+                              Text('Bill ID: #${sale['id'].toString().substring(0, 8)}', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: Colors.grey)),
+                            ],
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: DottedLine(color: Color(0xFFE2E8F0)),
+                        ),
+                        
+                        // Customer Section
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(10)),
+                              child: const Icon(Icons.person_outline, size: 18, color: Color(0xFF64748B)),
+                            ),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('CUSTOMER', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
+                                Text(customer?['name'] ?? 'Walk-in Customer', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14)),
+                              ],
+                            ),
+                          ],
+                        ),
+                        if (customer != null && customer['phone'] != null) ...[
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 38),
+                            child: Text(customer['phone'], style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          ),
+                        ],
+                        
+                        const SizedBox(height: 24),
+                        Text('ITEMS', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
+                        const SizedBox(height: 12),
+                        ...items.map((item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(item['products']['name'], style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                                    Text('${item['quantity']} × Rs. ${item['price_at_sale']}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                                  ],
+                                ),
+                              ),
+                              Text('Rs. ${item['quantity'] * item['price_at_sale']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                            ],
+                          ),
+                        )),
+                        
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: DottedLine(color: Color(0xFFE2E8F0)),
+                        ),
+                        
+                        // Summary
+                        _summaryRow('Subtotal', 'Rs. ${sale['total_amount']}'),
+                        if (sale['discount'] > 0) 
+                          _summaryRow('Discount', '- Rs. ${sale['discount']}', valueColor: Colors.red),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(color: const Color(0xFF0F172A), borderRadius: BorderRadius.circular(16)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('TOTAL AMOUNT', style: GoogleFonts.plusJakartaSans(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold)),
+                              Text('Rs. ${sale['final_amount']}', style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
+            
+            // Actions
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _actionBtn(
+                          icon: Icons.share_rounded,
+                          label: 'Share Bill',
+                          onTap: () {
+                            final itemsText = items.map((i) => "• ${i['products']['name']}\n  ${i['quantity']} × Rs. ${i['price_at_sale']} = Rs. ${i['quantity'] * i['price_at_sale']}").join("\n\n");
+                            final shareText = "✨ *LOCAL SHOP STORE* ✨\n"
+                                "----------------------------\n"
+                                "🧾 *Bill #${sale['id'].toString().substring(0, 8)}*\n"
+                                "📅 Date: ${DateFormat('dd MMM yyyy').format(date)}\n"
+                                "👤 Customer: ${customer?['name'] ?? 'Walk-in'}\n"
+                                "----------------------------\n"
+                                "$itemsText\n"
+                                "----------------------------\n"
+                                "💰 *Total Amount: Rs. ${sale['final_amount']}*\n"
+                                "💳 Payment: ${sale['payment_method']}\n"
+                                "----------------------------\n"
+                                "🙏 Thank you for your business!";
+                            Share.share(shareText);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _actionBtn(
+                          icon: Icons.print_rounded,
+                          label: 'Reprint',
+                          isPrimary: true,
+                          onTap: () => PdfGenerator.reprintBill(sale),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton.icon(
                     onPressed: () => _confirmDelete(sale['id']),
-                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                    label: const Text('Delete Bill', style: TextStyle(color: Colors.red)),
-                    style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.red)),
+                    icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                    label: const Text('Delete Transaction', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.done),
-                    label: const Text('Done'),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -234,6 +355,64 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _summaryRow(String label, String value, {Color? valueColor}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+          Text(value, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: valueColor)),
+        ],
+      ),
+    );
+  }
+
+  Widget _actionBtn({required IconData icon, required String label, required VoidCallback onTap, bool isPrimary = false}) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        height: 54,
+        decoration: BoxDecoration(
+          color: isPrimary ? const Color(0xFF0F172A) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: isPrimary ? null : Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 20, color: isPrimary ? Colors.white : const Color(0xFF0F172A)),
+            const SizedBox(width: 8),
+            Text(label, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: isPrimary ? Colors.white : const Color(0xFF0F172A))),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DottedLine extends StatelessWidget {
+  final Color color;
+  const DottedLine({super.key, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final boxWidth = constraints.constrainWidth();
+        const dashWidth = 4.0;
+        final dashCount = (boxWidth / (2 * dashWidth)).floor();
+        return Flex(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          direction: Axis.horizontal,
+          children: List.generate(dashCount, (_) {
+            return SizedBox(width: dashWidth, height: 1, child: DecoratedBox(decoration: BoxDecoration(color: color)));
+          }),
+        );
+      },
     );
   }
 }

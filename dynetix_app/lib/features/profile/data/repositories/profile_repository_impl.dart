@@ -1,5 +1,6 @@
+import 'dart:io';
 import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/entities/profile_entity.dart';
@@ -63,15 +64,25 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
       if (fileSource is List<int>) {
         await _supabase.storage.from('profiles').uploadBinary(
-          path, 
-          Uint8List.fromList(fileSource),
-          fileOptions: const FileOptions(cacheControl: '3600', upsert: true)
+            path,
+            Uint8List.fromList(fileSource),
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: true)
         );
+      } else if (fileSource is String) {
+        if (kIsWeb) {
+          // On web, a string might be a Blob URL or data URL
+          // Supabase web client usually handles this, but here we assume it's a path
+          throw Exception('Direct path upload not supported on web. Use bytes.');
+        } else {
+          await _supabase.storage.from('profiles').upload(
+              path,
+              File(fileSource),
+              fileOptions: const FileOptions(cacheControl: '3600', upsert: true)
+          );
+        }
       } else {
-        // This part will only run on mobile where File is supported
-        // But we handle it generically to avoid crash on web
         await _supabase.storage.from('profiles').upload(path, fileSource,
-          fileOptions: const FileOptions(cacheControl: '3600', upsert: true));
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: true));
       }
 
       final String imageUrl = _supabase.storage.from('profiles').getPublicUrl(path);

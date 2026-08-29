@@ -9,7 +9,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DashboardLayout(
-      selectedIndex: 5,
+      selectedIndex: 6,
       title: 'settings'.tr,
       child: ListView(
         padding: const EdgeInsets.all(24),

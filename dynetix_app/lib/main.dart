@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/theme/bloc/theme_cubit.dart';
+import 'core/currency/currency_cubit.dart';
 import 'features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/presentation/bloc/auth_cubit.dart';
@@ -68,6 +69,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<ThemeCubit>(
           create: (context) => ThemeCubit(),
+        ),
+        BlocProvider<CurrencyCubit>(
+          create: (context) => CurrencyCubit(),
         ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(

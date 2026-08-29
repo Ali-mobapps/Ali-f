@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -90,10 +91,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       radius: 60,
                       backgroundColor: AppColors.charcoalDepth,
                       backgroundImage: _localImagePath != null
-                          ? (kIsWeb ? NetworkImage(_localImagePath!) : NetworkImage(_localImagePath!)) as ImageProvider // Placeholder for web
-                          : (_profileImageUrl != null && _profileImageUrl!.isNotEmpty
+                          ? (kIsWeb
+                              ? NetworkImage(_localImagePath!)
+                              : FileImage(File(_localImagePath!))) as ImageProvider
+                          : (_profileImageUrl != null &&
+                                  _profileImageUrl!.isNotEmpty
                               ? NetworkImage(_profileImageUrl!)
-                              : const NetworkImage('https://i.pravatar.cc/150?u=user')),
+                              : const NetworkImage(
+                                  'https://i.pravatar.cc/150?u=user')),
                     ),
                   ),
                   Positioned(

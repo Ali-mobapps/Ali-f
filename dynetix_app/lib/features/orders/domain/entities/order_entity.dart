@@ -10,6 +10,7 @@ class OrderEntity extends Equatable {
   final DateTime createdAt;
   final String paymentStatus; // 'unpaid', 'pending_verification', 'paid'
   final String? paymentScreenshot;
+  final List<String> deliverables;
 
   const OrderEntity({
     required this.id,
@@ -21,12 +22,14 @@ class OrderEntity extends Equatable {
     required this.createdAt,
     this.paymentStatus = 'unpaid',
     this.paymentScreenshot,
+    this.deliverables = const [],
   });
 
   OrderEntity copyWith({
     String? status,
     String? paymentStatus,
     String? paymentScreenshot,
+    List<String>? deliverables,
   }) {
     return OrderEntity(
       id: id,
@@ -38,9 +41,10 @@ class OrderEntity extends Equatable {
       createdAt: createdAt,
       paymentStatus: paymentStatus ?? this.paymentStatus,
       paymentScreenshot: paymentScreenshot ?? this.paymentScreenshot,
+      deliverables: deliverables ?? this.deliverables,
     );
   }
 
   @override
-  List<Object?> get props => [id, customerId, status, serviceTitle, paymentStatus, paymentScreenshot];
+  List<Object?> get props => [id, customerId, status, serviceTitle, paymentStatus, paymentScreenshot, deliverables];
 }

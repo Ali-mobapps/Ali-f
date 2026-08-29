@@ -6,13 +6,15 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:record/record.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/dynetix_widgets.dart';
 import '../../domain/entities/inquiry_entity.dart';
 import '../../data/models/inquiry_model.dart';
 import '../bloc/inquiries_cubit.dart';
-import '../bloc/inquiries_state.dart';
 
 class InquiryChatScreen extends StatefulWidget {
   final String itemId;
@@ -37,6 +39,10 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
   final _scrollController = ScrollController();
   Stream<List<InquiryEntity>>? _inquiryStream;
 
+  // Audio Recording
+  final AudioRecorder _audioRecorder = AudioRecorder();
+  bool _isRecording = false;
+
   @override
   void initState() {
     super.initState();
@@ -48,8 +54,8 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
       _inquiryStream = Supabase.instance.client
           .from('inquiries')
           .stream(primaryKey: ['id'])
-          .eq('user_id', widget.userId) 
-          .order('created_at', ascending: true)
+          .eq('user_id', widget.userId)
+          .order('created_at', ascending: false) // Reverse order for reverse list
           .map((data) => data
               .map((json) => InquiryModel.fromJson(json, json['id'].toString()))
               .where((msg) {
@@ -65,7 +71,41 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _audioRecorder.dispose();
     super.dispose();
+  }
+
+  Future<void> _startRecording() async {
+    try {
+      if (await _audioRecorder.hasPermission()) {
+        final directory = await getApplicationDocumentsDirectory();
+        final path = '${directory.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        
+        const config = RecordConfig(); // Default config
+        await _audioRecorder.start(config, path: path);
+        
+        setState(() {
+          _isRecording = true;
+        });
+      }
+    } catch (e) {
+      // Log error silently
+    }
+  }
+
+  Future<void> _stopRecording() async {
+    try {
+      final path = await _audioRecorder.stop();
+      setState(() {
+        _isRecording = false;
+      });
+
+      if (path != null) {
+        _handleFileUpload(File(path), 'voice_note.m4a', '[AUDIO]');
+      }
+    } catch (e) {
+      // Log error silently
+    }
   }
 
   void _sendMessage({String? message}) {
@@ -73,10 +113,10 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
     if (text.isEmpty) return;
 
     final inquiry = InquiryModel(
-      id: '', 
+      id: '',
       userId: widget.userId,
-      itemId: 'global_support', // Standardized ID
-      itemType: 'support',
+      itemId: widget.itemId, // Use widget.itemId instead of hardcoded
+      itemType: widget.itemId == 'global_support' ? 'support' : 'inquiry',
       senderRole: widget.userRole,
       message: text,
       createdAt: DateTime.now(),
@@ -191,15 +231,17 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
         }
       } else {
         if (platformFile is XFile) {
-          fileToUpload = File(platformFile.path!);
+          fileToUpload = File(platformFile.path);
         } else if (platformFile is PlatformFile) {
           fileToUpload = File(platformFile.path!);
         }
       }
 
       if (fileToUpload != null) {
-        final url = await context.read<InquiriesCubit>().uploadFile(fileToUpload, fileName);
-        _sendMessage(message: '$prefix$url');
+        if (mounted) {
+          final url = await context.read<InquiriesCubit>().uploadFile(fileToUpload, fileName);
+          _sendMessage(message: '$prefix$url');
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -296,12 +338,13 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
 
                   return ListView.builder(
                     controller: _scrollController,
+                    reverse: true, // New messages at bottom
                     padding: const EdgeInsets.all(20),
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final msg = messages[index];
                       final isMe = msg.senderRole == widget.userRole;
-                      
+
                       return _buildMessageBubble(msg, isMe);
                     },
                   );
@@ -350,6 +393,9 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
       fileUrl = msg.message.replaceFirst('[PDF]', '');
       final name = fileUrl.split('/').last.split('?').first;
       content = _buildFileItem(Icons.picture_as_pdf_rounded, name, Colors.redAccent);
+    } else if (msg.message.startsWith('[AUDIO]')) {
+      fileUrl = msg.message.replaceFirst('[AUDIO]', '');
+      content = _VoiceNotePlayer(url: fileUrl, isMe: isMe);
     } else if (msg.message.startsWith('[ZIP]')) {
       fileUrl = msg.message.replaceFirst('[ZIP]', '');
       final name = fileUrl.split('/').last.split('?').first;
@@ -429,40 +475,168 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
         border: Border(top: BorderSide(color: AppColors.glassBorder)),
       ),
       child: SafeArea(
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primary),
-              onPressed: _pickAttachment,
-            ),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(30)),
-                child: TextField(
-                  controller: _messageController,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                  onSubmitted: (_) => _sendMessage(),
-                  decoration: const InputDecoration(
-                    hintText: "Message Support...",
-                    border: InputBorder.none,
-                    hintStyle: TextStyle(color: AppColors.textDisabled),
-                  ),
+            if (_isRecording)
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.mic_rounded, color: Colors.redAccent, size: 20),
+                    const SizedBox(width: 12),
+                    const Expanded(child: Text('Recording Voice Note...', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 13))),
+                    IconButton(
+                      icon: const Icon(Icons.cancel_outlined, color: AppColors.textDisabled),
+                      onPressed: () async {
+                        await _audioRecorder.stop();
+                        setState(() => _isRecording = false);
+                      },
+                    ),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            GestureDetector(
-              onTap: () => _sendMessage(),
-              child: Container(
-                height: 48, width: 48,
-                decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                child: const Icon(Icons.send_rounded, color: Colors.black, size: 20),
-              ),
+            Row(
+              children: [
+                if (!_isRecording)
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primary),
+                    onPressed: _pickAttachment,
+                  ),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(30)),
+                    child: TextField(
+                      controller: _messageController,
+                      enabled: !_isRecording,
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      onSubmitted: (_) => _sendMessage(),
+                      decoration: const InputDecoration(
+                        hintText: "Message Support...",
+                        border: InputBorder.none,
+                        hintStyle: TextStyle(color: AppColors.textDisabled),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                if (_messageController.text.trim().isEmpty && !_isRecording)
+                  GestureDetector(
+                    onLongPress: _startRecording,
+                    onLongPressUp: _stopRecording,
+                    child: Container(
+                      height: 48, width: 48,
+                      decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                      child: const Icon(Icons.mic_rounded, color: Colors.black, size: 20),
+                    ),
+                  )
+                else
+                  GestureDetector(
+                    onTap: _isRecording ? _stopRecording : () => _sendMessage(),
+                    child: Container(
+                      height: 48, width: 48,
+                      decoration: BoxDecoration(color: _isRecording ? Colors.redAccent : AppColors.primary, shape: BoxShape.circle),
+                      child: Icon(_isRecording ? Icons.stop_rounded : Icons.send_rounded, color: Colors.black, size: 20),
+                    ),
+                  ),
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class _VoiceNotePlayer extends StatefulWidget {
+  final String url;
+  final bool isMe;
+  const _VoiceNotePlayer({required this.url, required this.isMe});
+
+  @override
+  State<_VoiceNotePlayer> createState() => _VoiceNotePlayerState();
+}
+
+class _VoiceNotePlayerState extends State<_VoiceNotePlayer> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isPlaying = false;
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer.onDurationChanged.listen((d) => setState(() => _duration = d));
+    _audioPlayer.onPositionChanged.listen((p) => setState(() => _position = p));
+    _audioPlayer.onPlayerComplete.listen((_) => setState(() => _isPlaying = false));
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 200,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(_isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded, color: widget.isMe ? Colors.black : AppColors.primary),
+            onPressed: () async {
+              if (_isPlaying) {
+                await _audioPlayer.pause();
+              } else {
+                await _audioPlayer.play(UrlSource(widget.url));
+              }
+              setState(() => _isPlaying = !_isPlaying);
+            },
+          ),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SliderTheme(
+                  data: SliderThemeData(
+                    trackHeight: 2,
+                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                    activeTrackColor: widget.isMe ? Colors.black54 : AppColors.primary,
+                    inactiveTrackColor: Colors.white10,
+                    thumbColor: widget.isMe ? Colors.black : AppColors.primary,
+                  ),
+                  child: Slider(
+                    value: _position.inMilliseconds.toDouble(),
+                    max: _duration.inMilliseconds.toDouble() > 0 ? _duration.inMilliseconds.toDouble() : 1.0,
+                    onChanged: (value) => _audioPlayer.seek(Duration(milliseconds: value.toInt())),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(_formatDuration(_position), style: TextStyle(color: widget.isMe ? Colors.black54 : Colors.white54, fontSize: 8)),
+                      Text(_formatDuration(_duration), style: TextStyle(color: widget.isMe ? Colors.black54 : Colors.white54, fontSize: 8)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$minutes:$seconds";
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
 import '../../../../core/widgets/dashboard_layout.dart';
 import '../../../../core/database/supabase_helper.dart';
 import '../../models/customer_model.dart';
@@ -26,31 +27,48 @@ class _LedgerPageState extends State<LedgerPage> {
   }
 
   void _loadData() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
     final customersData = await _db.getCustomers();
     final customers = customersData.map((e) => Customer.fromMap(e)).toList();
     
+    // Sort customers so those with highest debt appear first
+    customers.sort((a, b) => b.totalBalance.compareTo(a.totalBalance));
+    
     double total = customers.fold(0, (sum, c) => sum + c.totalBalance);
 
-    setState(() {
-      _customers = customers;
-      _totalDebt = total;
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _customers = customers;
+        _totalDebt = total;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<double> _getTotalSpent(String customerId) async {
+    final ledger = await _db.getCustomerLedgerWithBills(customerId);
+    double total = 0;
+    for (var entry in ledger) {
+      if (entry['type'] == 'credit') {
+        total += (entry['amount'] as num).toDouble();
+      }
+    }
+    return total;
   }
 
   @override
   Widget build(BuildContext context) {
     return DashboardLayout(
       selectedIndex: 3,
-      title: 'Customer Ledger (Khata)',
+      title: 'ledger'.tr,
       child: Column(
         children: [
           // Debt Summary Banner
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(32),
-            color: const Color(0xFF0F172A), // Updated to match professional theme
+            color: const Color(0xFF0F172A),
             child: Column(
               children: [
                 Text(
@@ -79,7 +97,7 @@ class _LedgerPageState extends State<LedgerPage> {
                   child: TextField(
                     decoration: InputDecoration(
                       hintText: 'Find by name or phone...',
-                      prefixIcon: const Icon(Icons.person_search_rounded, color: Color(0xFF94A3B8)),
+                      prefixIcon: Icon(Icons.person_search_rounded, color: const Color(0xFF94A3B8)),
                       filled: true,
                       fillColor: const Color(0xFFF8FAFC),
                       isDense: true,
@@ -113,6 +131,7 @@ class _LedgerPageState extends State<LedgerPage> {
                     final customer = _customers[index];
                     return _CustomerDebtCard(
                       customer: customer, 
+                      getTotalSpent: _getTotalSpent,
                       onTap: () => Navigator.push(
                         context, 
                         MaterialPageRoute(builder: (_) => CustomerDetailsPage(customer: customer))
@@ -166,38 +185,76 @@ class _LedgerPageState extends State<LedgerPage> {
 
 class _CustomerDebtCard extends StatelessWidget {
   final Customer customer;
+  final Future<double> Function(String) getTotalSpent;
   final VoidCallback onTap;
 
-  const _CustomerDebtCard({required this.customer, required this.onTap});
+  const _CustomerDebtCard({
+    required this.customer, 
+    required this.getTotalSpent, 
+    required this.onTap
+  });
 
   @override
   Widget build(BuildContext context) {
     final balance = customer.totalBalance;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade100),
+      ),
+      child: InkWell(
         onTap: onTap,
-        contentPadding: const EdgeInsets.all(16),
-        leading: CircleAvatar(
-          backgroundColor: const Color(0xFFF1F5F9),
-          child: Text(customer.name[0].toUpperCase(), style: const TextStyle(color: Color(0xFF0F172A))),
-        ),
-        title: Text(customer.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(customer.phone),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            const Text('RUNNING BALANCE', style: TextStyle(fontSize: 10, color: Colors.grey)),
-            Text(
-              'Rs. ${balance.toStringAsFixed(0)}', 
-              style: TextStyle(
-                color: balance > 0 ? Colors.red : Colors.green, 
-                fontWeight: FontWeight.bold,
-                fontSize: 18
-              )
-            ),
-          ],
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: const Color(0xFFF1F5F9),
+                child: Text(customer.name[0].toUpperCase(), 
+                  style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(customer.name, 
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(customer.phone, 
+                      style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    const SizedBox(height: 4),
+                    FutureBuilder<double>(
+                      future: getTotalSpent(customer.id),
+                      builder: (context, snapshot) {
+                        final spent = snapshot.data ?? 0.0;
+                        return Text('Business Volume: Rs. ${spent.toStringAsFixed(0)}', 
+                          style: const TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.bold));
+                      }
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text('DUE BALANCE', 
+                    style: TextStyle(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold)),
+                  Text(
+                    'Rs. ${balance.toStringAsFixed(0)}', 
+                    style: TextStyle(
+                      color: balance > 0 ? Colors.red : Colors.green, 
+                      fontWeight: FontWeight.w900,
+                      fontSize: 18
+                    )
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

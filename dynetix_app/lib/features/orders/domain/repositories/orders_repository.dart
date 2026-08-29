@@ -7,5 +7,7 @@ abstract class OrdersRepository {
   Future<void> updateOrderStatus(String orderId, String status);
   Future<void> updatePaymentStatus(String orderId, String status, {String? screenshotUrl});
   Future<String> uploadPaymentScreenshot(dynamic file, String orderId);
+  Future<String> uploadDeliverable(dynamic file, String orderId, String fileName);
+  Future<void> updateDeliverables(String orderId, List<String> urls);
   Future<void> deleteOrder(String orderId);
 }

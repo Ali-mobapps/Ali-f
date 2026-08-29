@@ -11,6 +11,7 @@ class OrderModel extends OrderEntity {
     required super.createdAt,
     super.paymentStatus,
     super.paymentScreenshot,
+    super.deliverables,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +25,7 @@ class OrderModel extends OrderEntity {
       createdAt: DateTime.parse(json['created_at']),
       paymentStatus: json['payment_status'] ?? 'unpaid',
       paymentScreenshot: json['payment_screenshot'],
+      deliverables: (json['deliverables'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
     );
   }
 
@@ -37,6 +39,7 @@ class OrderModel extends OrderEntity {
       'service_title': serviceTitle,
       'payment_status': paymentStatus,
       'payment_screenshot': paymentScreenshot,
+      'deliverables': deliverables,
     };
   }
 }

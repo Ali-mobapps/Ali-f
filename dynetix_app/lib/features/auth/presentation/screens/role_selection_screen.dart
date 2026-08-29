@@ -68,7 +68,7 @@ class RoleSelectionScreen extends StatelessWidget {
                     _buildPortalOption(
                       context,
                       title: 'Customer Login',
-                      subtitle: 'Access premium solutions and academy.',
+                      subtitle: 'Access premium solutions and skills.',
                       icon: Icons.diamond_rounded,
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
                       isPrimary: true,

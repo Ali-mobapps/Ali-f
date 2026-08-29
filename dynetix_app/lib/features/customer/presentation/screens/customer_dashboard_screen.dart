@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -27,6 +25,8 @@ import '../../../profile/presentation/bloc/profile_cubit.dart';
 import '../../../profile/presentation/bloc/profile_state.dart' as profile_state;
 import '../../../profile/presentation/screens/profile_screen.dart';
 import 'package:dynetix_app/features/support/presentation/screens/ai_assistant_screen.dart';
+import '../../../../core/currency/currency_cubit.dart';
+import '../../../../core/currency/currency_state.dart';
 
 class CustomerDashboardScreen extends StatefulWidget {
   const CustomerDashboardScreen({super.key});
@@ -75,7 +75,7 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
         },
       ),
       _CustomerServicesTab(searchQuery: _searchQuery),
-      _CustomerAcademyTab(searchQuery: _searchQuery),
+      _CustomerSkillsTab(searchQuery: _searchQuery),
       _CustomerMessagesTab(userId: authState is AuthAuthenticated ? authState.user.id : ''),
       _CustomerProjectsTab(userId: authState is AuthAuthenticated ? authState.user.id : ''),
       const _CustomerPaymentsTab(),
@@ -94,6 +94,21 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
           child: DynetixLogo(size: 32, showGlow: false),
         ),
         actions: [
+          BlocBuilder<CurrencyCubit, CurrencyState>(
+            builder: (context, state) {
+              return TextButton(
+                onPressed: () => context.read<CurrencyCubit>().toggleCurrency(),
+                child: Text(
+                  state.code,
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(onPressed: () {
             setState(() => _currentIndex = 3); // Switch to Chat tab
           }, icon: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.primary)),
@@ -101,6 +116,33 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
         ],
       ),
       body: pages[_currentIndex],
+      floatingActionButton: _currentIndex == 3
+          ? FloatingActionButton(
+              onPressed: () {
+                final authState = context.read<AuthCubit>().state;
+                final userId =
+                    authState is AuthAuthenticated ? authState.user.id : '';
+                if (userId.isNotEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => InquiryChatScreen(
+                        itemId: 'global_support',
+                        itemTitle: 'Dynetix Support',
+                        userRole: 'customer',
+                        userId: userId,
+                      ),
+                    ),
+                  ).then((_) {
+                    if (!mounted) return;
+                    context.read<InquiriesCubit>().fetchInquiries(userId, false);
+                  });
+                }
+              },
+              backgroundColor: AppColors.primary,
+              child: const Icon(Icons.add_comment_rounded, color: Colors.black),
+            )
+          : null,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -118,7 +160,7 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Services'),
-          BottomNavigationBarItem(icon: Icon(Icons.school_rounded), label: 'Academy'),
+          BottomNavigationBarItem(icon: Icon(Icons.school_rounded), label: 'Skills'),
           BottomNavigationBarItem(icon: Icon(Icons.chat_rounded), label: 'Chat'),
           BottomNavigationBarItem(icon: Icon(Icons.assignment_rounded), label: 'Projects'),
           BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Payments'),
@@ -192,6 +234,11 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
                               width: 44,
                               height: 44,
                               fit: BoxFit.cover,
+                              key: ValueKey(imageUrl),
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                              },
                               errorBuilder: (context, error, stackTrace) =>
                                   const Icon(Icons.person_rounded,
                                       color: AppColors.primary),
@@ -350,7 +397,7 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
           const Text('Popular Courses', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 16),
           // Placeholder for courses
-          const Text('Check the Academy tab for all courses.', style: TextStyle(color: AppColors.textDisabled, fontSize: 13)),
+          const Text('Check the Skills tab for all courses.', style: TextStyle(color: AppColors.textDisabled, fontSize: 13)),
           const SizedBox(height: 100),
         ],
       ),
@@ -400,14 +447,39 @@ class _CustomerMessagesTab extends StatelessWidget {
         if (state is InquiriesLoaded) {
           if (state.inquiries.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.chat_bubble_outline_rounded, size: 64, color: AppColors.textDisabled),
-                  const SizedBox(height: 16),
-                  const Text('No conversations yet.', style: TextStyle(color: AppColors.textSecondary)),
-                  const Text('Message us from any service or course!', style: TextStyle(color: AppColors.textDisabled, fontSize: 12)),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.forum_outlined, size: 80, color: AppColors.textDisabled),
+                    const SizedBox(height: 24),
+                    const Text('Direct Admin Support', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    const Text('Start a real-time conversation with our support team just like WhatsApp!', 
+                      style: TextStyle(color: AppColors.textDisabled, fontSize: 13), textAlign: TextAlign.center),
+                    const SizedBox(height: 40),
+                    DynetixButton(
+                      text: 'START CHAT NOW',
+                      icon: Icons.chat_bubble_rounded,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => InquiryChatScreen(
+                              itemId: 'global_support',
+                              itemTitle: 'Dynetix Support',
+                              userRole: 'customer',
+                              userId: userId,
+                            ),
+                          ),
+                        ).then((_) {
+                          context.read<InquiriesCubit>().fetchInquiries(userId, false);
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
             );
           }
@@ -610,9 +682,9 @@ class _CustomerServicesTab extends StatelessWidget {
   }
 }
 
-class _CustomerAcademyTab extends StatelessWidget {
+class _CustomerSkillsTab extends StatelessWidget {
   final String searchQuery;
-  const _CustomerAcademyTab({this.searchQuery = ''});
+  const _CustomerSkillsTab({this.searchQuery = ''});
 
   @override
   Widget build(BuildContext context) {
@@ -831,10 +903,36 @@ class _CustomerProjectsTab extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Rs. ${order.price.toStringAsFixed(2)}', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                                Text(CurrencyCubit.of(context).formatPrice(order.price), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                                 Text('Created: ${order.createdAt.day}/${order.createdAt.month}', style: const TextStyle(color: AppColors.textDisabled, fontSize: 11)),
                               ],
                             ),
+                            if (order.deliverables.isNotEmpty) ...[
+                              const SizedBox(height: 16),
+                              const Text('PROJECT DELIVERABLES', style: TextStyle(color: AppColors.textSecondary, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                              const SizedBox(height: 8),
+                              ...order.deliverables.map((url) {
+                                final name = url.split('/').last.split('?').first;
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(10)),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.download_for_offline_rounded, color: AppColors.primary, size: 16),
+                                      const SizedBox(width: 10),
+                                      Expanded(child: Text(name, style: const TextStyle(color: Colors.white70, fontSize: 11), overflow: TextOverflow.ellipsis)),
+                                      IconButton(
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        icon: const Icon(Icons.open_in_new_rounded, color: AppColors.textDisabled, size: 14),
+                                        onPressed: () => launchUrl(Uri.parse(url)),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
+                            ],
                             if (order.status == 'completed') ...[
                               const SizedBox(height: 20),
                               DynetixButton(
@@ -877,93 +975,7 @@ class _CustomerProjectsTab extends StatelessWidget {
     );
   }
 
-  Future<void> _pickPaymentProof(BuildContext context, String orderId) async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery);
-    
-    if (image != null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Uploading proof...')));
-      
-      dynamic fileToUpload;
-      if (kIsWeb) {
-        fileToUpload = await image.readAsBytes();
-      } else {
-        // Use a generic dynamic way to avoid dart:io on web
-        fileToUpload = image; // Pass XFile directly
-      }
-      
-      await context.read<OrdersCubit>().uploadPaymentProof(orderId, fileToUpload);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment proof uploaded for verification!'), backgroundColor: AppColors.success));
-    }
-  }
 
-  void _showPaymentInstructions(BuildContext context, OrderEntity order) {
-    final paymentState = context.read<PaymentCubit>().state;
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('Secure Payment', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: SingleChildScrollView( // Fix: Wrap with SingleChildScrollView to prevent overflow
-          child: SizedBox(
-            width: double.maxFinite,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Transfer the exact amount to one of our accounts:', style: TextStyle(color: Colors.white70, fontSize: 13)),
-                const SizedBox(height: 12),
-                Text('Rs. ${order.price.toStringAsFixed(2)}', style: const TextStyle(color: AppColors.primary, fontSize: 28, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 24),
-                if (paymentState is pay_state.PaymentLoaded && paymentState.payments.isNotEmpty)
-                  ...paymentState.payments.map((p) => Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12)),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(p.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                              Text(p.accountNumber, style: const TextStyle(color: AppColors.textDisabled, fontSize: 12)),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.copy_rounded, size: 18, color: AppColors.primary),
-                          onPressed: () {
-                            Clipboard.setData(ClipboardData(text: p.accountNumber));
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Account number copied!')));
-                          },
-                        ),
-                      ],
-                    ),
-                  )).toList()
-                else
-                  const Text('No payment methods found. Please contact support.', style: TextStyle(color: Colors.redAccent, fontSize: 12)),
-                const SizedBox(height: 16),
-                const Text('After payment, click the button below to upload your screenshot.', style: TextStyle(color: AppColors.textDisabled, fontSize: 11), textAlign: TextAlign.center),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _pickPaymentProof(context, order.id);
-            },
-            child: const Text('I HAVE PAID (Upload Proof)'),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showDeleteOrderDialog(BuildContext context, OrderEntity order) {
     showDialog(
@@ -1157,14 +1169,14 @@ Widget _buildConsumerCard(BuildContext context, ServiceEntity item) {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      'Rs. ${displayPrice.toStringAsFixed(0)}', 
+                                      CurrencyCubit.of(context).formatPrice(displayPrice), 
                                       style: const TextStyle(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 18)
                                     ),
                                   ],
                                 ),
                                 if (hasDiscount)
                                   Text(
-                                    'Rs. ${item.price.toStringAsFixed(0)}',
+                                    CurrencyCubit.of(context).formatPrice(item.price),
                                     style: const TextStyle(
                                       color: AppColors.textDisabled, 
                                       fontSize: 13, 
