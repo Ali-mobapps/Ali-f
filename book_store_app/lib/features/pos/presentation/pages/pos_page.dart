@@ -408,16 +408,24 @@ class _POSPageState extends State<POSPage> {
                   'name': nameController.text,
                   'phone': phoneController.text,
                   'address': addressController.text,
-                  'total_balance': 0.0, // Initial running balance
+                  'total_balance': 0.0,
                 };
-                final savedCustomer = await _db.insertCustomer(customerData);
-                setState(() {
-                   _selectedCustomer = Customer.fromMap(savedCustomer);
-                   _customers.add(_selectedCustomer!);
-                });
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  _processCheckout();
+                try {
+                  final savedCustomer = await _db.insertCustomer(customerData);
+                  setState(() {
+                    _selectedCustomer = Customer.fromMap(savedCustomer);
+                    _customers.add(_selectedCustomer!);
+                    _customerNameController.text = _selectedCustomer!.name;
+                  });
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    _processCheckout();
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    Get.snackbar('Error', 'Failed to create customer: $e', 
+                      backgroundColor: Colors.red, colorText: Colors.white);
+                  }
                 }
               }
             },

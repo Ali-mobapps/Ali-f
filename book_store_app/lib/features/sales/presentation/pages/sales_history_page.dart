@@ -103,12 +103,22 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                           ),
                           title: Text('Bill #${sale['id'].toString().substring(0, 8)}', style: const TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Text(DateFormat('dd MMM yyyy, hh:mm a').format(date)),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('Rs. ${sale['final_amount']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                              Text(sale['payment_method'], style: TextStyle(fontSize: 10, color: sale['payment_method'] == 'Cash' ? Colors.green : Colors.red)),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text('Rs. ${sale['final_amount']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  Text(sale['payment_method'], style: TextStyle(fontSize: 10, color: sale['payment_method'] == 'Cash' ? Colors.green : Colors.red)),
+                                ],
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                                onPressed: () => _confirmDelete(sale['id']),
+                              ),
                             ],
                           ),
                         ),

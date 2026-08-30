@@ -120,25 +120,43 @@ class _LedgerPageState extends State<LedgerPage> {
             ),
           ),
           
-          // Customer List
+          // Refresh Indicator
           Expanded(
-            child: _isLoading 
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                  padding: const EdgeInsets.all(24),
-                  itemCount: _customers.length,
-                  itemBuilder: (context, index) {
-                    final customer = _customers[index];
-                    return _CustomerDebtCard(
-                      customer: customer, 
-                      getTotalSpent: _getTotalSpent,
-                      onTap: () => Navigator.push(
-                        context, 
-                        MaterialPageRoute(builder: (_) => CustomerDetailsPage(customer: customer))
-                      ).then((_) => _loadData()),
-                    );
-                  },
-                ),
+            child: RefreshIndicator(
+              onRefresh: () async => _loadData(),
+              child: _isLoading 
+                ? const SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: 400,
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  )
+                : _customers.isEmpty 
+                  ? const SingleChildScrollView(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: 400,
+                        child: Center(child: Text('No customers found')),
+                      ),
+                    )
+                  : ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(24),
+                      itemCount: _customers.length,
+                      itemBuilder: (context, index) {
+                        final customer = _customers[index];
+                        return _CustomerDebtCard(
+                          customer: customer, 
+                          getTotalSpent: _getTotalSpent,
+                          onTap: () => Navigator.push(
+                            context, 
+                            MaterialPageRoute(builder: (_) => CustomerDetailsPage(customer: customer))
+                          ).then((_) => _loadData()),
+                        );
+                      },
+                    ),
+            ),
           ),
         ],
       ),
@@ -170,6 +188,8 @@ class _LedgerPageState extends State<LedgerPage> {
                   'id': const Uuid().v4(),
                   'name': name.text,
                   'phone': phone.text,
+                  'address': '',
+                  'total_balance': 0.0,
                 });
                 _loadData();
                 navigator.pop();

@@ -8,8 +8,8 @@ class Customer {
   Customer({
     required this.id,
     required this.name,
-    required this.phone,
-    required this.address,
+    this.phone = '',
+    this.address = '',
     this.totalBalance = 0.0,
   });
 
@@ -25,10 +25,10 @@ class Customer {
 
   factory Customer.fromMap(Map<String, dynamic> map) {
     return Customer(
-      id: map['id'],
-      name: map['name'],
-      phone: map['phone'],
-      address: map['address'],
+      id: map['id'] ?? '',
+      name: map['name'] ?? 'Unknown',
+      phone: map['phone'] ?? '',
+      address: map['address'] ?? '',
       totalBalance: (map['total_balance'] as num?)?.toDouble() ?? 0.0,
     );
   }

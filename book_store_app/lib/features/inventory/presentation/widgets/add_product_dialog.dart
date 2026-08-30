@@ -23,6 +23,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
   late TextEditingController _priceController;
   late TextEditingController _stockController;
   late TextEditingController _thresholdController;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -123,30 +124,46 @@ class _AddProductDialogState extends State<AddProductDialog> {
         ElevatedButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              final product = Product(
-                id: widget.product?.id ?? const Uuid().v4(),
-                name: _nameController.text,
-                type: widget.type,
-                courseOrCategory: _courseController.text,
-                rackLocation: _rackController.text,
-                costPrice: double.tryParse(_costController.text) ?? 0.0,
-                salePrice: double.tryParse(_priceController.text) ?? 0.0,
-                stockQuantity: int.tryParse(_stockController.text) ?? 0,
-                minStockThreshold: int.tryParse(_thresholdController.text) ?? 3,
-              );
-              
-              final navigator = Navigator.of(context);
-              if (isEditing) {
-                await SupabaseHelper().updateProduct(product.toMap());
-              } else {
-                await SupabaseHelper().insertProduct(product.toMap());
+              setState(() => _isLoading = true);
+              try {
+                final product = Product(
+                  id: widget.product?.id ?? const Uuid().v4(),
+                  name: _nameController.text,
+                  type: widget.type,
+                  courseOrCategory: _courseController.text,
+                  rackLocation: _rackController.text,
+                  costPrice: double.tryParse(_costController.text) ?? 0.0,
+                  salePrice: double.tryParse(_priceController.text) ?? 0.0,
+                  stockQuantity: int.tryParse(_stockController.text) ?? 0,
+                  minStockThreshold: int.tryParse(_thresholdController.text) ?? 3,
+                );
+                
+                final navigator = Navigator.of(context);
+                if (isEditing) {
+                  await SupabaseHelper().updateProduct(product.toMap());
+                } else {
+                  await SupabaseHelper().insertProduct(product.toMap());
+                }
+                
+                widget.onAdded();
+                navigator.pop();
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              } finally {
+                if (mounted) setState(() => _isLoading = false);
               }
-              
-              widget.onAdded();
-              navigator.pop();
             }
           },
-          child: const Text('Save'),
+          child: _isLoading 
+            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+            : const Text('Save'),
         ),
       ],
     );

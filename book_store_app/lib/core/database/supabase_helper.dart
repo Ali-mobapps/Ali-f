@@ -17,11 +17,19 @@ class SupabaseHelper {
   }
 
   Future<void> updateProduct(Map<String, dynamic> product) async {
-    await _client.from('products').update(product).eq('id', product['id']);
+    try {
+      await _client.from('products').update(product).eq('id', product['id']);
+    } catch (e) {
+      throw Exception('Failed to update product: $e');
+    }
   }
 
   Future<void> deleteProduct(String id) async {
-    await _client.from('products').delete().eq('id', id);
+    try {
+      await _client.from('products').delete().eq('id', id);
+    } catch (e) {
+      throw Exception('Failed to delete product: $e');
+    }
   }
 
   // POS / Sales
@@ -36,19 +44,31 @@ class SupabaseHelper {
   }
 
   Future<Map<String, dynamic>> insertCustomer(Map<String, dynamic> customer) async {
-    final response = await _client.from('customers').insert(customer).select().single();
+    final data = {
+      ...customer,
+      'total_balance': customer['total_balance'] ?? 0.0,
+      'address': customer['address'] ?? '',
+      'phone': customer['phone'] ?? '',
+    };
+    final response = await _client.from('customers').insert(data).select().single();
     return response;
   }
 
   Future<void> updateCustomerBalance(String customerId, double amountChange) async {
-    // Fetch current balance
-    final customer = await _client.from('customers').select('total_balance').eq('id', customerId).single();
-    double currentBalance = (customer['total_balance'] as num?)?.toDouble() ?? 0.0;
-    
-    // Update with new balance
-    await _client.from('customers').update({
-      'total_balance': currentBalance + amountChange
-    }).eq('id', customerId);
+    try {
+      // Fetch current balance
+      final response = await _client.from('customers').select('total_balance').eq('id', customerId).single();
+      double currentBalance = (response['total_balance'] as num?)?.toDouble() ?? 0.0;
+      
+      // Update with new balance
+      await _client.from('customers').update({
+        'total_balance': currentBalance + amountChange
+      }).eq('id', customerId);
+    } catch (e) {
+      print('Error updating balance: $e');
+      // Even if balance update fails, we don't want to crash the whole process
+      // but we should probably know about it.
+    }
   }
 
   Future<void> insertLedgerEntry(Map<String, dynamic> entry) async {
@@ -86,9 +106,13 @@ class SupabaseHelper {
   }
 
   Future<void> deleteSale(String saleId) async {
-    // Note: Due to foreign keys, we need to handle ledger entries linked to this sale
-    await _client.from('ledger_entries').delete().eq('sale_id', saleId);
-    await _client.from('sale_items').delete().eq('sale_id', saleId);
-    await _client.from('sales').delete().eq('id', saleId);
+    try {
+      // Note: Due to foreign keys, we need to handle ledger entries linked to this sale
+      await _client.from('ledger_entries').delete().eq('sale_id', saleId);
+      await _client.from('sale_items').delete().eq('sale_id', saleId);
+      await _client.from('sales').delete().eq('id', saleId);
+    } catch (e) {
+      throw Exception('Failed to delete sale: $e');
+    }
   }
 }

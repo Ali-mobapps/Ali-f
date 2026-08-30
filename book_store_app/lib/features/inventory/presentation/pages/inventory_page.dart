@@ -295,10 +295,40 @@ class _ProductCard extends StatelessWidget {
           Positioned(
             top: 4,
             right: 4,
-            child: IconButton(
-              icon: const Icon(Icons.edit_note, size: 20, color: Color(0xFF94A3B8)), 
-              onPressed: () => showDialog(context: context, builder: (_) => AddProductDialog(type: product.type, product: product, onAdded: onUpdate))
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit_note, size: 20, color: Color(0xFF94A3B8)), 
+                  onPressed: () => showDialog(context: context, builder: (_) => AddProductDialog(type: product.type, product: product, onAdded: onUpdate))
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, size: 20, color: Colors.redAccent), 
+                  onPressed: () => _confirmDelete(context, product.id, onUpdate),
+                ),
+              ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, String id, VoidCallback onUpdate) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Item?'),
+        content: const Text('This will permanently remove this item from inventory. Are you sure?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              await SupabaseHelper().deleteProduct(id);
+              if (context.mounted) Navigator.pop(context);
+              onUpdate();
+            },
+            child: const Text('Delete'),
           ),
         ],
       ),
