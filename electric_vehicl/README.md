@@ -1,17 +1,2 @@
-# electric_vehicl
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img width="494" height="626" alt="volte plus 1" src="https://github.com/user-attachments/assets/22a5c25f-ede3-44cc-8f7d-19b6821f3a6b" />
+<img width="505" height="609" alt="volte plus 2" src="https://github.com/user-attachments/assets/a4ee6834-4ab1-4f6e-9ea1-9ea87f0f7bbd" />
