@@ -1,17 +1,2 @@
-# workout_tracker_app
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img width="493" height="616" alt="worout 1" src="https://github.com/user-attachments/assets/c44f0e78-0042-40b8-a813-8d8b7187d200" />
+<img width="487" height="602" alt="workout 2" src="https://github.com/user-attachments/assets/83e485ea-85aa-418e-b1a2-819ff847c727" />
