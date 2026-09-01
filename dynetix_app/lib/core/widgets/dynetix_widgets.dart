@@ -13,8 +13,8 @@ class GlassPanel extends StatelessWidget {
   const GlassPanel({
     super.key,
     required this.child,
-    this.borderRadius = 24,
-    this.blur = 20,
+    this.borderRadius = 20,
+    this.blur = 10,
     this.borderColor,
     this.backgroundColor,
     this.padding = 0,
@@ -22,23 +22,24 @@ class GlassPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: Container(
-          padding: EdgeInsets.all(padding),
-          decoration: BoxDecoration(
-            color: backgroundColor ?? AppColors.charcoalDepth.withValues(alpha: 0.4),
-            borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(
-              color: borderColor ?? AppColors.glassBorder,
-              width: 1,
-            ),
-          ),
-          child: child,
+    return Container(
+      padding: EdgeInsets.all(padding),
+      decoration: BoxDecoration(
+        color: backgroundColor ?? Colors.white,
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(
+          color: borderColor ?? AppColors.primary.withValues(alpha: 0.08),
+          width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
+      child: child,
     );
   }
 }
@@ -69,7 +70,7 @@ class DynetixButton extends StatelessWidget {
       return OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: color ?? AppColors.primary, width: 1.5),
+          side: BorderSide(color: color ?? AppColors.primary, width: 2),
           padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 24),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
@@ -88,7 +89,6 @@ class DynetixButton extends StatelessWidget {
                     style: TextStyle(
                       color: textColor ?? AppColors.primary,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
                       fontSize: 14,
                     ),
                   ),
@@ -102,9 +102,9 @@ class DynetixButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: (color ?? AppColors.primary).withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: (color ?? AppColors.primary).withValues(alpha: 0.25),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -112,7 +112,7 @@ class DynetixButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: color ?? AppColors.primary,
-          foregroundColor: textColor ?? Colors.black,
+          foregroundColor: textColor ?? Colors.white,
           minimumSize: const Size(double.infinity, 60),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           elevation: 0,
@@ -122,7 +122,7 @@ class DynetixButton extends StatelessWidget {
                 child: SizedBox(
                   height: 24,
                   width: 24,
-                  child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2.5),
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                 ),
               )
             : Row(
@@ -132,16 +132,15 @@ class DynetixButton extends StatelessWidget {
                   Flexible(
                     child: Text(
                       text,
-                      maxLines: 1, // Fix: Ensure one line
+                      maxLines: 1,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold, 
-                        letterSpacing: 1.2, // Slightly reduced spacing
-                        fontSize: 13, // Slightly reduced font
+                        fontSize: 14,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
-                  if (icon != null) ...[const SizedBox(width: 8), Icon(icon, size: 16)],
+                  if (icon != null) ...[const SizedBox(width: 8), Icon(icon, size: 18)],
                 ],
               ),
       ),
@@ -160,12 +159,12 @@ class DynetixLogo extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: AppColors.background, // Exact match with the app background
+        color: Colors.white, 
         shape: BoxShape.circle,
         boxShadow: showGlow ? [
           BoxShadow(
             color: AppColors.primary.withValues(alpha: 0.1),
-            blurRadius: 40,
+            blurRadius: 30,
             spreadRadius: 2,
           ),
         ] : null,
@@ -174,8 +173,8 @@ class DynetixLogo extends StatelessWidget {
         child: ClipOval(
           child: Image.asset(
             'assets/images/logo.png',
-            width: size * 0.9,
-            height: size * 0.9,
+            width: size * 0.85,
+            height: size * 0.85,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) => Icon(
               Icons.rocket_launch_rounded,
@@ -215,23 +214,40 @@ class DynetixTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label.isNotEmpty) ...[
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white, fontSize: 14)),
+          Text(label, style: const TextStyle(
+            fontWeight: FontWeight.bold, 
+            color: AppColors.textPrimary, 
+            fontSize: 14
+          )),
           const SizedBox(height: 8),
         ],
         TextField(
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: AppColors.textPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: Colors.white30, fontSize: 14),
-            prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: AppColors.gold) : null,
+            hintStyle: const TextStyle(
+              color: AppColors.textDisabled, 
+              fontSize: 14
+            ),
+            prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: AppColors.primary) : null,
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: AppColors.cardBackground,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.gold, width: 1.5)),
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16), 
+              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.1))
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16), 
+              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.1))
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16), 
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5)
+            ),
           ),
         ),
       ],

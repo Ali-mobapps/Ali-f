@@ -27,6 +27,7 @@ import '../../../profile/presentation/screens/profile_screen.dart';
 import 'package:dynetix_app/features/support/presentation/screens/ai_assistant_screen.dart';
 import '../../../../core/currency/currency_cubit.dart';
 import '../../../../core/currency/currency_state.dart';
+import '../../../../core/l10n/language_cubit.dart';
 
 class CustomerDashboardScreen extends StatefulWidget {
   const CustomerDashboardScreen({super.key});
@@ -134,7 +135,7 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
                       ),
                     ),
                   ).then((_) {
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     context.read<InquiriesCubit>().fetchInquiries(userId, false);
                   });
                 }
@@ -157,14 +158,14 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
         type: BottomNavigationBarType.fixed,
         selectedFontSize: 9, // Small font to fit 7 items
         unselectedFontSize: 9,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Services'),
-          BottomNavigationBarItem(icon: Icon(Icons.school_rounded), label: 'Skills'),
-          BottomNavigationBarItem(icon: Icon(Icons.chat_rounded), label: 'Chat'),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment_rounded), label: 'Projects'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Payments'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.home_rounded), label: context.watch<LanguageCubit>().t('home')),
+          BottomNavigationBarItem(icon: const Icon(Icons.grid_view_rounded), label: context.watch<LanguageCubit>().t('services')),
+          BottomNavigationBarItem(icon: const Icon(Icons.school_rounded), label: context.watch<LanguageCubit>().t('skills')),
+          BottomNavigationBarItem(icon: const Icon(Icons.chat_rounded), label: context.watch<LanguageCubit>().t('chat')),
+          BottomNavigationBarItem(icon: const Icon(Icons.assignment_rounded), label: context.watch<LanguageCubit>().t('projects')),
+          BottomNavigationBarItem(icon: const Icon(Icons.account_balance_wallet_rounded), label: context.watch<LanguageCubit>().t('payments')),
+          BottomNavigationBarItem(icon: const Icon(Icons.person_rounded), label: context.watch<LanguageCubit>().t('profile')),
         ],
       ),
     );
@@ -206,10 +207,10 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Hello, ${widget.userName}! 👋',
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white),
+                            color: AppColors.getOnBackgroundColor(context)),
                         overflow: TextOverflow.ellipsis),
                     const Text('What would you like to learn or explore today?',
                         style: TextStyle(
@@ -256,7 +257,7 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
           // Search Bar
           TextField(
             controller: _searchController,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: AppColors.getOnBackgroundColor(context)),
             decoration: InputDecoration(
               hintText: 'Search services or courses...',
               hintStyle: const TextStyle(color: AppColors.textSecondary),
@@ -298,7 +299,7 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
                   bottom: 0,
                   child: Opacity(
                     opacity: 0.8,
-                    child: Icon(Icons.psychology_rounded, size: 160, color: Colors.white.withValues(alpha: 0.2)),
+                    child: Icon(Icons.psychology_rounded, size: 160, color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.2)),
                   ),
                 ),
                 Padding(
@@ -307,7 +308,7 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Meet your Dynetix\nAI Assistant', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, height: 1.2)),
+                      Text('Meet your Dynetix\nAI Assistant', style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontSize: 18, fontWeight: FontWeight.bold, height: 1.2)),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AiAssistantScreen())),
@@ -331,7 +332,7 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Top Services', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text('Top Services', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.getOnBackgroundColor(context))),
               TextButton(onPressed: () => context.read<ServicesCubit>().fetchServices(), child: const Text('Refresh')),
             ],
           ),
@@ -394,7 +395,7 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
             },
           ),
           const SizedBox(height: 32),
-          const Text('Popular Courses', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text('Popular Courses', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.getOnBackgroundColor(context))),
           const SizedBox(height: 16),
           // Placeholder for courses
           const Text('Check the Skills tab for all courses.', style: TextStyle(color: AppColors.textDisabled, fontSize: 13)),
@@ -435,7 +436,7 @@ class _CustomerMessagesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (userId.isEmpty) return const Center(child: Text('Please login to see messages.', style: TextStyle(color: Colors.white54)));
+    if (userId.isEmpty) return Center(child: Text('Please login to see messages.', style: TextStyle(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.54))));
 
     // Fetch inquiries for this customer
     context.read<InquiriesCubit>().fetchInquiries(userId, false);
@@ -454,7 +455,7 @@ class _CustomerMessagesTab extends StatelessWidget {
                   children: [
                     const Icon(Icons.forum_outlined, size: 80, color: AppColors.textDisabled),
                     const SizedBox(height: 24),
-                    const Text('Direct Admin Support', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text('Direct Admin Support', style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontSize: 20, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     const Text('Start a real-time conversation with our support team just like WhatsApp!', 
                       style: TextStyle(color: AppColors.textDisabled, fontSize: 13), textAlign: TextAlign.center),
@@ -474,6 +475,9 @@ class _CustomerMessagesTab extends StatelessWidget {
                             ),
                           ),
                         ).then((_) {
+                          if (!context.mounted) {
+                            return;
+                          }
                           context.read<InquiriesCubit>().fetchInquiries(userId, false);
                         });
                       },
@@ -503,7 +507,7 @@ class _CustomerMessagesTab extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('My Messages', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                    Text('My Messages', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.getOnBackgroundColor(context))),
                     IconButton(
                       icon: const Icon(Icons.delete_sweep_rounded, color: Colors.redAccent),
                       onPressed: () => _showClearAllChatsDialog(context, conversationKeys),
@@ -548,7 +552,7 @@ class _CustomerMessagesTab extends StatelessWidget {
                             backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                             child: const Icon(Icons.headset_mic_rounded, color: AppColors.primary),
                           ),
-                          title: const Text('Dynetix Support', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          title: Text('Dynetix Support', style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontWeight: FontWeight.bold)),
                           subtitle: Text(
                             displayMessage, 
                             maxLines: 1, 
@@ -588,7 +592,7 @@ class _CustomerMessagesTab extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Delete Chat', style: TextStyle(color: Colors.white)),
+        title: Text('Delete Chat', style: TextStyle(color: AppColors.getOnBackgroundColor(context))),
         content: const Text('Are you sure you want to delete this conversation?', style: TextStyle(color: AppColors.textSecondary)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
@@ -611,7 +615,7 @@ class _CustomerMessagesTab extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Clear All Chats', style: TextStyle(color: Colors.white)),
+        title: Text('Clear All Chats', style: TextStyle(color: AppColors.getOnBackgroundColor(context))),
         content: const Text('This will permanently delete all your conversations. Proceed?', style: TextStyle(color: AppColors.textSecondary)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
@@ -744,8 +748,8 @@ class _CustomerPaymentsTab extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Secure Assets', style: TextStyle(color: AppColors.primary, fontSize: 24, fontWeight: FontWeight.bold)),
-                const Text('Manage your capital and payment configurations.', style: TextStyle(color: AppColors.textSecondary)),
+                const Text('Payment Methods', style: TextStyle(color: AppColors.primary, fontSize: 24, fontWeight: FontWeight.bold)),
+                const Text('Manage your capital and payment gateways.', style: TextStyle(color: AppColors.textSecondary)),
                 const SizedBox(height: 32),
                 Expanded(
                   child: ListView.builder(
@@ -764,7 +768,7 @@ class _CustomerPaymentsTab extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(method.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16)),
+                                    Text(method.name, style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.getOnBackgroundColor(context), fontSize: 16)),
                                     if (method.accountTitle != null && method.accountTitle!.isNotEmpty)
                                       Text(method.accountTitle!, style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w500)),
                                     Text(method.accountNumber, style: const TextStyle(color: AppColors.textDisabled, fontSize: 14)),
@@ -818,7 +822,7 @@ class _CustomerProjectsTab extends StatelessWidget {
               children: [
                 const Icon(Icons.wifi_off_rounded, size: 48, color: Colors.redAccent),
                 const SizedBox(height: 16),
-                const Text('Realtime connection timed out.', style: TextStyle(color: Colors.white)),
+                Text('Realtime connection timed out.', style: TextStyle(color: AppColors.getOnBackgroundColor(context))),
                 Text('Error: ${state.message}', style: const TextStyle(color: AppColors.textDisabled, fontSize: 10), textAlign: TextAlign.center),
                 const SizedBox(height: 24),
                 DynetixButton(
@@ -858,7 +862,7 @@ class _CustomerProjectsTab extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('My Active Projects', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                    Text('My Active Projects', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.getOnBackgroundColor(context))),
                     IconButton(
                       icon: const Icon(Icons.refresh_rounded, color: AppColors.primary),
                       onPressed: () => context.read<OrdersCubit>().watchCustomerOrders(userId),
@@ -882,7 +886,7 @@ class _CustomerProjectsTab extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(child: Text(order.serviceTitle, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))),
+                                Expanded(child: Text(order.serviceTitle, style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontWeight: FontWeight.bold, fontSize: 16))),
                                 Row(
                                   children: [
                                     _buildStatusBadge(order.status),
@@ -916,12 +920,12 @@ class _CustomerProjectsTab extends StatelessWidget {
                                 return Container(
                                   margin: const EdgeInsets.only(bottom: 6),
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(10)),
+                                  decoration: BoxDecoration(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.03), borderRadius: BorderRadius.circular(10)),
                                   child: Row(
                                     children: [
                                       const Icon(Icons.download_for_offline_rounded, color: AppColors.primary, size: 16),
                                       const SizedBox(width: 10),
-                                      Expanded(child: Text(name, style: const TextStyle(color: Colors.white70, fontSize: 11), overflow: TextOverflow.ellipsis)),
+                                      Expanded(child: Text(name, style: TextStyle(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.7), fontSize: 11), overflow: TextOverflow.ellipsis)),
                                       IconButton(
                                         padding: EdgeInsets.zero,
                                         constraints: const BoxConstraints(),
@@ -937,8 +941,8 @@ class _CustomerProjectsTab extends StatelessWidget {
                               const SizedBox(height: 20),
                               DynetixButton(
                                 text: 'GIVE REVIEW',
-                                color: AppColors.gold,
-                                textColor: Colors.black,
+                                color: AppColors.primary,
+                                textColor: Colors.white,
                                 onPressed: () => _showRatingDialog(context, order),
                               ),
                             ],
@@ -982,7 +986,7 @@ class _CustomerProjectsTab extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Delete Project', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text('Delete Project', style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontWeight: FontWeight.bold)),
         content: Text(
           'Are you sure you want to delete the project "${order.serviceTitle}"? This action cannot be undone.',
           style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
@@ -992,17 +996,22 @@ class _CustomerProjectsTab extends StatelessWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () async {
-              await context.read<OrdersCubit>().deleteOrder(order.id);
-              if (context.mounted) {
-                // Customer only hides/clears for themselves
-                await context.read<InquiriesCubit>().clearChat('global_support', userId: userId, role: 'customer');
-                Navigator.pop(context);
-                // Refresh list
-                context.read<OrdersCubit>().watchCustomerOrders(userId);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Order canceled and chat cleared'), backgroundColor: AppColors.error),
-                );
-              }
+              final ordersCubit = context.read<OrdersCubit>();
+              final inquiriesCubit = context.read<InquiriesCubit>();
+              final navigator = Navigator.of(context);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+              await ordersCubit.deleteOrder(order.id);
+              
+              // Customer only hides/clears for themselves
+              await inquiriesCubit.clearChat('global_support', userId: userId, role: 'customer');
+              navigator.pop();
+              
+              // Refresh list
+              ordersCubit.watchCustomerOrders(userId);
+              scaffoldMessenger.showSnackBar(
+                const SnackBar(content: Text('Order canceled and chat cleared'), backgroundColor: AppColors.error),
+              );
             },
             child: const Text('Delete'),
           ),
@@ -1020,7 +1029,7 @@ class _CustomerProjectsTab extends StatelessWidget {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           backgroundColor: AppColors.surface,
-          title: const Text('Rate our Service', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          title: Text('Rate our Service', style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontSize: 18, fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1042,11 +1051,11 @@ class _CustomerProjectsTab extends StatelessWidget {
               const SizedBox(height: 16),
               TextField(
                 controller: commentController,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: AppColors.getOnBackgroundColor(context)),
                 maxLines: 3,
                 decoration: InputDecoration(
                   hintText: 'Share your experience...',
-                  hintStyle: const TextStyle(color: Colors.white24),
+                  hintStyle: TextStyle(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.24)),
                   filled: true,
                   fillColor: AppColors.cardBackground,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -1147,13 +1156,13 @@ Widget _buildConsumerCard(BuildContext context, ServiceEntity item) {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
+                        Text(item.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.getOnBackgroundColor(context))),
                         const SizedBox(height: 4),
                         Row(
                           children: [
                             ...List.generate(5, (index) => Icon(
-                              index < item.averageRating.floor() ? Icons.star_rounded : Icons.star_half_rounded, 
-                              color: AppColors.gold, 
+                              index < item.averageRating.floor() ? Icons.star_rounded : Icons.star_rounded, 
+                              color: index < item.averageRating.floor() ? AppColors.gold : AppColors.getOnBackgroundColor(context).withValues(alpha: 0.1), 
                               size: 14
                             )),
                             const SizedBox(width: 6),
@@ -1206,7 +1215,7 @@ Widget _buildConsumerCard(BuildContext context, ServiceEntity item) {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         image: DecorationImage(image: NetworkImage(item.portfolioUrls[i]), fit: BoxFit.cover),
-                        border: Border.all(color: Colors.white10),
+                        border: Border.all(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.1)),
                       ),
                     ),
                   ),
@@ -1219,7 +1228,7 @@ Widget _buildConsumerCard(BuildContext context, ServiceEntity item) {
                 children: [
                   Expanded(
                     child: DynetixButton(
-                      text: 'BOOK NOW',
+                      text: item.type == 'course' ? 'ENROLL NOW' : 'BOOK NOW',
                       onPressed: () => _showCheckoutDialog(context, item, displayPrice),
                     ),
                   ),
@@ -1262,9 +1271,9 @@ Widget _buildConsumerCard(BuildContext context, ServiceEntity item) {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('FLAT', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
-                  Text('$offPercentage%', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, height: 1.1)),
-                  const Text('OFF', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                  Text('FLAT', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                  Text('$offPercentage%', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, height: 1.1)),
+                  Text('OFF', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
@@ -1286,7 +1295,7 @@ void _showCheckoutDialog(BuildContext context, ServiceEntity item, double basePr
     builder: (context) => StatefulBuilder(
       builder: (context, setDialogState) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Checkout Summary', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text('Checkout Summary', style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1294,12 +1303,12 @@ void _showCheckoutDialog(BuildContext context, ServiceEntity item, double basePr
             Text(item.title, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 8),
             Text(item.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textDisabled, fontSize: 11)),
-            const Divider(height: 32, color: Colors.white10),
+            Divider(height: 32, color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.1)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Service Price', style: TextStyle(color: Colors.white70)),
-                Text('Rs. ${basePrice.toStringAsFixed(0)}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                Text('Service Price', style: TextStyle(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.7))),
+                Text('Rs. ${basePrice.toStringAsFixed(0)}', style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontWeight: FontWeight.bold)),
               ],
             ),
             if (discountPercent > 0) ...[
@@ -1315,7 +1324,7 @@ void _showCheckoutDialog(BuildContext context, ServiceEntity item, double basePr
             const SizedBox(height: 16),
             TextField(
               controller: promoController,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+              style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontSize: 13),
               decoration: InputDecoration(
                 hintText: 'Enter Promo Code',
                 suffixIcon: IconButton(
@@ -1343,11 +1352,11 @@ void _showCheckoutDialog(BuildContext context, ServiceEntity item, double basePr
                 ),
               ),
             ),
-            const Divider(height: 32, color: Colors.white10),
+            Divider(height: 32, color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.1)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('TOTAL PAYABLE', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                Text('TOTAL PAYABLE', style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontWeight: FontWeight.bold)),
                 Text('Rs. ${finalPrice.toStringAsFixed(0)}', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 22)),
               ],
             ),

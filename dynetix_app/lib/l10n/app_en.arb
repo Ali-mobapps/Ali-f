@@ -1,0 +1,20 @@
+{
+  "appTitle": "Dynetix App",
+  "welcomeBack": "Welcome Back",
+  "login": "Login",
+  "signUp": "Sign Up",
+  "email": "Email Address",
+  "password": "Password",
+  "forgotPassword": "Forgot Password?",
+  "services": "Services",
+  "skills": "Skills",
+  "chat": "Chat",
+  "projects": "Projects",
+  "payments": "Payments",
+  "profile": "Profile",
+  "logout": "Logout",
+  "enrollNow": "Enroll Now",
+  "bookNow": "Book Now",
+  "message": "Message",
+  "home": "Home"
+}

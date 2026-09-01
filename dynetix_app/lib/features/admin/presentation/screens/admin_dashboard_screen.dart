@@ -227,9 +227,9 @@ class _InsightsDashboard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Business Intelligence',
+                    Text('Business Intelligence',
                         style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.getOnBackgroundColor(context),
                             fontSize: 24,
                             fontWeight: FontWeight.bold)),
                     const Text('Real-time performance metrics.',
@@ -258,7 +258,7 @@ class _InsightsDashboard extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           Text(CurrencyCubit.of(context).formatPrice(totalEarnings),
-                              style: const TextStyle(color: Colors.white,
+                              style: TextStyle(color: AppColors.getOnBackgroundColor(context),
                                   fontSize: 36,
                                   fontWeight: FontWeight.w900)),
                           const SizedBox(height: 4),
@@ -274,20 +274,20 @@ class _InsightsDashboard extends StatelessWidget {
                     // Stats Grid
                     Row(
                       children: [
-                        _buildStatCard('Total Projects', totalOrders.toString(),
+                        _buildStatCard(context, 'Total Projects', totalOrders.toString(),
                             Icons.assignment_rounded, Colors.blueAccent),
                         const SizedBox(width: 16),
-                        _buildStatCard('Active Jobs', activeOrders.toString(),
+                        _buildStatCard(context, 'Active Jobs', activeOrders.toString(),
                             Icons.bolt_rounded, Colors.orangeAccent),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        _buildStatCard('Completed', completedOrders.toString(),
+                        _buildStatCard(context, 'Completed', completedOrders.toString(),
                             Icons.check_circle_rounded, AppColors.success),
                         const SizedBox(width: 16),
-                        _buildStatCard('Services', totalServices.toString(),
+                        _buildStatCard(context, 'Services', totalServices.toString(),
                             Icons.layers_rounded, Colors.purpleAccent),
                       ],
                     ),
@@ -296,9 +296,9 @@ class _InsightsDashboard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                             'Project Status Distribution', style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.getOnBackgroundColor(context),
                             fontSize: 16,
                             fontWeight: FontWeight.bold)),
                         TextButton.icon(
@@ -320,27 +320,27 @@ class _InsightsDashboard extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     _buildDistributionBar(
-                        'Completed', completedOrders, totalOrders,
+                        context, 'Completed', completedOrders, totalOrders,
                         AppColors.success),
                     _buildDistributionBar(
-                        'In Progress', activeOrders, totalOrders,
+                        context, 'In Progress', activeOrders, totalOrders,
                         Colors.blueAccent),
                     _buildDistributionBar(
-                        'Pending', totalOrders - activeOrders - completedOrders,
+                        context, 'Pending', totalOrders - activeOrders - completedOrders,
                         totalOrders, Colors.grey),
 
                     const SizedBox(height: 48),
-                    const Text('Performance Analytics', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text('Performance Analytics', style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontSize: 18, fontWeight: FontWeight.bold)),
                     const Text('Financial and service growth trends.', style: TextStyle(color: AppColors.textDisabled, fontSize: 12)),
                     const SizedBox(height: 24),
                     
                     // Monthly Revenue Line Chart
-                    _buildRevenueLineChart(orderState),
+                    _buildRevenueLineChart(context, orderState),
                     
                     const SizedBox(height: 32),
                     
                     // Service Popularity Pie Chart
-                    _buildServicePopularityChart(orderState),
+                    _buildServicePopularityChart(context, orderState),
                     
                     const SizedBox(height: 100),
                   ],
@@ -353,7 +353,7 @@ class _InsightsDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildRevenueLineChart(OrdersState state) {
+  Widget _buildRevenueLineChart(BuildContext context, OrdersState state) {
     if (state is! OrdersLoaded || state.orders.isEmpty) {
       return const SizedBox();
     }
@@ -392,7 +392,7 @@ class _InsightsDashboard extends StatelessWidget {
                       getTitlesWidget: (value, meta) {
                         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                         if (value >= 1 && value <= 12) {
-                          return Text(months[value.toInt() - 1], style: const TextStyle(color: Colors.white24, fontSize: 10));
+                          return Text(months[value.toInt() - 1], style: TextStyle(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.24), fontSize: 10));
                         }
                         return const Text('');
                       },
@@ -422,7 +422,7 @@ class _InsightsDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildServicePopularityChart(OrdersState state) {
+  Widget _buildServicePopularityChart(BuildContext context, OrdersState state) {
     if (state is! OrdersLoaded || state.orders.isEmpty) {
       return const SizedBox();
     }
@@ -443,7 +443,7 @@ class _InsightsDashboard extends StatelessWidget {
         value: count.toDouble(),
         title: '${(count / state.orders.length * 100).toStringAsFixed(0)}%',
         radius: 50,
-        titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+        titleStyle: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.getOnBackgroundColor(context)),
       ));
       colorIndex++;
     });
@@ -474,7 +474,7 @@ class _InsightsDashboard extends StatelessWidget {
                         children: [
                           Container(width: 8, height: 8, decoration: BoxDecoration(shape: BoxShape.circle, color: colors[index % colors.length])),
                           const SizedBox(width: 8),
-                          Expanded(child: Text(e.key, style: const TextStyle(color: Colors.white70, fontSize: 10), overflow: TextOverflow.ellipsis)),
+                          Expanded(child: Text(e.key, style: TextStyle(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.7), fontSize: 10), overflow: TextOverflow.ellipsis)),
                         ],
                       ),
                     );
@@ -488,7 +488,7 @@ class _InsightsDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon,
+  Widget _buildStatCard(BuildContext context, String title, String value, IconData icon,
       Color color) {
     return Expanded(
       child: GlassPanel(
@@ -498,7 +498,7 @@ class _InsightsDashboard extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 24),
             const SizedBox(height: 16),
-            Text(value, style: const TextStyle(color: Colors.white,
+            Text(value, style: TextStyle(color: AppColors.getOnBackgroundColor(context),
                 fontSize: 24,
                 fontWeight: FontWeight.bold)),
             Text(title, style: const TextStyle(
@@ -509,7 +509,7 @@ class _InsightsDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildDistributionBar(String label, int count, int total,
+  Widget _buildDistributionBar(BuildContext context, String label, int count, int total,
       Color color) {
     double percentage = total > 0 ? (count / total) : 0;
     return Container(
@@ -520,7 +520,7 @@ class _InsightsDashboard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(label,
-                  style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                  style: TextStyle(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.7), fontSize: 12)),
               Text('$count', style: TextStyle(
                   color: color, fontWeight: FontWeight.bold, fontSize: 12)),
             ],
@@ -530,7 +530,7 @@ class _InsightsDashboard extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: percentage,
-              backgroundColor: Colors.white10,
+              backgroundColor: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.1),
               valueColor: AlwaysStoppedAnimation<Color>(color),
               minHeight: 6,
             ),
@@ -709,8 +709,8 @@ class _OrdersDashboard extends StatelessWidget {
                 const Icon(Icons.wifi_off_rounded,
                     size: 48, color: Colors.redAccent),
                 const SizedBox(height: 16),
-                const Text('Realtime connection issues.',
-                    style: TextStyle(color: Colors.white)),
+                Text('Realtime connection issues.',
+                    style: TextStyle(color: AppColors.getOnBackgroundColor(context))),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Text(state.message,
@@ -743,18 +743,18 @@ class _OrdersDashboard extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildEarningsHeader(totalEarnings),
+            _buildEarningsHeader(context, totalEarnings),
             Padding(
               padding: const EdgeInsets.symmetric(
                   horizontal: 24.0, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Project Tracking',
+                  Text('Project Tracking',
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white)),
+                          color: AppColors.getOnBackgroundColor(context))),
                   Row(
                     children: [
                       IconButton(
@@ -802,7 +802,7 @@ class _OrdersDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildEarningsHeader(double total) {
+  Widget _buildEarningsHeader(BuildContext context, double total) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.all(20),
@@ -824,8 +824,8 @@ class _OrdersDashboard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Rs. ${total.toStringAsFixed(2)}',
-              style: const TextStyle(
-                  color: Colors.white,
+              style: TextStyle(
+                  color: AppColors.getOnBackgroundColor(context),
                   fontSize: 32,
                   fontWeight: FontWeight.w900),
             ),
@@ -869,8 +869,8 @@ class _OrdersDashboard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(order.serviceTitle,
-                          style: const TextStyle(
-                              color: Colors.white,
+                          style: TextStyle(
+                              color: AppColors.getOnBackgroundColor(context),
                               fontWeight: FontWeight.bold,
                               fontSize: 16)),
                       Text('Order ID: ${order.id.substring(0, 8)}',
@@ -939,7 +939,7 @@ class _OrdersDashboard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            const Divider(color: Colors.white10),
+            Divider(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.1)),
             const SizedBox(height: 12),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -988,8 +988,8 @@ class _OrdersDashboard extends StatelessWidget {
       builder: (context) =>
           AlertDialog(
             backgroundColor: AppColors.surface,
-            title: const Text(
-                'Delete Order', style: TextStyle(color: Colors.white)),
+            title: Text(
+                'Delete Order', style: TextStyle(color: AppColors.getOnBackgroundColor(context))),
             content: Text(
                 'Are you sure you want to delete the order for "${order
                     .serviceTitle}"?',
@@ -1002,19 +1002,25 @@ class _OrdersDashboard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.redAccent),
                 onPressed: () async {
+                  final ordersCubit = context.read<OrdersCubit>();
+                  final inquiriesCubit = context.read<InquiriesCubit>();
+                  final navigator = Navigator.of(context);
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+
                   // Delete from database
-                  await context.read<OrdersCubit>().deleteOrder(order.id);
-                  if (context.mounted) {
-                    // Permanent Deletion: Remove related support history for this user
-                    await context.read<InquiriesCubit>().clearChat(
-                        'global_support', userId: order.customerId,
-                        role: 'admin');
-                    Navigator.of(context).pop();
-                    // Force a fresh stream to update the whole UI (including Insights)
-                    context.read<OrdersCubit>().watchAllOrders();
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('Order permanently removed')));
-                  }
+                  await ordersCubit.deleteOrder(order.id);
+                  
+                  // Permanent Deletion: Remove related support history for this user
+                  await inquiriesCubit.clearChat(
+                      'global_support', userId: order.customerId,
+                      role: 'admin');
+                  
+                  navigator.pop();
+                  
+                  // Force a fresh stream to update the whole UI (including Insights)
+                  ordersCubit.watchAllOrders();
+                  scaffoldMessenger.showSnackBar(const SnackBar(
+                      content: Text('Order permanently removed')));
                 },
                 child: const Text('Delete'),
               ),
@@ -1029,7 +1035,7 @@ class _OrdersDashboard extends StatelessWidget {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           backgroundColor: AppColors.surface,
-          title: const Text('Project Deliverables', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          title: Text('Project Deliverables', style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontSize: 18, fontWeight: FontWeight.bold)),
           content: SizedBox(
             width: double.maxFinite,
             child: Column(
@@ -1050,11 +1056,11 @@ class _OrdersDashboard extends StatelessWidget {
                         final name = url.split('/').last.split('?').first;
                         return Container(
                           margin: const EdgeInsets.only(bottom: 8),
-                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12)),
+                          decoration: BoxDecoration(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12)),
                           child: ListTile(
                             dense: true,
                             leading: const Icon(Icons.insert_drive_file_rounded, color: AppColors.primary, size: 20),
-                            title: Text(name, style: const TextStyle(color: Colors.white, fontSize: 12), overflow: TextOverflow.ellipsis),
+                            title: Text(name, style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontSize: 12), overflow: TextOverflow.ellipsis),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
                               onPressed: () {
@@ -1073,7 +1079,11 @@ class _OrdersDashboard extends StatelessWidget {
                 DynetixButton(
                   text: 'UPLOAD NEW FILE',
                   icon: Icons.cloud_upload_rounded,
-                  onPressed: () async {
+                onPressed: () async {
+                    final ordersCubit = context.read<OrdersCubit>();
+                    final scaffoldMessenger = ScaffoldMessenger.of(context);
+                    final navigator = Navigator.of(context);
+
                     FilePickerResult? result = await FilePicker.platform.pickFiles();
                     if (result != null) {
                       final platformFile = result.files.single;
@@ -1085,10 +1095,10 @@ class _OrdersDashboard extends StatelessWidget {
                       }
                       
                       if (context.mounted) {
-                        Navigator.pop(context); // Close dialog while uploading
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Uploading file...')));
+                        navigator.pop(); // Close dialog while uploading
+                        scaffoldMessenger.showSnackBar(const SnackBar(content: Text('Uploading file...')));
                       }
-                      await context.read<OrdersCubit>().uploadDeliverable(order.id, fileToUpload, platformFile.name, order.deliverables);
+                      await ordersCubit.uploadDeliverable(order.id, fileToUpload, platformFile.name, order.deliverables);
                     }
                   },
                 ),
@@ -1118,8 +1128,8 @@ class _OrdersDashboard extends StatelessWidget {
             builder: (context, setDialogState) =>
                 AlertDialog(
                   backgroundColor: AppColors.surface,
-                  title: const Text('Manual Order Entry',
-                      style: TextStyle(color: Colors.white)),
+                  title: Text('Manual Order Entry',
+                      style: TextStyle(color: AppColors.getOnBackgroundColor(context))),
                   content: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -1137,8 +1147,8 @@ class _OrdersDashboard extends StatelessWidget {
                             items: servicesState.services.map((s) =>
                                 DropdownMenuItem(
                                   value: s,
-                                  child: Text(s.title, style: const TextStyle(
-                                      color: Colors.white, fontSize: 13),
+                                  child: Text(s.title, style: TextStyle(
+                                      color: AppColors.getOnBackgroundColor(context), fontSize: 13),
                                       overflow: TextOverflow.ellipsis),
                                 )).toList(),
                             onChanged: (val) {
@@ -1152,7 +1162,7 @@ class _OrdersDashboard extends StatelessWidget {
                         const SizedBox(height: 16),
                         TextField(
                           controller: customerIdController,
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: AppColors.getOnBackgroundColor(context)),
                           decoration: const InputDecoration(
                               labelText: 'Customer ID (UUID)',
                               hintText: 'Copy from Supabase Users'),
@@ -1160,7 +1170,7 @@ class _OrdersDashboard extends StatelessWidget {
                         const SizedBox(height: 16),
                         TextField(
                           controller: priceController,
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: AppColors.getOnBackgroundColor(context)),
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
                               labelText: 'Custom Price (Rs.)'),
@@ -1223,8 +1233,8 @@ class _OrdersDashboard extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: isCurrent
               ? AppColors.primary
-              : (color ?? Colors.white.withValues(alpha: 0.05)),
-          foregroundColor: isCurrent ? Colors.black : (color ?? Colors.white70),
+              : (color ?? AppColors.getOnBackgroundColor(context).withValues(alpha: 0.05)),
+          foregroundColor: isCurrent ? Colors.black : (color ?? AppColors.getOnBackgroundColor(context).withValues(alpha: 0.7)),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           minimumSize: const Size(0, 40),
           // Fix: Prevent infinite width crash in horizontal Row
@@ -1274,9 +1284,9 @@ class _PaymentsDashboard extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(method.name, style: const TextStyle(
+                                  Text(method.name, style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white)),
+                                      color: AppColors.getOnBackgroundColor(context))),
                                   Text(method.accountNumber,
                                       style: const TextStyle(
                                           color: AppColors.textDisabled,
@@ -1298,9 +1308,9 @@ class _PaymentsDashboard extends StatelessWidget {
                                   builder: (context) =>
                                       AlertDialog(
                                         backgroundColor: AppColors.surface,
-                                        title: const Text('Delete Method',
+                                        title: Text('Delete Method',
                                             style: TextStyle(
-                                                color: Colors.white)),
+                                                color: AppColors.getOnBackgroundColor(context))),
                                         content: const Text(
                                             'Are you sure you want to remove this payment method?',
                                             style: TextStyle(color: AppColors
@@ -1359,8 +1369,8 @@ class _CustomerMessagesDashboard extends StatelessWidget {
         }
         if (state is InquiriesLoaded) {
           if (state.inquiries.isEmpty) {
-            return const Center(child: Text('No customer inquiries yet.',
-                style: TextStyle(color: Colors.white54)));
+            return Center(child: Text('No customer inquiries yet.',
+                style: TextStyle(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.54))));
           }
 
           // Group by userId only to show one entry per customer (WhatsApp Style)
@@ -1383,9 +1393,9 @@ class _CustomerMessagesDashboard extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Conversations', style: TextStyle(fontSize: 24,
+                    Text('Conversations', style: TextStyle(fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white)),
+                        color: AppColors.getOnBackgroundColor(context))),
                     IconButton(
                       icon: const Icon(
                           Icons.delete_sweep_rounded, color: Colors.redAccent),
@@ -1466,8 +1476,8 @@ class _CustomerMessagesDashboard extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            title: Text(displayName, style: const TextStyle(
-                                color: Colors.white,
+                            title: Text(displayName, style: TextStyle(
+                                color: AppColors.getOnBackgroundColor(context),
                                 fontWeight: FontWeight.bold)),
                             subtitle: Text(
                               displayMessage,
@@ -1541,8 +1551,8 @@ class _CustomerMessagesDashboard extends StatelessWidget {
       builder: (context) =>
           AlertDialog(
             backgroundColor: AppColors.surface,
-            title: const Text(
-                'Delete Chat', style: TextStyle(color: Colors.white)),
+            title: Text(
+                'Delete Chat', style: TextStyle(color: AppColors.getOnBackgroundColor(context))),
             content: Text(
                 'Are you sure you want to delete the conversation with "$name"?',
                 style: const TextStyle(color: AppColors.textSecondary)),
@@ -1559,6 +1569,7 @@ class _CustomerMessagesDashboard extends StatelessWidget {
                     Navigator.of(context).pop();
                     // Refresh list with a slight delay for Supabase to propagate
                     Future.delayed(const Duration(milliseconds: 300), () {
+                      if (!context.mounted) return;
                       context.read<InquiriesCubit>().fetchInquiries('', true);
                     });
                   }
@@ -1576,8 +1587,8 @@ class _CustomerMessagesDashboard extends StatelessWidget {
       builder: (context) =>
           AlertDialog(
             backgroundColor: AppColors.surface,
-            title: const Text(
-                'Clear All Chats', style: TextStyle(color: Colors.white)),
+            title: Text(
+                'Clear All Chats', style: TextStyle(color: AppColors.getOnBackgroundColor(context))),
             content: const Text(
                 'This will permanently delete all customer conversations. Proceed?',
                 style: TextStyle(color: AppColors.textSecondary)),
@@ -1618,18 +1629,18 @@ class _ReviewsDashboard extends StatelessWidget {
         }
         if (state is rev_state.ReviewsLoaded) {
           if (state.reviews.isEmpty) {
-            return const Center(child: Text('No feedback received yet.',
-                style: TextStyle(color: Colors.white54)));
+            return Center(child: Text('No feedback received yet.',
+                style: TextStyle(color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.54))));
           }
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(24.0),
+              Padding(
+                padding: const EdgeInsets.all(24.0),
                 child: Text('Customer Feedback', style: TextStyle(fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white)),
+                    color: AppColors.getOnBackgroundColor(context))),
               ),
               Expanded(
                 child: ListView.builder(
@@ -1652,7 +1663,7 @@ class _ReviewsDashboard extends StatelessWidget {
                                       Icon(
                                           Icons.star_rounded,
                                           color: i < review.rating ? AppColors
-                                              .gold : Colors.white10,
+                                              .gold : AppColors.getOnBackgroundColor(context).withValues(alpha: 0.1),
                                           size: 16
                                       )),
                                 ),
@@ -1669,8 +1680,8 @@ class _ReviewsDashboard extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Text(review.comment, style: const TextStyle(
-                                color: Colors.white70, fontSize: 13)),
+                            Text(review.comment, style: TextStyle(
+                                color: AppColors.getOnBackgroundColor(context).withValues(alpha: 0.7), fontSize: 13)),
                             const SizedBox(height: 12),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1815,9 +1826,9 @@ class _AdminProfileDashboardState extends State<_AdminProfileDashboard> {
                 ),
               ),
               const SizedBox(height: 24),
-              Text(name, style: const TextStyle(fontSize: 22,
+              Text(name, style: TextStyle(fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white)),
+                  color: AppColors.getOnBackgroundColor(context))),
               Text(email,
                   style: const TextStyle(color: AppColors.textSecondary)),
               const SizedBox(height: 48),
@@ -1855,11 +1866,11 @@ class _AdminProfileDashboardState extends State<_AdminProfileDashboard> {
               ),
 
               const SizedBox(height: 32),
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text('Database Tools', style: TextStyle(fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white)),
+                    color: AppColors.getOnBackgroundColor(context))),
               ),
               const SizedBox(height: 16),
               DynetixButton(
@@ -1943,7 +1954,7 @@ class _AdminProfileDashboardState extends State<_AdminProfileDashboard> {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24)),
             leading: Icon(icon, color: AppColors.primary),
-            title: Text(title, style: const TextStyle(color: Colors.white)),
+            title: Text(title, style: TextStyle(color: AppColors.getOnBackgroundColor(context))),
             trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14,
                 color: AppColors.textDisabled),
           ),
@@ -2011,10 +2022,10 @@ Widget _buildAdminItemCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.title, style: const TextStyle(
+                Text(item.title, style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: Colors.white)),
+                    color: AppColors.getOnBackgroundColor(context))),
                 Row(
                   children: [
                     if (hasDiscount) ...[
@@ -2065,19 +2076,19 @@ void _showServiceDialog(BuildContext context,
         AlertDialog(
           backgroundColor: AppColors.surface,
           title: Text(service == null ? 'Add $type' : 'Edit $type',
-              style: const TextStyle(color: Colors.white)),
+              style: TextStyle(color: AppColors.getOnBackgroundColor(context))),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(controller: titleController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: AppColors.getOnBackgroundColor(context)),
                     decoration: const InputDecoration(labelText: 'Title')),
                 const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(child: TextField(controller: priceController,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: AppColors.getOnBackgroundColor(context)),
                         decoration: const InputDecoration(labelText: 'Price'),
                         keyboardType: TextInputType.number)),
                     const SizedBox(width: 12),
@@ -2091,16 +2102,16 @@ void _showServiceDialog(BuildContext context,
                 const SizedBox(height: 16),
                 TextField(
                     controller: portfolioController,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: TextStyle(color: AppColors.getOnBackgroundColor(context), fontSize: 13),
                     decoration: const InputDecoration(
                       labelText: 'Portfolio Image URLs',
                       hintText: 'Link1, Link2, Link3...',
-                      hintStyle: TextStyle(color: Colors.white24, fontSize: 11),
+                      hintStyle: TextStyle(color: AppColors.textDisabled, fontSize: 11),
                     )
                 ),
                 const SizedBox(height: 16),
                 TextField(controller: descController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: AppColors.getOnBackgroundColor(context)),
                     decoration: const InputDecoration(labelText: 'Description'),
                     maxLines: 3),
               ],
@@ -2149,24 +2160,24 @@ void _showPaymentDialog(BuildContext context, {PaymentMethodEntity? method}) {
     builder: (context) =>
         AlertDialog(
           backgroundColor: AppColors.surface,
-          title: const Text(
-              'Payment Method', style: TextStyle(color: Colors.white)),
+          title: Text(
+              'Payment Method', style: TextStyle(color: AppColors.getOnBackgroundColor(context))),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(controller: nameController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: AppColors.getOnBackgroundColor(context)),
                     decoration: const InputDecoration(
                         labelText: 'Provider Name (e.g. EasyPaisa)')),
                 const SizedBox(height: 16),
                 TextField(controller: numberController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: AppColors.getOnBackgroundColor(context)),
                     decoration: const InputDecoration(
                         labelText: 'Account Number')),
                 const SizedBox(height: 16),
                 TextField(controller: titleController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: AppColors.getOnBackgroundColor(context)),
                     decoration: const InputDecoration(
                         labelText: 'Account Title (Owner Name)')),
               ],

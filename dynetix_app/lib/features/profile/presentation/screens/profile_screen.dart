@@ -6,6 +6,8 @@ import '../../../../core/widgets/dynetix_widgets.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../bloc/profile_cubit.dart';
 import '../bloc/profile_state.dart';
+import '../../../../core/currency/currency_cubit.dart';
+import '../../../../core/l10n/language_cubit.dart';
 import 'edit_profile_screen.dart';
 import 'settings_features_screens.dart';
 import 'package:dynetix_app/features/support/presentation/screens/ai_assistant_screen.dart';
@@ -103,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           backgroundColor: AppColors.primary,
                           radius: 18,
                           child: IconButton(
-                            icon: const Icon(Icons.edit, size: 18, color: Colors.black),
+                            icon: const Icon(Icons.edit, size: 18, color: Colors.white),
                             onPressed: () {
                               Navigator.push(
                                 context,
@@ -127,7 +129,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white)),
+                      color: AppColors.textPrimary)),
               const SizedBox(height: 4),
               Container(
                 padding:
@@ -194,6 +196,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               _buildOption(
                 context,
+                Icons.language_rounded,
+                'Language Preference',
+                'Switch between English and Urdu',
+                onTap: () {
+                  context.read<LanguageCubit>().toggleLanguage();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Language changed to ${context.read<LanguageCubit>().state.languageCode == 'en' ? 'English' : 'Urdu'}'),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
+              ),
+              _buildOption(
+                context,
                 Icons.info_outline_rounded,
                 'About Dynetix',
                 'Version info and company details',
@@ -249,13 +266,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.03),
+                  color: AppColors.primary.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(10)),
               child: Icon(icon, color: AppColors.primary, size: 22),
             ),
             title: Text(title,
                 style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontSize: 15,
                     fontWeight: FontWeight.w500)),
             subtitle: Text(subtitle,
@@ -274,7 +291,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Logout', style: TextStyle(color: Colors.white)),
+        title: const Text('Logout', style: TextStyle(color: AppColors.textPrimary)),
         content: const Text('Are you sure you want to logout?',
             style: TextStyle(color: AppColors.textSecondary)),
         actions: [

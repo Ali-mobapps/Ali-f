@@ -9,6 +9,8 @@ import 'role_selection_screen.dart';
 import '../../../customer/presentation/screens/customer_dashboard_screen.dart';
 import '../../../admin/presentation/screens/admin_dashboard_screen.dart';
 
+import '../../../../core/l10n/language_cubit.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -76,9 +78,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'EXCELLENCE IN EVERY NODE',
-                  style: TextStyle(
+                Text(
+                  context.watch<LanguageCubit>().t('excellence'),
+                  style: const TextStyle(
                     fontSize: 10,
                     letterSpacing: 3,
                     color: AppColors.textDisabled,

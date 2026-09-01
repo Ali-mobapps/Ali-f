@@ -108,7 +108,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       backgroundColor: AppColors.primary,
                       radius: 20,
                       child: IconButton(
-                        icon: const Icon(Icons.camera_alt_rounded, size: 20, color: Colors.black),
+                        icon: const Icon(Icons.camera_alt_rounded, size: 20, color: Colors.white),
                         onPressed: _pickImage,
                       ),
                     ),
@@ -144,11 +144,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _selectedGender,
-                  hint: const Text('Identity Specification', style: TextStyle(color: Colors.white30, fontSize: 14)),
+                  hint: const Text('Identity Specification', style: TextStyle(color: AppColors.textDisabled, fontSize: 14)),
                   dropdownColor: AppColors.surface,
                   isExpanded: true,
                   icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
-                  style: const TextStyle(color: Colors.white, fontSize: 15),
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
                   items: _genders.map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,

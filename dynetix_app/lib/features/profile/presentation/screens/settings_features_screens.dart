@@ -22,7 +22,7 @@ class ThemePreferencesScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Visual Identity', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Visual Identity', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             const Text('Choose your preferred visual mode for the application.', style: TextStyle(color: AppColors.textDisabled, fontSize: 13)),
             const SizedBox(height: 32),
@@ -72,7 +72,7 @@ class ThemePreferencesScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: TextStyle(color: isSelected ? Colors.white : AppColors.textDisabled, fontWeight: FontWeight.bold)),
+                  Text(title, style: TextStyle(color: isSelected ? AppColors.textPrimary : AppColors.textDisabled, fontWeight: FontWeight.bold)),
                   Text(subtitle, style: const TextStyle(color: AppColors.textDisabled, fontSize: 11)),
                 ],
               ),
@@ -109,7 +109,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          const Text('Alert Preferences', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('Alert Preferences', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           const Text('Manage how you receive updates and messages.', style: TextStyle(color: AppColors.textDisabled, fontSize: 13)),
           const SizedBox(height: 32),
@@ -127,7 +127,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     return GlassPanel(
       padding: 8,
       child: SwitchListTile(
-        title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+        title: Text(title, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 15)),
         subtitle: Text(subtitle, style: const TextStyle(color: AppColors.textDisabled, fontSize: 11)),
         value: value,
         onChanged: onChanged,
@@ -156,7 +156,7 @@ class AboutDynetixScreen extends StatelessWidget {
           children: [
             const DynetixLogo(size: 100),
             const SizedBox(height: 24),
-            const Text('DYNETIX', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: 8, color: Colors.white)),
+            const Text('DYNETIX', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: 8, color: AppColors.textPrimary)),
             const Text('v1.0.0 Stable Build', style: TextStyle(color: AppColors.textDisabled, fontSize: 12)),
             const SizedBox(height: 48),
             const GlassPanel(
@@ -164,13 +164,13 @@ class AboutDynetixScreen extends StatelessWidget {
               child: Text(
                 'Dynetix is an elite professional solutions platform designed to bridge the gap between premium services and digital excellence. Our mission is to empower professionals and businesses with cutting-edge tools and services.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white, height: 1.6, fontSize: 14),
+                style: TextStyle(color: AppColors.textPrimary, height: 1.6, fontSize: 14),
               ),
             ),
             const SizedBox(height: 48),
             const Text('DEVELOPED BY', style: TextStyle(color: AppColors.textDisabled, fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            const Text('Dynetix Engineering Team', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            const Text('Dynetix Engineering Team', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
             const SizedBox(height: 64),
             TextButton(
               onPressed: () {},
@@ -202,7 +202,7 @@ class SystemSettingsScreen extends StatelessWidget {
         children: [
           const Text('General Configuration',
               style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold)),
           const SizedBox(height: 32),
@@ -250,13 +250,13 @@ class SystemSettingsScreen extends StatelessWidget {
           leading: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.03),
+                color: AppColors.primary.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(10)),
             child: Icon(icon, color: AppColors.primary, size: 22),
           ),
           title: Text(title,
               style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontSize: 15,
                   fontWeight: FontWeight.bold)),
           subtitle: Text(subtitle,
@@ -275,12 +275,12 @@ class SystemSettingsScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text(title, style: const TextStyle(color: Colors.white)),
+        title: Text(title, style: const TextStyle(color: AppColors.textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: options
               .map((opt) => ListTile(
-                    title: Text(opt, style: const TextStyle(color: Colors.white)),
+                    title: Text(opt, style: const TextStyle(color: AppColors.textPrimary)),
                     onTap: () {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -298,7 +298,7 @@ class SystemSettingsScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Clear Storage', style: TextStyle(color: Colors.white)),
+        title: const Text('Clear Storage', style: TextStyle(color: AppColors.textPrimary)),
         content: const Text('Do you want to clear app cache and local data?',
             style: TextStyle(color: AppColors.textSecondary)),
         actions: [

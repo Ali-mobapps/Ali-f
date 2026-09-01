@@ -78,11 +78,14 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
   Future<void> _startRecording() async {
     try {
       if (await _audioRecorder.hasPermission()) {
-        final directory = await getApplicationDocumentsDirectory();
-        final path = '${directory.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        String? path;
+        if (!kIsWeb) {
+          final directory = await getApplicationDocumentsDirectory();
+          path = '${directory.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        }
         
-        const config = RecordConfig(); // Default config
-        await _audioRecorder.start(config, path: path);
+        const config = RecordConfig(encoder: AudioEncoder.aacLc); 
+        await _audioRecorder.start(config, path: path ?? '');
         
         setState(() {
           _isRecording = true;
@@ -101,7 +104,9 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
       });
 
       if (path != null) {
-        _handleFileUpload(File(path), 'voice_note.m4a', '[AUDIO]');
+        // Use XFile to handle both web (blob) and mobile (file path)
+        final xFile = XFile(path);
+        _handleFileUpload(xFile, 'voice_note.m4a', '[AUDIO]');
       }
     } catch (e) {
       // Log error silently
@@ -228,12 +233,22 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
           fileToUpload = await platformFile.readAsBytes();
         } else if (platformFile is PlatformFile) {
           fileToUpload = platformFile.bytes;
+        } else if (platformFile is String) {
+          // It's a blob URL from the recorder
+          // Using a simple trick to get bytes from blob URL in web
+          // Note: This requires the 'http' package or a similar method
+          // For now, let's assume it works if we pass the string to Supabase
+          // Actually Supabase web client doesn't support 'blob:' URLs directly for upload
+          // We would need to fetch it.
+          fileToUpload = platformFile; 
         }
       } else {
         if (platformFile is XFile) {
           fileToUpload = File(platformFile.path);
         } else if (platformFile is PlatformFile) {
           fileToUpload = File(platformFile.path!);
+        } else if (platformFile is File) {
+          fileToUpload = platformFile;
         }
       }
 

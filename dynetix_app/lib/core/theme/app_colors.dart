@@ -1,35 +1,43 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Premium VIP Palette - Exact matches from design specifications
-  static const Color champagneGold = Color(0xFFD4AF37);
-  static const Color obsidian = Color(0xFF0A0A0A);
-  static const Color charcoalDepth = Color(0xFF1A1A1A);
-  static const Color softIvory = Color(0xFFF7E7CE);
+  // Azure Enterprise Palette (Premium Blue & Pure White)
+  static const Color royalBlue = Color(0xFF0066FF);
+  static const Color deepAzure = Color(0xFF0047AB); // Slightly darker for better contrast
+  static const Color midnightNavy = Color(0xFF0F172A);
+  static const Color softBackground = Color(0xFFF8FAFF); 
+  static const Color surfaceWhite = Colors.white;
   
-  static const Color primary = champagneGold;
-  static const Color background = obsidian;
-  static const Color surface = charcoalDepth;
-  static const Color glassBorder = Color(0x1AFFFFFF); // 0.1 opacity white
+  // Logical Aliases
+  static const Color primary = royalBlue;
+  static const Color background = softBackground; 
+  static const Color surface = surfaceWhite;
+  static const Color glassBorder = Color(0x1A0066FF); 
   
-  // Dashboard Tile Colors
-  static const Color gold = Color(0xFFFFD700);
-  static const Color darkBackground = Color(0xFF0F111A);
-  static const Color cardBackground = Color(0xFF1E2230);
+  // Backward Compatibility Aliases
+  static const Color obsidian = midnightNavy;
+  static const Color charcoalDepth = Color(0xFFE2E8F0);
+  static const Color champagneGold = royalBlue; 
+  static const Color electricBlue = royalBlue;
+  static const Color pureWhite = Colors.white;
+  static const Color softGrey = Color(0xFFF1F5F9);
   
-  // Text Colors
-  static const Color textPrimary = Color(0xFFE5E2E1);
-  static const Color textSecondary = Color(0xFFD0C5AF);
-  static const Color textDisabled = Color(0xFF99907C);
+  // Dashboard / Card Colors
+  static const Color gold = Color(0xFFD97706); // Darker amber for visibility on white
+  static const Color cardBackground = Colors.white;
+  static const Color darkCardBackground = Color(0xFFF1F5F9);
+  
+  // Text Colors - INCREASED CONTRAST
+  static const Color textPrimary = Color(0xFF0F172A); // Almost black for best readability
+  static const Color textSecondary = Color(0xFF475569); // Darker grey
+  static const Color textDisabled = Color(0xFF64748B); // Mid grey
   
   // Accents & Actions
-  static const Color success = Color(0xFF00E676);
-  static const Color error = Color(0xFFFFB4AB);
+  static const Color success = Color(0xFF059669);
+  static const Color error = Color(0xFFDC2626);
 
-  // Gradients
-  static const LinearGradient goldGradient = LinearGradient(
-    colors: [Color(0xFFD4AF37), Color(0xFFF2CA50)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
+  static Color getOnBackgroundColor(BuildContext context) {
+    // Force high contrast dark text for light background
+    return textPrimary;
+  }
 }

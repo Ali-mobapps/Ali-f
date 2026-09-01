@@ -41,20 +41,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 10),
-                    const Text('Join Dynetix', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
+                    const Text('Join Dynetix', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                     const Text('Become part of the elite professional network.', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                     const SizedBox(height: 48),
                     _buildLabel('Full Name'),
                     TextField(
                       controller: nameController,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: AppColors.textPrimary),
                       decoration: const InputDecoration(hintText: 'John Doe', prefixIcon: Icon(Icons.person_outline_rounded, size: 20)),
                     ),
                     const SizedBox(height: 24),
                     _buildLabel('Email Address'),
                     TextField(
                       controller: emailController,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: AppColors.textPrimary),
                       decoration: const InputDecoration(hintText: 'john@example.com', prefixIcon: Icon(Icons.mail_outline_rounded, size: 20)),
                     ),
                     const SizedBox(height: 24),
@@ -62,7 +62,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     TextField(
                       controller: passwordController,
                       obscureText: !_isPasswordVisible,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: AppColors.textPrimary),
                       decoration: InputDecoration(
                         hintText: '••••••••',
                         prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),

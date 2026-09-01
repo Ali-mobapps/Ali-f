@@ -61,12 +61,12 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Sign In', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                              const Text('Sign In', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                               const SizedBox(height: 32),
                               _buildLabel('Email Address'),
                               TextField(
                                 controller: emailController,
-                                style: const TextStyle(color: Colors.white, fontSize: 15),
+                                style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
                                 decoration: const InputDecoration(hintText: 'Enter Admin Email', prefixIcon: Icon(Icons.alternate_email_rounded, size: 20)),
                               ),
                               const SizedBox(height: 32),
@@ -74,7 +74,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                               TextField(
                                 controller: passwordController,
                                 obscureText: !_isPasswordVisible,
-                                style: const TextStyle(color: Colors.white, fontSize: 15),
+                                style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
                                 decoration: InputDecoration(
                                   hintText: '••••••••',
                                   prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),

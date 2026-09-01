@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -151,10 +152,11 @@ class InquiriesRepositoryImpl implements InquiriesRepository {
       final String path = 'chat_attachments/${DateTime.now().millisecondsSinceEpoch}_$fileName';
       
       if (file is List<int>) {
-        // Handle bytes (Web/Mobile)
         await _supabase.storage.from('chat').uploadBinary(path, Uint8List.fromList(file));
+      } else if (file is File) {
+        await _supabase.storage.from('chat').upload(path, file);
       } else {
-        // Handle File object (Mobile)
+        // Fallback for other types
         await _supabase.storage.from('chat').upload(path, file);
       }
 

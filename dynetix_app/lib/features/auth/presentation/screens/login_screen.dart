@@ -55,13 +55,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 20),
                         const DynetixLogo(size: 80, showGlow: true),
                         const SizedBox(height: 32),
-                        const Text('Welcome Back', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
+                        const Text('Welcome Back', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                         const Text('Continue your professional elite journey.', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                         const SizedBox(height: 48),
                         _buildLabel('Email Address'),
                         TextField(
                           controller: emailController,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: AppColors.textPrimary),
                           decoration: const InputDecoration(hintText: 'john.doe@example.com', prefixIcon: Icon(Icons.mail_outline_rounded, size: 20)),
                         ),
                         const SizedBox(height: 24),
@@ -69,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         TextField(
                           controller: passwordController,
                           obscureText: !_isPasswordVisible,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: AppColors.textPrimary),
                           decoration: InputDecoration(
                             hintText: '••••••••',
                             prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
@@ -147,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Reset Password', style: TextStyle(color: Colors.white)),
+        title: const Text('Reset Password', style: TextStyle(color: AppColors.textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -155,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 20),
             TextField(
               controller: resetEmailController,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.textPrimary),
               decoration: const InputDecoration(hintText: 'Email Address'),
             ),
           ],

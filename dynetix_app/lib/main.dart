@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/theme/bloc/theme_cubit.dart';
 import 'core/currency/currency_cubit.dart';
+import 'core/l10n/language_cubit.dart';
 import 'features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/presentation/bloc/auth_cubit.dart';
@@ -32,7 +34,7 @@ void main() async {
 
   await Supabase.initialize(
     url: 'https://sqoaobghpkfjcgghalgs.supabase.co',
-    anonKey:
+    publishableKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxb2FvYmdocGtmamNnZ2hhbGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwODkxNDgsImV4cCI6MjEwMTY2NTE0OH0.qJ1cvkhSRm9-64CYG8cGyylEL6npYRGuGS0ST2SDeKk',
   );
 
@@ -73,24 +75,41 @@ class MyApp extends StatelessWidget {
         BlocProvider<CurrencyCubit>(
           create: (context) => CurrencyCubit(),
         ),
+        BlocProvider<LanguageCubit>(
+          create: (context) => LanguageCubit(),
+        ),
       ],
-      child: BlocBuilder<ThemeCubit, ThemeMode>(
-        builder: (context, mode) {
-          return MaterialApp(
-            title: 'Dynetix App',
-            debugShowCheckedModeBanner: false,
-            themeMode: mode,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            home: const SplashScreen(),
-            routes: {
-              '/role-selection': (context) => const RoleSelectionScreen(),
-              '/login': (context) => const LoginScreen(),
-              '/signup': (context) => const SignUpScreen(),
-              '/admin-login': (context) => const AdminLoginScreen(),
-              '/admin-dashboard': (context) => const AdminDashboardScreen(),
-              '/customer-dashboard': (context) =>
-                  const CustomerDashboardScreen(),
+      child: BlocBuilder<LanguageCubit, Locale>(
+        builder: (context, locale) {
+          return BlocBuilder<ThemeCubit, ThemeMode>(
+            builder: (context, mode) {
+              return MaterialApp(
+                title: 'Dynetix App',
+                debugShowCheckedModeBanner: false,
+                themeMode: mode,
+                theme: AppTheme.lightTheme,
+                darkTheme: AppTheme.darkTheme,
+                locale: locale,
+                localizationsDelegates: const [
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('en'),
+                  Locale('ur'),
+                ],
+                home: const SplashScreen(),
+                routes: {
+                  '/role-selection': (context) => const RoleSelectionScreen(),
+                  '/login': (context) => const LoginScreen(),
+                  '/signup': (context) => const SignUpScreen(),
+                  '/admin-login': (context) => const AdminLoginScreen(),
+                  '/admin-dashboard': (context) => const AdminDashboardScreen(),
+                  '/customer-dashboard': (context) =>
+                      const CustomerDashboardScreen(),
+                },
+              );
             },
           );
         },

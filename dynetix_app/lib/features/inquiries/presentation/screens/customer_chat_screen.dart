@@ -24,7 +24,7 @@ class _CustomerChatScreenState extends State<CustomerChatScreen> {
             const Text('Dynetix Support • Online', style: TextStyle(fontSize: 10, color: AppColors.success)),
           ],
         ),
-        backgroundColor: AppColors.charcoalDepth,
+        backgroundColor: AppColors.surface,
       ),
       body: Column(
         children: [
@@ -62,7 +62,7 @@ class _CustomerChatScreenState extends State<CustomerChatScreen> {
         ),
         child: Text(
           text,
-          style: TextStyle(color: isMe ? Colors.black : Colors.white, fontSize: 14, height: 1.4),
+          style: TextStyle(color: isMe ? Colors.white : AppColors.textPrimary, fontSize: 14, height: 1.4),
         ),
       ),
     );
@@ -78,10 +78,10 @@ class _CustomerChatScreenState extends State<CustomerChatScreen> {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(30)),
+                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(30)),
                 child: TextField(
                   controller: _msgController,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
                   decoration: const InputDecoration(
                     hintText: 'Message support...',
                     border: InputBorder.none,
@@ -99,7 +99,7 @@ class _CustomerChatScreenState extends State<CustomerChatScreen> {
                 height: 48,
                 width: 48,
                 decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                child: const Icon(Icons.send_rounded, color: Colors.black, size: 20),
+                child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
               ),
             ),
           ],
