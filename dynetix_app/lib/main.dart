@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/theme/bloc/theme_cubit.dart';
 import 'core/currency/currency_cubit.dart';
 import 'core/l10n/language_cubit.dart';
+import 'core/notifications/notification_service.dart';
+import 'core/services/deeplink_service.dart';
+import 'core/services/offline_service.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/presentation/bloc/auth_cubit.dart';
@@ -28,18 +33,37 @@ import 'features/profile/data/repositories/profile_repository_impl.dart';
 import 'features/profile/presentation/bloc/profile_cubit.dart';
 import 'features/services/data/repositories/services_repository_impl.dart';
 import 'features/services/presentation/bloc/services_cubit.dart';
+import 'features/notifications/data/announcement_repository.dart';
+import 'features/notifications/presentation/bloc/announcement_cubit.dart';
+import 'features/notifications/presentation/screens/announcements_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await OfflineService.initialize();
 
+  // 1. Initialize Supabase first (NotificationService depends on it)
   await Supabase.initialize(
     url: 'https://sqoaobghpkfjcgghalgs.supabase.co',
     publishableKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxb2FvYmdocGtmamNnZ2hhbGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwODkxNDgsImV4cCI6MjEwMTY2NTE0OH0.qJ1cvkhSRm9-64CYG8cGyylEL6npYRGuGS0ST2SDeKk',
   );
 
+  // 2. Initialize Firebase and Notifications
+  try {
+    await Firebase.initializeApp();
+    await NotificationService.initialize();
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+  }
+
+  // 3. Initialize Deep Linking
+  DeepLinkService.initialize();
+
   runApp(const MyApp());
 }
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -78,6 +102,9 @@ class MyApp extends StatelessWidget {
         BlocProvider<LanguageCubit>(
           create: (context) => LanguageCubit(),
         ),
+        BlocProvider<AnnouncementCubit>(
+          create: (context) => AnnouncementCubit(AnnouncementRepository()),
+        ),
       ],
       child: BlocBuilder<LanguageCubit, Locale>(
         builder: (context, locale) {
@@ -85,6 +112,7 @@ class MyApp extends StatelessWidget {
             builder: (context, mode) {
               return MaterialApp(
                 title: 'Dynetix App',
+                navigatorKey: navigatorKey,
                 debugShowCheckedModeBanner: false,
                 themeMode: mode,
                 theme: AppTheme.lightTheme,
@@ -108,6 +136,7 @@ class MyApp extends StatelessWidget {
                   '/admin-dashboard': (context) => const AdminDashboardScreen(),
                   '/customer-dashboard': (context) =>
                       const CustomerDashboardScreen(),
+                  '/announcements': (context) => const AnnouncementsScreen(),
                 },
               );
             },

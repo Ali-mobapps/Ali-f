@@ -73,6 +73,26 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> updatePassword(String newPassword) async {
+    await _supabase.auth.updateUser(
+      UserAttributes(password: newPassword),
+    );
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId != null) {
+      // 1. Delete user record from public.users table
+      await _supabase.from('users').delete().eq('id', userId);
+      // 2. Note: Supabase auth user deletion usually requires admin privileges 
+      // or an edge function. For now, we sign out and inform user.
+      // In production, you would call an edge function here.
+      await _supabase.auth.signOut();
+    }
+  }
+
+  @override
   Future<UserEntity?> getCurrentUser() async {
     final user = _supabase.auth.currentUser;
     if (user == null) return null;
@@ -85,7 +105,7 @@ class AuthRepositoryImpl implements AuthRepository {
       
       if (data.isEmpty) {
         // Automatically set 'admin' role for your specific admin email
-        final isMasterAdmin = email.toLowerCase() == 'admin@dynetix.com';
+        final isMasterAdmin = email.toLowerCase() == 'info@dynetixhub.com';
         
         final defaultData = {
           'id': id,
@@ -106,7 +126,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return UserModel(
         id: id, 
         email: email, 
-        role: email.toLowerCase() == 'admin@dynetix.com' ? 'admin' : 'customer',
+        role: email.toLowerCase() == 'info@dynetixhub.com' ? 'admin' : 'customer',
         name: email.split('@').first
       );
     }

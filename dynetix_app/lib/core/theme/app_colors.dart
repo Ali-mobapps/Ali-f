@@ -5,7 +5,7 @@ class AppColors {
   static const Color royalBlue = Color(0xFF0066FF);
   static const Color deepAzure = Color(0xFF0047AB); // Slightly darker for better contrast
   static const Color midnightNavy = Color(0xFF0F172A);
-  static const Color softBackground = Color(0xFFF8FAFF); 
+  static const Color softBackground = Colors.white; 
   static const Color surfaceWhite = Colors.white;
   
   // Logical Aliases

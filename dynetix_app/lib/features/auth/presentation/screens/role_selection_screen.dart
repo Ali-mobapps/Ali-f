@@ -54,7 +54,7 @@ class RoleSelectionScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Software house Veahri',
+                      'Software company',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         letterSpacing: 2,
                         color: AppColors.textSecondary,

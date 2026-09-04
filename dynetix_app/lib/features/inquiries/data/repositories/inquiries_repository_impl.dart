@@ -130,6 +130,12 @@ class InquiriesRepositoryImpl implements InquiriesRepository {
   }
 
   @override
+  Future<void> deleteAllInquiries() async {
+    // This will clear the entire inquiries table for Admin
+    await _supabase.from('inquiries').delete().neq('id', '0'); 
+  }
+
+  @override
   Future<void> deleteInquiriesByItem(String itemId, {String? userId, required String role}) async {
     if (role == 'admin') {
       // Admin deletes permanently all messages for this user (WhatsApp Thread style)

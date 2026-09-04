@@ -34,6 +34,9 @@ import '../../../profile/presentation/bloc/profile_cubit.dart';
 import '../../../profile/presentation/bloc/profile_state.dart' as profile_state;
 import '../../../profile/presentation/screens/edit_profile_screen.dart';
 import '../../../profile/presentation/screens/settings_features_screens.dart';
+import '../../../notifications/presentation/bloc/announcement_cubit.dart';
+import '../../../../core/notifications/notification_service.dart';
+import '../../../../core/services/pdf_service.dart';
 
 // Mapping icons for services
 IconData _getServiceIcon(String title, String type) {
@@ -925,6 +928,16 @@ class _OrdersDashboard extends StatelessWidget {
                             fontSize: 11,
                             fontWeight: FontWeight.bold)),
                   ),
+                TextButton.icon(
+                  onPressed: () => PdfService.generateInvoice(order),
+                  icon: const Icon(Icons.receipt_long_rounded,
+                      color: Colors.blueAccent, size: 18),
+                  label: const Text('INVOICE',
+                      style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold)),
+                ),
                 const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: () => _showDeliverablesDialog(context, order),
@@ -1112,8 +1125,96 @@ class _OrdersDashboard extends StatelessWidget {
       ),
     );
   }
+}
 
-  void _showAddOrderDialog(BuildContext context) {
+void _showBroadcastDialog(BuildContext context) {
+  final titleController = TextEditingController();
+  final contentController = TextEditingController();
+  String selectedType = 'global';
+
+  showDialog(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setDialogState) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Broadcast Announcement', 
+            style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  labelText: 'Headline', 
+                  labelStyle: const TextStyle(color: AppColors.textSecondary),
+                  hintText: 'e.g. New Course Launch!',
+                  hintStyle: TextStyle(color: AppColors.textDisabled.withValues(alpha: 0.5)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: contentController,
+                style: const TextStyle(color: AppColors.textPrimary),
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: 'Details', 
+                  labelStyle: const TextStyle(color: AppColors.textSecondary),
+                  hintText: 'Enter announcement message...',
+                  hintStyle: TextStyle(color: AppColors.textDisabled.withValues(alpha: 0.5)),
+                ),
+              ),
+              const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                initialValue: selectedType,
+                dropdownColor: AppColors.surface,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: const InputDecoration(
+                  labelText: 'Target Audience',
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'global', child: Text('All Users', style: TextStyle(color: AppColors.textPrimary))),
+                  DropdownMenuItem(value: 'enrolled', child: Text('Enrolled Students Only', style: TextStyle(color: AppColors.textPrimary))),
+                ],
+                onChanged: (val) => setDialogState(() => selectedType = val!),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL')),
+          ElevatedButton(
+            onPressed: () {
+              if (titleController.text.isNotEmpty && contentController.text.isNotEmpty) {
+                final title = titleController.text.trim();
+                final body = contentController.text.trim();
+                
+                context.read<AnnouncementCubit>().broadcast(
+                  title,
+                  body,
+                  selectedType,
+                );
+                
+                // Trigger Real Push Notification
+                NotificationService.sendNotificationToAll(title: title, body: body);
+                
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Announcement broadcasted and notifications sent!'), backgroundColor: AppColors.success),
+                );
+              }
+            },
+            child: const Text('BROADCAST'),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+void _showAddOrderDialog(BuildContext context) {
     final servicesState = context
         .read<ServicesCubit>()
         .state;
@@ -1247,7 +1348,6 @@ class _OrdersDashboard extends StatelessWidget {
       ),
     );
   }
-}
 
 class _PaymentsDashboard extends StatelessWidget {
   const _PaymentsDashboard();
@@ -1376,7 +1476,9 @@ class _CustomerMessagesDashboard extends StatelessWidget {
           // Group by userId only to show one entry per customer (WhatsApp Style)
           final Map<String, List<InquiryEntity>> grouped = {};
           for (var inquiry in state.inquiries) {
-            final key = inquiry.userId;
+            // Handle guest users by grouping them under a unique guest tag if userId is empty
+            // Or if the user wants strictly one thread per real user, keep empty as is.
+            final key = inquiry.userId.isEmpty ? 'guest_session' : inquiry.userId;
             if (!grouped.containsKey(key)) {
               grouped[key] = [];
             }
@@ -1600,10 +1702,9 @@ class _CustomerMessagesDashboard extends StatelessWidget {
                     backgroundColor: Colors.redAccent),
                 onPressed: () async {
                   Navigator.of(context).pop();
-                  for (var id in userIds) {
-                    await context.read<InquiriesCubit>().clearChat(
-                        'global_support', userId: id, role: 'admin');
-                  }
+                  // Efficiently clear EVERYTHING in the inquiries table for admin
+                  await context.read<InquiriesCubit>().deleteAllInquiries();
+                  
                   if (context.mounted) {
                     context.read<InquiriesCubit>().fetchInquiries('', true);
                   }
@@ -1737,7 +1838,7 @@ class _AdminProfileDashboardState extends State<_AdminProfileDashboard> {
     final authState = context
         .read<AuthCubit>()
         .state;
-    String email = 'dynetix.info@gmail.com';
+    String email = 'info@dynetixhub.com';
     if (authState is AuthAuthenticated) {
       email = authState.user.email;
     }
@@ -1863,6 +1964,22 @@ class _AdminProfileDashboardState extends State<_AdminProfileDashboard> {
                 onTap: () =>
                     Navigator.push(context, MaterialPageRoute(
                         builder: (_) => const AboutDynetixScreen())),
+              ),
+
+              const SizedBox(height: 32),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Communication Tools', style: TextStyle(fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.getOnBackgroundColor(context))),
+              ),
+              const SizedBox(height: 16),
+              DynetixButton(
+                text: 'BROADCAST ANNOUNCEMENT',
+                color: AppColors.primary.withValues(alpha: 0.1),
+                textColor: AppColors.primary,
+                isOutline: true,
+                onPressed: () => _showBroadcastDialog(context),
               ),
 
               const SizedBox(height: 32),

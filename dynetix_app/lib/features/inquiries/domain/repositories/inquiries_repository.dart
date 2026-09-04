@@ -7,5 +7,6 @@ abstract class InquiriesRepository {
   Future<List<InquiryEntity>> getInquiriesByUser(String userId);
   Future<void> sendInquiry(InquiryEntity inquiry);
   Future<void> deleteInquiriesByItem(String itemId, {String? userId, required String role});
+  Future<void> deleteAllInquiries();
   Future<String> uploadInquiryFile(dynamic file, String fileName);
 }

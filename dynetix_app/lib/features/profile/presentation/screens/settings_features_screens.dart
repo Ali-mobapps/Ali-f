@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/bloc/theme_cubit.dart';
 import '../../../../core/widgets/dynetix_widgets.dart';
+import '../../../auth/presentation/bloc/auth_cubit.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../auth/presentation/screens/role_selection_screen.dart';
 
 class ThemePreferencesScreen extends StatelessWidget {
   const ThemePreferencesScreen({super.key});
@@ -224,6 +227,11 @@ class SystemSettingsScreen extends StatelessWidget {
             _showClearCacheDialog(context);
           }),
           const SizedBox(height: 16),
+          _buildSettingTile(context, 'Security & Privacy',
+              'Change password and account deletion', Icons.security_rounded, onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const SecuritySettingsScreen()));
+          }),
+          const SizedBox(height: 16),
           _buildSettingTile(
               context, 'App Version', '1.0.0 (Build 240815)', Icons.info_outline_rounded,
               onTap: () {
@@ -313,6 +321,143 @@ class SystemSettingsScreen extends StatelessWidget {
                   const SnackBar(content: Text('Cache cleared successfully')));
             },
             child: const Text('Clear Now'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SecuritySettingsScreen extends StatefulWidget {
+  const SecuritySettingsScreen({super.key});
+
+  @override
+  State<SecuritySettingsScreen> createState() => _SecuritySettingsScreenState();
+}
+
+class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthUnauthenticated) {
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const RoleSelectionScreen()), (route) => false);
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: AppColors.error));
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          title: const Text('SECURITY & PRIVACY', style: TextStyle(letterSpacing: 2, fontSize: 14, fontWeight: FontWeight.bold)),
+          backgroundColor: AppColors.surface,
+          centerTitle: true,
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            const Text('Security Credentials', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 32),
+            _buildSecurityTile(
+              context, 
+              'Update Master Password', 
+              'Secure your account with a new password.', 
+              Icons.lock_reset_rounded, 
+              onTap: () => _showUpdatePasswordDialog(context),
+            ),
+            const SizedBox(height: 16),
+            _buildSecurityTile(
+              context, 
+              'Account Deletion', 
+              'Permanently remove your data and access.', 
+              Icons.delete_forever_rounded, 
+              color: Colors.redAccent,
+              onTap: () => _showDeleteAccountDialog(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSecurityTile(BuildContext context, String title, String subtitle, IconData icon, {VoidCallback? onTap, Color? color}) {
+    return GlassPanel(
+      padding: 0,
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          onTap: onTap,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+                color: (color ?? AppColors.primary).withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(10)),
+            child: Icon(icon, color: color ?? AppColors.primary, size: 22),
+          ),
+          title: Text(title, style: TextStyle(color: color ?? AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.bold)),
+          subtitle: Text(subtitle, style: const TextStyle(color: AppColors.textDisabled, fontSize: 11)),
+          trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textDisabled),
+        ),
+      ),
+    );
+  }
+
+  void _showUpdatePasswordDialog(BuildContext context) {
+    final passwordController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Change Password', style: TextStyle(color: AppColors.textPrimary)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter your new secure password.', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+            const SizedBox(height: 20),
+            TextField(
+              controller: passwordController,
+              obscureText: true,
+              style: const TextStyle(color: AppColors.textPrimary),
+              decoration: const InputDecoration(hintText: 'New Password'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL')),
+          ElevatedButton(
+            onPressed: () {
+              if (passwordController.text.length >= 6) {
+                context.read<AuthCubit>().updatePassword(passwordController.text.trim());
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password updated successfully!'), backgroundColor: AppColors.success));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password must be at least 6 characters')));
+              }
+            },
+            child: const Text('UPDATE'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Delete Account', style: TextStyle(color: Colors.redAccent)),
+        content: const Text('This action is irreversible. All your orders, reviews, and profile data will be permanently deleted. Are you sure?', style: TextStyle(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () {
+              context.read<AuthCubit>().deleteAccount();
+              Navigator.pop(context);
+            },
+            child: const Text('DELETE PERMANENTLY'),
           ),
         ],
       ),

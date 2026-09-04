@@ -28,6 +28,8 @@ import 'package:dynetix_app/features/support/presentation/screens/ai_assistant_s
 import '../../../../core/currency/currency_cubit.dart';
 import '../../../../core/currency/currency_state.dart';
 import '../../../../core/l10n/language_cubit.dart';
+import '../../../notifications/presentation/screens/announcements_screen.dart';
+import '../../../../core/services/pdf_service.dart';
 
 class CustomerDashboardScreen extends StatefulWidget {
   const CustomerDashboardScreen({super.key});
@@ -113,7 +115,9 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
           IconButton(onPressed: () {
             setState(() => _currentIndex = 3); // Switch to Chat tab
           }, icon: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.primary)),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary)),
+          IconButton(onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const AnnouncementsScreen()));
+          }, icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary)),
         ],
       ),
       body: pages[_currentIndex],
@@ -908,7 +912,14 @@ class _CustomerProjectsTab extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(CurrencyCubit.of(context).formatPrice(order.price), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
-                                Text('Created: ${order.createdAt.day}/${order.createdAt.month}', style: const TextStyle(color: AppColors.textDisabled, fontSize: 11)),
+                                if (order.status == 'completed')
+                                  TextButton.icon(
+                                    onPressed: () => PdfService.generateInvoice(order),
+                                    icon: const Icon(Icons.receipt_long_rounded, color: AppColors.primary, size: 18),
+                                    label: const Text('INVOICE', style: TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold)),
+                                  )
+                                else
+                                  Text('Created: ${order.createdAt.day}/${order.createdAt.month}', style: const TextStyle(color: AppColors.textDisabled, fontSize: 11)),
                               ],
                             ),
                             if (order.deliverables.isNotEmpty) ...[

@@ -35,6 +35,15 @@ class InquiriesCubit extends Cubit<InquiriesState> {
     }
   }
 
+  Future<void> deleteAllInquiries() async {
+    try {
+      await repository.deleteAllInquiries();
+      // No need to emit success, just refresh manually or let stream handle it
+    } catch (e) {
+      emit(InquiriesError(e.toString()));
+    }
+  }
+
   Future<String> uploadFile(dynamic file, String fileName) async {
     try {
       return await repository.uploadInquiryFile(file, fileName);

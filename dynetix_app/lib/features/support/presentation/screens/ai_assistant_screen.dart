@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/dynetix_widgets.dart';
+import '../../../../core/ai/ai_service.dart';
 
 class AiAssistantScreen extends StatefulWidget {
   const AiAssistantScreen({super.key});
@@ -34,7 +35,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
     });
   }
 
-  void _handleMessage() {
+  Future<void> _handleMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
@@ -50,10 +51,9 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
     _controller.clear();
     _scrollToBottom();
 
-    // Fix: Ensure Bot Reply always triggers
-    Future.delayed(const Duration(seconds: 1), () {
+    try {
+      final response = await AiService.getResponse(text);
       if (mounted) {
-        final response = _getBotResponse(text);
         setState(() {
           _isTyping = false;
           _messages.add({
@@ -64,32 +64,19 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
         });
         _scrollToBottom();
       }
-    });
-  }
-
-  String _getBotResponse(String input) {
-    input = input.toLowerCase();
-    
-    if (input.contains('hello') || input.contains('hi') || input.contains('hey') || input.contains('ky h') || input.contains('kya hal')) {
-      return "Greetings from Dynetix! I am your AI Assistant. How can I help you with our elite services today?";
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isTyping = false;
+          _messages.add({
+            'isBot': true,
+            'message': "I am facing a connection issue. Please check your internet or try again later.",
+            'time': DateTime.now(),
+          });
+        });
+        _scrollToBottom();
+      }
     }
-    if (input.contains('pay') || input.contains('payment') || input.contains('paise') || input.contains('money') || input.contains('paisa')) {
-      return "For payments, we accept EasyPaisa, JazzCash, and HBL. You can find the details in the 'Payments' tab. Just copy the number and upload the proof in your Project section.";
-    }
-    if (input.contains('service') || input.contains('work') || input.contains('kaam') || input.contains('offer')) {
-      return "Dynetix offers premium 3D Modeling, Web Development, SEO, and Graphic Design. Check the 'Services' tab for the full list and FLAT OFF deals!";
-    }
-    if (input.contains('course') || input.contains('skill') || input.contains('learn') || input.contains('parhna')) {
-      return "Our Skills section provides professional courses in AI (Python), Data Analytics, and Business Strategy. Visit the 'Skills' tab to start learning.";
-    }
-    if (input.contains('status') || input.contains('order') || input.contains('project') || input.contains('progress')) {
-      return "You can track your projects in real-time under the 'Projects' tab. It shows if your work is 'In Progress' or 'Completed'.";
-    }
-    if (input.contains('contact') || input.contains('admin') || input.contains('chat') || input.contains('help')) {
-      return "If you need human assistance, please use the 'Chat' tab to message our support team directly.";
-    }
-    
-    return "I am still learning! You can ask me about Services, Courses, Payments, or Project Status. For anything else, please contact our support chat.";
   }
 
   @override
@@ -119,7 +106,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
                     decoration: BoxDecoration(
-                      color: isBot ? AppColors.surface : AppColors.primary,
+                      color: isBot ? AppColors.softGrey : AppColors.primary,
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(16),
                         topRight: const Radius.circular(16),
@@ -129,7 +116,11 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                     ),
                     child: Text(
                       msg['message'],
-                      style: TextStyle(color: isBot ? Colors.white : Colors.black, fontSize: 14),
+                      style: TextStyle(
+                        color: isBot ? AppColors.textPrimary : Colors.white, 
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 );
@@ -139,7 +130,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
           if (_isTyping)
             const Padding(
               padding: EdgeInsets.only(left: 20, bottom: 10),
-              child: Align(alignment: Alignment.centerLeft, child: Text('AI is typing...', style: TextStyle(color: AppColors.primary, fontSize: 10))),
+              child: Align(alignment: Alignment.centerLeft, child: Text('AI Assistant is thinking...', style: TextStyle(color: AppColors.primary, fontSize: 10))),
             ),
           _buildInput(),
         ],
@@ -150,21 +141,39 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
   Widget _buildInput() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(color: AppColors.surface, border: Border(top: BorderSide(color: AppColors.glassBorder))),
+      decoration: const BoxDecoration(
+        color: AppColors.surface, 
+        border: Border(top: BorderSide(color: AppColors.glassBorder))
+      ),
       child: SafeArea(
         child: Row(
           children: [
             Expanded(
-              child: TextField(
-                controller: _controller,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(hintText: "Type a message...", border: InputBorder.none),
-                onSubmitted: (_) => _handleMessage(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.softGrey,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: TextField(
+                  controller: _controller,
+                  style: const TextStyle(color: AppColors.textPrimary),
+                  decoration: const InputDecoration(
+                    hintText: "Ask about Dynetix services...", 
+                    hintStyle: TextStyle(color: AppColors.textDisabled),
+                    border: InputBorder.none
+                  ),
+                  onSubmitted: (_) => _handleMessage(),
+                ),
               ),
             ),
-            IconButton(
-              onPressed: _handleMessage,
-              icon: const Icon(Icons.send_rounded, color: AppColors.primary),
+            const SizedBox(width: 8),
+            CircleAvatar(
+              backgroundColor: AppColors.primary,
+              child: IconButton(
+                onPressed: _handleMessage,
+                icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+              ),
             ),
           ],
         ),
