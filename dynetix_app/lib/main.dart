@@ -11,6 +11,7 @@ import 'core/l10n/language_cubit.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/services/deeplink_service.dart';
 import 'core/services/offline_service.dart';
+import 'core/services/stripe_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
@@ -41,6 +42,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await OfflineService.initialize();
+  await StripeService.init();
 
   // 1. Initialize Supabase first (NotificationService depends on it)
   await Supabase.initialize(

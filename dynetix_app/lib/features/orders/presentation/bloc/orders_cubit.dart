@@ -100,6 +100,26 @@ class OrdersCubit extends Cubit<OrdersState> {
     }
   }
 
+  Future<void> fetchAllOrdersManual() async {
+    emit(OrdersLoading());
+    try {
+      final orders = await repository.fetchAllOrders();
+      emit(OrdersLoaded(orders));
+    } catch (e) {
+      emit(OrdersError(e.toString()));
+    }
+  }
+
+  Future<void> fetchCustomerOrdersManual(String userId) async {
+    emit(OrdersLoading());
+    try {
+      final orders = await repository.fetchCustomerOrders(userId);
+      emit(OrdersLoaded(orders));
+    } catch (e) {
+      emit(OrdersError(e.toString()));
+    }
+  }
+
   @override
   Future<void> close() {
     _subscription?.cancel();

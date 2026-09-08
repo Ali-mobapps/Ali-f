@@ -99,9 +99,21 @@ class _LoginScreenState extends State<LoginScreen> {
                               onPressed: () {
                                 final email = emailController.text.trim();
                                 final password = passwordController.text.trim();
-                                if (email.isNotEmpty && password.isNotEmpty) {
-                                  context.read<AuthCubit>().login(email, password);
+                                
+                                if (email.isEmpty || password.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter credentials')));
+                                  return;
                                 }
+
+                                // Rule: Email must end with .com for security
+                                if (!email.toLowerCase().endsWith('.com')) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Invalid Email: Only .com domains are supported for secure access.'), backgroundColor: Colors.redAccent),
+                                  );
+                                  return;
+                                }
+
+                                context.read<AuthCubit>().login(email, password);
                               },
                             );
                           },

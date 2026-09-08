@@ -30,6 +30,7 @@ import '../../../../core/currency/currency_state.dart';
 import '../../../../core/l10n/language_cubit.dart';
 import '../../../notifications/presentation/screens/announcements_screen.dart';
 import '../../../../core/services/pdf_service.dart';
+import '../../../../core/services/stripe_service.dart';
 
 class CustomerDashboardScreen extends StatefulWidget {
   const CustomerDashboardScreen({super.key});
@@ -803,17 +804,26 @@ class _CustomerPaymentsTab extends StatelessWidget {
   }
 }
 
-class _CustomerProjectsTab extends StatelessWidget {
+class _CustomerProjectsTab extends StatefulWidget {
   final String userId;
   const _CustomerProjectsTab({required this.userId});
 
   @override
-  Widget build(BuildContext context) {
-    if (userId.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<OrdersCubit>().watchCustomerOrders(userId);
-      });
+  State<_CustomerProjectsTab> createState() => _CustomerProjectsTabState();
+}
+
+class _CustomerProjectsTabState extends State<_CustomerProjectsTab> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.userId.isNotEmpty) {
+      context.read<OrdersCubit>().watchCustomerOrders(widget.userId);
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.userId.isEmpty) return const Center(child: Text('Please login to view projects.'));
 
     return BlocBuilder<OrdersCubit, OrdersState>(
       builder: (context, state) {
@@ -833,8 +843,8 @@ class _CustomerProjectsTab extends StatelessWidget {
                   text: 'RETRY CONNECTION',
                   isOutline: true,
                   onPressed: () {
-                    if (userId.isNotEmpty) {
-                      context.read<OrdersCubit>().watchCustomerOrders(userId);
+                    if (widget.userId.isNotEmpty) {
+                      context.read<OrdersCubit>().watchCustomerOrders(widget.userId);
                     }
                   },
                 ),
@@ -844,15 +854,29 @@ class _CustomerProjectsTab extends StatelessWidget {
         }
 
         if (state is OrdersLoaded) {
-          if (state.orders.isEmpty) {
+          // Rule: Only show orders that have been approved by Admin (not in 'pending' status)
+          final approvedOrders = state.orders.where((o) => o.status != 'pending').toList();
+
+          if (approvedOrders.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.assignment_late_outlined, size: 64, color: AppColors.textDisabled.withValues(alpha: 0.2)),
+                  Icon(Icons.verified_user_outlined, size: 64, color: AppColors.textDisabled.withValues(alpha: 0.2)),
                   const SizedBox(height: 16),
-                  const Text('No active projects yet.', style: TextStyle(color: AppColors.textDisabled)),
-                  const Text('Book a service to get started!', style: TextStyle(color: AppColors.textDisabled, fontSize: 12)),
+                  const Text('No approved projects yet.', style: TextStyle(color: AppColors.textDisabled, fontWeight: FontWeight.bold)),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 40),
+                    child: Text('Once Admin approves your order, it will appear here.', 
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColors.textDisabled, fontSize: 11)),
+                  ),
+                  const SizedBox(height: 24),
+                  TextButton.icon(
+                    onPressed: () => context.read<OrdersCubit>().fetchCustomerOrdersManual(widget.userId),
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('Check for Approval'),
+                  ),
                 ],
               ),
             );
@@ -869,7 +893,7 @@ class _CustomerProjectsTab extends StatelessWidget {
                     Text('My Active Projects', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.getOnBackgroundColor(context))),
                     IconButton(
                       icon: const Icon(Icons.refresh_rounded, color: AppColors.primary),
-                      onPressed: () => context.read<OrdersCubit>().watchCustomerOrders(userId),
+                      onPressed: () => context.read<OrdersCubit>().fetchCustomerOrdersManual(widget.userId),
                     ),
                   ],
                 ),
@@ -877,9 +901,9 @@ class _CustomerProjectsTab extends StatelessWidget {
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  itemCount: state.orders.length,
+                  itemCount: approvedOrders.length,
                   itemBuilder: (context, index) {
-                    final order = state.orders[index];
+                    final order = approvedOrders[index];
                     return Container(
                       margin: const EdgeInsets.only(bottom: 16),
                       child: GlassPanel(
@@ -990,8 +1014,6 @@ class _CustomerProjectsTab extends StatelessWidget {
     );
   }
 
-
-
   void _showDeleteOrderDialog(BuildContext context, OrderEntity order) {
     showDialog(
       context: context,
@@ -1015,11 +1037,11 @@ class _CustomerProjectsTab extends StatelessWidget {
               await ordersCubit.deleteOrder(order.id);
               
               // Customer only hides/clears for themselves
-              await inquiriesCubit.clearChat('global_support', userId: userId, role: 'customer');
+              await inquiriesCubit.clearChat('global_support', userId: widget.userId, role: 'customer');
               navigator.pop();
               
               // Refresh list
-              ordersCubit.watchCustomerOrders(userId);
+              ordersCubit.watchCustomerOrders(widget.userId);
               scaffoldMessenger.showSnackBar(
                 const SnackBar(content: Text('Order canceled and chat cleared'), backgroundColor: AppColors.error),
               );
@@ -1385,6 +1407,11 @@ void _showCheckoutDialog(BuildContext context, ServiceEntity item, double basePr
                 return;
               }
 
+              final ordersCubit = context.read<OrdersCubit>();
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              final navigator = Navigator.of(context);
+
+              // Directly create Order (Skipping payment step as per request)
               final order = OrderEntity(
                 id: '', 
                 customerId: userId,
@@ -1392,18 +1419,21 @@ void _showCheckoutDialog(BuildContext context, ServiceEntity item, double basePr
                 serviceTitle: item.title,
                 price: finalPrice,
                 status: 'pending',
+                paymentStatus: 'pending_verification', // Admin will verify or user pays later
                 createdAt: DateTime.now(),
               );
               
-              await context.read<OrdersCubit>().createOrder(order);
-              if (context.mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Order placed successfully!'), backgroundColor: AppColors.success),
-                );
-              }
+              await ordersCubit.createOrder(order);
+              
+              navigator.pop(); // Close checkout dialog
+              scaffoldMessenger.showSnackBar(
+                const SnackBar(
+                  content: Text('✅ Order Request Sent! Admin will contact you.'), 
+                  backgroundColor: AppColors.success
+                ),
+              );
             },
-            child: const Text('CONFIRM ORDER'),
+            child: Text(item.type == 'course' ? 'ENROLL NOW' : 'CONFIRM ORDER'),
           ),
         ],
       ),

@@ -109,9 +109,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               return;
                             }
 
-                            if (password.length < 6) {
+                            // Rule: Email must end with .com
+                            if (!email.toLowerCase().endsWith('.com')) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Password must be at least 6 characters'), backgroundColor: Colors.orange),
+                                const SnackBar(content: Text('Security Alert: Only .com email addresses are allowed (e.g. @gmail.com)'), backgroundColor: Colors.redAccent),
+                              );
+                              return;
+                            }
+
+                            // Rule: Password must be exactly 8 characters
+                            if (password.length != 8) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Security Requirement: Password must be exactly 8 characters long'), backgroundColor: Colors.redAccent),
                               );
                               return;
                             }

@@ -210,14 +210,14 @@ class _InsightsDashboard extends StatelessWidget {
                 totalOrders = orderState.orders.length;
                 activeOrders = orderState.orders
                     .where((o) =>
-                o.status == 'in_progress' || o.status == 'pending')
+                o.status == 'in_progress' || o.status == 'pending' || o.status == 'review')
                     .length;
                 completedOrders =
                     orderState.orders
                         .where((o) => o.status == 'completed')
                         .length;
                 totalEarnings = orderState.orders
-                    .where((o) => o.paymentStatus == 'paid')
+                    .where((o) => o.paymentStatus == 'paid' || o.paymentStatus == 'verified')
                     .fold(0, (sum, item) => sum + item.price);
               }
 
@@ -230,13 +230,31 @@ class _InsightsDashboard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Business Intelligence',
-                        style: TextStyle(
-                            color: AppColors.getOnBackgroundColor(context),
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold)),
-                    const Text('Real-time performance metrics.',
-                        style: TextStyle(color: AppColors.textDisabled)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Business Intelligence',
+                                style: TextStyle(
+                                    color: AppColors.getOnBackgroundColor(context),
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold)),
+                            const Text('Real-time performance metrics.',
+                                style: TextStyle(color: AppColors.textDisabled)),
+                          ],
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.sync_rounded, color: AppColors.primary),
+                          onPressed: () {
+                            context.read<OrdersCubit>().fetchAllOrdersManual();
+                            context.read<ServicesCubit>().fetchServices();
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Syncing data with database...')));
+                          },
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 32),
 
                     // Large Earnings Card
@@ -739,7 +757,7 @@ class _OrdersDashboard extends StatelessWidget {
         if (state is OrdersLoaded) {
           orders = state.orders;
           totalEarnings = orders
-              .where((o) => o.paymentStatus == 'paid')
+              .where((o) => o.paymentStatus == 'paid' || o.paymentStatus == 'verified')
               .fold(0, (sum, item) => sum + item.price);
         }
 
@@ -769,7 +787,7 @@ class _OrdersDashboard extends StatelessWidget {
                         icon: const Icon(Icons.refresh_rounded,
                             color: AppColors.primary, size: 20),
                         onPressed: () =>
-                            context.read<OrdersCubit>().watchAllOrders(),
+                            context.read<OrdersCubit>().fetchAllOrdersManual(),
                       ),
                     ],
                   ),
@@ -1517,12 +1535,16 @@ class _CustomerMessagesDashboard extends StatelessWidget {
                     final chatMessages = grouped[customerId]!;
                     final lastMessage = chatMessages.first;
 
-                    // Search for the customer's name in the message thread
+                    // Search for the customer's name in the message thread (skip AI/Admin messages)
                     String displayName = 'Customer Chat';
                     for (var m in chatMessages) {
-                      if (m.message.contains(']: ')) {
-                        displayName = m.message.split(']: ')[0].replaceFirst('[', '');
-                        break;
+                      if (m.senderRole == 'customer' && m.message.contains(']: ')) {
+                        final potentialName = m.message.split(']: ')[0].replaceFirst('[', '');
+                        // Strictly filter out any AI keywords from the name
+                        if (!potentialName.toLowerCase().contains('ai auto-reply')) {
+                          displayName = potentialName;
+                          break;
+                        }
                       }
                     }
 

@@ -10,4 +10,6 @@ abstract class OrdersRepository {
   Future<String> uploadDeliverable(dynamic file, String orderId, String fileName);
   Future<void> updateDeliverables(String orderId, List<String> urls);
   Future<void> deleteOrder(String orderId);
+  Future<List<OrderEntity>> fetchAllOrders();
+  Future<List<OrderEntity>> fetchCustomerOrders(String userId);
 }

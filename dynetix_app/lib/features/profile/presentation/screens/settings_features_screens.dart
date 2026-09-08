@@ -134,7 +134,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         subtitle: Text(subtitle, style: const TextStyle(color: AppColors.textDisabled, fontSize: 11)),
         value: value,
         onChanged: onChanged,
-        activeColor: AppColors.primary,
+        activeThumbColor: AppColors.primary,
         activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
       ),
     );

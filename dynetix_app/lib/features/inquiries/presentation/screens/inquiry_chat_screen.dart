@@ -425,7 +425,7 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
     } else {
       content = Text(
         msg.message,
-        style: TextStyle(color: isMe ? Colors.black : Colors.white, fontSize: 14),
+        style: TextStyle(color: isMe ? Colors.black : AppColors.textPrimary, fontSize: 14),
       );
     }
 
@@ -445,7 +445,7 @@ class _InquiryChatScreenState extends State<InquiryChatScreen> {
           padding: isFile ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
           decoration: BoxDecoration(
-            color: isMe ? AppColors.primary : AppColors.cardBackground,
+            color: isMe ? AppColors.primary : AppColors.softGrey,
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(16),
               topRight: const Radius.circular(16),

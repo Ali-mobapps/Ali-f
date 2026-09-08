@@ -30,18 +30,25 @@ class OrdersRepositoryImpl implements OrdersRepository {
 
   @override
   Future<void> createOrder(OrderEntity order) async {
-    final model = OrderModel(
-      id: order.id,
-      customerId: order.customerId,
-      serviceId: order.serviceId,
-      status: order.status,
-      price: order.price,
-      serviceTitle: order.serviceTitle,
-      createdAt: order.createdAt,
-      paymentStatus: order.paymentStatus,
-      paymentScreenshot: order.paymentScreenshot,
-    );
-    await _supabase.from('orders').insert(model.toJson());
+    try {
+      final model = OrderModel(
+        id: order.id,
+        customerId: order.customerId,
+        serviceId: order.serviceId,
+        status: order.status,
+        price: order.price,
+        serviceTitle: order.serviceTitle,
+        createdAt: order.createdAt,
+        paymentStatus: order.paymentStatus,
+        paymentScreenshot: order.paymentScreenshot,
+      );
+      print('Creating order in Supabase: ${model.toJson()}');
+      await _supabase.from('orders').insert(model.toJson());
+      print('Order created successfully');
+    } catch (e) {
+      print('Supabase Create Order Error: $e');
+      rethrow;
+    }
   }
 
   @override
@@ -100,5 +107,24 @@ class OrdersRepositoryImpl implements OrdersRepository {
   @override
   Future<void> deleteOrder(String orderId) async {
     await _supabase.from('orders').delete().eq('id', orderId);
+  }
+
+  @override
+  Future<List<OrderEntity>> fetchAllOrders() async {
+    final List<dynamic> data = await _supabase
+        .from('orders')
+        .select()
+        .order('created_at', ascending: false);
+    return data.map((json) => OrderModel.fromJson(json)).toList();
+  }
+
+  @override
+  Future<List<OrderEntity>> fetchCustomerOrders(String userId) async {
+    final List<dynamic> data = await _supabase
+        .from('orders')
+        .select()
+        .eq('customer_id', userId)
+        .order('created_at', ascending: false);
+    return data.map((json) => OrderModel.fromJson(json)).toList();
   }
 }
