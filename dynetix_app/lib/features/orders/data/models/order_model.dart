@@ -39,19 +39,22 @@ class OrderModel extends OrderEntity {
       'price': price,
       'service_title': serviceTitle,
       'payment_status': paymentStatus,
-      'payment_screenshot': paymentScreenshot,
-      'deliverables': deliverables,
-      'created_at': createdAt.toIso8601String(),
     };
 
-    if (serviceId != null) {
-      // Try to send as integer if possible, otherwise as string (UUID)
+    // Note: 'id' and 'created_at' are omitted to let Supabase generate them automatically.
+    // 'deliverables' is also omitted if empty to avoid schema issues.
+    if (deliverables.isNotEmpty) {
+      data['deliverables'] = deliverables;
+    }
+
+    if (paymentScreenshot != null && paymentScreenshot!.isNotEmpty) {
+      data['payment_screenshot'] = paymentScreenshot;
+    }
+
+    if (serviceId != null && serviceId!.isNotEmpty) {
+      // Try to send as integer if possible, otherwise as string
       final intId = int.tryParse(serviceId!);
-      if (intId != null) {
-        data['service_id'] = intId;
-      } else {
-        data['service_id'] = serviceId;
-      }
+      data['service_id'] = intId ?? serviceId;
     }
 
     return data;

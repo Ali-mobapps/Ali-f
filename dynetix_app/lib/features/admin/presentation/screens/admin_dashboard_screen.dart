@@ -135,6 +135,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           child: DynetixLogo(size: 32, showGlow: false),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.sync_rounded, color: AppColors.primary),
+            onPressed: () {
+              context.read<OrdersCubit>().fetchAllOrdersManual();
+              context.read<ServicesCubit>().fetchServices();
+              context.read<InquiriesCubit>().fetchInquiries('', true);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Global Sync: All data refreshed.')));
+            },
+            tooltip: 'Sync All Data',
+          ),
           BlocBuilder<CurrencyCubit, CurrencyState>(
             builder: (context, state) {
               return TextButton(
@@ -795,26 +805,40 @@ class _OrdersDashboard extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: orders.isEmpty
-                  ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.assignment_late_outlined,
-                        size: 48,
-                        color: AppColors.textDisabled.withValues(alpha: 0.2)),
-                    const SizedBox(height: 16),
-                    const Text('No active projects found.',
-                        style: TextStyle(color: AppColors.textSecondary)),
-                  ],
-                ),
-              )
-                  : ListView.builder(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                itemCount: orders.length,
-                itemBuilder: (context, index) {
-                  return _buildOrderCard(context, orders[index]);
-                },
+              child: RefreshIndicator(
+                onRefresh: () => context.read<OrdersCubit>().fetchAllOrdersManual(),
+                color: AppColors.primary,
+                child: orders.isEmpty
+                    ? SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.6,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.assignment_late_outlined,
+                                    size: 48,
+                                    color: AppColors.textDisabled.withValues(alpha: 0.2)),
+                                const SizedBox(height: 16),
+                                const Text('No active projects found.',
+                                    style: TextStyle(color: AppColors.textSecondary)),
+                                const SizedBox(height: 8),
+                                const Text('Pull down to refresh from database',
+                                    style: TextStyle(color: AppColors.textDisabled, fontSize: 10)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                        itemCount: orders.length,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return _buildOrderCard(context, orders[index]);
+                        },
+                      ),
               ),
             ),
           ],

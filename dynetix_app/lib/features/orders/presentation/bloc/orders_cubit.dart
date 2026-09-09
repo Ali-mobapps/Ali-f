@@ -41,7 +41,8 @@ class OrdersCubit extends Cubit<OrdersState> {
   Future<void> createOrder(OrderEntity order) async {
     try {
       await repository.createOrder(order);
-      // Stream will automatically pick it up, but we can emit loading briefly if we want
+      // Automatically refresh orders after creation to ensure UI is in sync
+      await fetchAllOrdersManual(); 
     } catch (e) {
       emit(OrdersError('Failed to book order: ${e.toString()}'));
     }
