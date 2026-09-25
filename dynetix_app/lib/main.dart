@@ -48,7 +48,7 @@ void main() async {
   await Supabase.initialize(
     url: 'https://sqoaobghpkfjcgghalgs.supabase.co',
     publishableKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxb2FvYmdocGtmamNnZ2hhbGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwODkxNDgsImV4cCI6MjEwMTY2NTE0OH0.qJ1cvkhSRm9-64CYG8cGyylEL6npYRGuGS0ST2SDeKk',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxb2FvYmdocGtmamNnZ2hhbGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwODkxNDgsImV4cCI6MjEwMTY2NTE0OH0.qJ1cvkhSRm9-64CYG8cGyylEL6npYRGuGS0ST2SDeKk',
   );
 
   // 2. Initialize Firebase and Notifications
@@ -75,7 +75,9 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthCubit>(
-          create: (context) => AuthCubit(AuthRepositoryImpl())..checkAuth(),
+          create: (context) =>
+          AuthCubit(AuthRepositoryImpl())
+            ..checkAuth(),
         ),
         BlocProvider<ServicesCubit>(
           create: (context) => ServicesCubit(ServicesRepositoryImpl()),
@@ -137,7 +139,7 @@ class MyApp extends StatelessWidget {
                   '/admin-login': (context) => const AdminLoginScreen(),
                   '/admin-dashboard': (context) => const AdminDashboardScreen(),
                   '/customer-dashboard': (context) =>
-                      const CustomerDashboardScreen(),
+                  const CustomerDashboardScreen(),
                   '/announcements': (context) => const AnnouncementsScreen(),
                 },
               );
