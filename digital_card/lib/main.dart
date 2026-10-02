@@ -357,7 +357,7 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
               )
             : const Text(
                 'Campus Dashboard',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
         centerTitle: true,
         backgroundColor: const Color(0xFF1E3A8A),
@@ -517,7 +517,7 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -534,23 +534,23 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                   child: _buildDigitalIdCard(),
                 ),
 
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
 
-                // Section 2: Header for Courses (Overflow-safe)
+                // Section 2: Header for Courses (Overflow-proof)
                 Row(
                   children: [
                     Expanded(
                       child: Text(
-                        _isSearching ? 'Search Results' : 'Enrolled Courses (Current Semester)',
+                        _isSearching ? 'Search Results' : 'Enrolled Courses',
                         style: const TextStyle(
-                          fontSize: 15,
+                          fontSize: 14.5,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF0F172A),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
@@ -560,15 +560,15 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                       child: Text(
                         '${_filteredCourses.length} Subjects',
                         style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.bold,
                           color: Color(0xFF1E3A8A),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
 
                 // 4. COURSES / SUBJECTS LIST (ListView.builder & ListTile)
                 if (_filteredCourses.isEmpty)
@@ -595,7 +595,7 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                       final course = _filteredCourses[index];
                       return Card(
                         elevation: 1.5,
-                        margin: const EdgeInsets.only(bottom: 10),
+                        margin: const EdgeInsets.only(bottom: 8),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -604,12 +604,12 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                           onTap: () => _showCourseDetails(course),
                           child: ListTile(
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
+                              horizontal: 10,
+                              vertical: 2,
                             ),
                             leading: Container(
-                              width: 44,
-                              height: 44,
+                              width: 42,
+                              height: 42,
                               decoration: BoxDecoration(
                                 color: const Color(0xFF1E3A8A).withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(10),
@@ -620,7 +620,7 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                                   style: const TextStyle(
                                     color: Color(0xFF1E3A8A),
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 12,
+                                    fontSize: 11.5,
                                   ),
                                 ),
                               ),
@@ -629,26 +629,23 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                               course['name']!,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 13.5,
+                                fontSize: 13,
                                 color: Color(0xFF1E293B),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
-                            subtitle: Padding(
-                              padding: const EdgeInsets.only(top: 2.0),
-                              child: Text(
-                                '${course['code']} • ${course['instructor']} • ${course['room']}',
-                                style: TextStyle(
-                                  fontSize: 11.5,
-                                  color: Colors.grey.shade600,
-                                ),
-                                overflow: TextOverflow.ellipsis,
+                            subtitle: Text(
+                              '${course['code']} • ${course['instructor']} • ${course['room']}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade600,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                             trailing: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 6,
-                                vertical: 4,
+                                vertical: 3,
                               ),
                               decoration: BoxDecoration(
                                 color: Colors.teal.shade50,
@@ -659,7 +656,7 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                                 course['credits']!,
                                 style: TextStyle(
                                   color: Colors.teal.shade800,
-                                  fontSize: 10.5,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -670,18 +667,18 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                     },
                   ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
                 // 5. QUICK NOTES / SEARCH INPUT (TextField & ElevatedButton)
                 const Text(
                   'Quick Notes / Search Query',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14.5,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF0F172A),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
 
                 Card(
                   elevation: 1.5,
@@ -689,7 +686,7 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(12.0),
+                    padding: const EdgeInsets.all(10.0),
                     child: Column(
                       children: [
                         TextField(
@@ -697,11 +694,11 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                           onSubmitted: (_) => _addQuickNote(),
                           decoration: InputDecoration(
                             hintText: 'Type a quick reminder, note, or query...',
-                            hintStyle: const TextStyle(fontSize: 13),
-                            prefixIcon: const Icon(Icons.note_alt_outlined, size: 20),
+                            hintStyle: const TextStyle(fontSize: 12.5),
+                            prefixIcon: const Icon(Icons.note_alt_outlined, size: 18),
                             suffixIcon: _noteController.text.isNotEmpty
                                 ? IconButton(
-                                    icon: const Icon(Icons.clear, size: 18),
+                                    icon: const Icon(Icons.clear, size: 16),
                                     onPressed: () {
                                       setState(() {
                                         _noteController.clear();
@@ -715,33 +712,33 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                             filled: true,
                             fillColor: Colors.grey.shade50,
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
+                              horizontal: 10,
+                              vertical: 8,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Flexible(
                               child: Text(
                                 '${_quickNotes.length} notes saved',
-                                style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
+                                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             const SizedBox(width: 8),
                             ElevatedButton.icon(
                               onPressed: _addQuickNote,
-                              icon: const Icon(Icons.send_rounded, size: 16),
-                              label: const Text('Submit Note', style: TextStyle(fontSize: 13)),
+                              icon: const Icon(Icons.send_rounded, size: 15),
+                              label: const Text('Submit Note', style: TextStyle(fontSize: 12.5)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF1E3A8A),
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 10,
+                                  horizontal: 14,
+                                  vertical: 8,
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
@@ -756,25 +753,25 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                 ),
 
                 if (_quickNotes.isNotEmpty) ...[
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         'Your Quick Notes:',
                         style: TextStyle(
-                          fontSize: 13.5,
+                          fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF1E3A8A),
                         ),
                       ),
                       Text(
                         'Swipe or tap trash to delete',
-                        style: TextStyle(fontSize: 10.5, color: Colors.grey.shade600),
+                        style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   ListView.builder(
                     itemCount: _quickNotes.length,
                     shrinkWrap: true,
@@ -787,17 +784,17 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                         onDismissed: (_) => _deleteNote(index),
                         background: Container(
                           margin: const EdgeInsets.only(bottom: 6),
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
                           decoration: BoxDecoration(
                             color: Colors.red.shade400,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           alignment: Alignment.centerRight,
-                          child: const Icon(Icons.delete, color: Colors.white, size: 20),
+                          child: const Icon(Icons.delete, color: Colors.white, size: 18),
                         ),
                         child: Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          margin: const EdgeInsets.only(bottom: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
@@ -816,17 +813,17 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                               const Icon(
                                 Icons.bookmark_border,
                                 color: Color(0xFF1E3A8A),
-                                size: 18,
+                                size: 16,
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
                                   note,
-                                  style: const TextStyle(fontSize: 12.5, height: 1.3),
+                                  style: const TextStyle(fontSize: 12, height: 1.25),
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 18, color: Colors.redAccent),
+                                icon: const Icon(Icons.delete_outline, size: 16, color: Colors.redAccent),
                                 tooltip: 'Delete Note',
                                 onPressed: () => _deleteNote(index),
                               ),
@@ -838,7 +835,7 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                   ),
                 ],
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -847,18 +844,18 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
     );
   }
 
-  // 2. PROFILE & ID CARD (Stack & Card - Overflow-Safe)
+  // 2. PROFILE & ID CARD (Stack & Card - 100% Overflow-Free)
   // 3. STUDENT INFO & ALIGNMENT (Column & Row, SizedBox, Padding)
   Widget _buildDigitalIdCard() {
     return Card(
-      elevation: 5,
-      shadowColor: const Color(0xFF1E3A8A).withValues(alpha: 0.35),
+      elevation: 4,
+      shadowColor: const Color(0xFF1E3A8A).withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           gradient: const LinearGradient(
             colors: [
               Color(0xFF1E3A8A), // Deep Navy Blue
@@ -869,45 +866,40 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
             end: Alignment.bottomRight,
           ),
         ),
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Top Institution Header (Row)
             Row(
               children: [
-                Expanded(
-                  child: Row(
-                    children: const [
-                      Icon(Icons.school, color: Colors.white, size: 24),
-                      SizedBox(width: 6),
-                      Flexible(
-                        child: Text(
-                          'CAMPUS DIGITAL ID',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            letterSpacing: 0.8,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                const Icon(Icons.school, color: Colors.white, size: 22),
+                const SizedBox(width: 6),
+                const Expanded(
+                  child: Text(
+                    'CAMPUS DIGITAL ID',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      letterSpacing: 0.6,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
                     '2024 - 2028',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 10.5,
+                      fontSize: 10,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -915,7 +907,7 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
               ],
             ),
 
-            const Divider(color: Colors.white24, height: 20, thickness: 1),
+            const Divider(color: Colors.white24, height: 18, thickness: 1),
 
             // Profile Picture with Stack + Student Info
             Row(
@@ -928,39 +920,39 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                     alignment: Alignment.bottomRight,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(2.5),
+                        padding: const EdgeInsets.all(2),
                         decoration: const BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
                         child: const CircleAvatar(
-                          radius: 34,
+                          radius: 30,
                           backgroundColor: Color(0xFFDBEAFE),
                           child: Icon(
                             Icons.person,
-                            size: 46,
+                            size: 40,
                             color: Color(0xFF1E3A8A),
                           ),
                         ),
                       ),
                       // Green Active/Online Dot Overlay
                       Positioned(
-                        bottom: 2,
-                        right: 2,
+                        bottom: 1,
+                        right: 1,
                         child: Tooltip(
                           message: _isOnline ? 'Online / Active' : 'Offline',
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
-                            width: 16,
-                            height: 16,
+                            width: 14,
+                            height: 14,
                             decoration: BoxDecoration(
                               color: _isOnline ? Colors.greenAccent.shade400 : Colors.grey.shade400,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2.5),
+                              border: Border.all(color: Colors.white, width: 2),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(alpha: 0.2),
-                                  blurRadius: 3,
+                                  blurRadius: 2,
                                   offset: const Offset(0, 1),
                                 ),
                               ],
@@ -972,7 +964,7 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                   ),
                 ),
 
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
 
                 // 3. STUDENT DETAILS (Column & Row)
                 Expanded(
@@ -983,23 +975,23 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                         StudentProfile.name,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 17,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 2),
                       Text(
                         'Reg No: ${StudentProfile.regNo}',
                         style: TextStyle(
                           color: Colors.yellowAccent.shade100,
-                          fontSize: 12.5,
+                          fontSize: 11.5,
                           fontWeight: FontWeight.w600,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 4),
                       Row(
                         children: [
                           Flexible(
@@ -1016,7 +1008,7 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
                                 StudentProfile.department,
                                 style: TextStyle(
                                   color: Colors.white70,
-                                  fontSize: 10.5,
+                                  fontSize: 10,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -1030,21 +1022,21 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
               ],
             ),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
 
             // Card Bottom Details (Row with 3 Columns)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
                   Expanded(child: _buildCardMetric('DEPARTMENT', 'Software Eng.')),
-                  Container(width: 1, height: 24, color: Colors.white24),
+                  Container(width: 1, height: 22, color: Colors.white24),
                   Expanded(child: _buildCardMetric('SEMESTER', StudentProfile.semester)),
-                  Container(width: 1, height: 24, color: Colors.white24),
+                  Container(width: 1, height: 22, color: Colors.white24),
                   Expanded(child: _buildCardMetric('STATUS', _isOnline ? 'Active' : 'Offline')),
                 ],
               ),
@@ -1078,7 +1070,7 @@ class _CampusDashboardScreenState extends State<CampusDashboardScreen> {
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 11.5,
+              fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
           ),
