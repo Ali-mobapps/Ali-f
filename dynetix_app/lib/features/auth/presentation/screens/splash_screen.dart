@@ -35,13 +35,21 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   void _navigateBasedOnAuth(AuthState state) {
     if (state is AuthAuthenticated) {
-      if (state.user.role == 'admin') {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AdminDashboardScreen()));
+      final role = state.user.role.toLowerCase();
+      if (role == 'admin' || role == 'team_member') {
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (_) => const AdminDashboardScreen()));
       } else {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const CustomerDashboardScreen()));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (_) => const CustomerDashboardScreen()));
       }
     } else if (state is AuthUnauthenticated || state is AuthError) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const RoleSelectionScreen()));
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (_) => const RoleSelectionScreen()));
     }
   }
 

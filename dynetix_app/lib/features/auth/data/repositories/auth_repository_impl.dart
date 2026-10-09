@@ -101,33 +101,51 @@ class AuthRepositoryImpl implements AuthRepository {
 
   Future<UserEntity> _fetchUserProfile(String id, String email) async {
     try {
-      final List<dynamic> data = await _supabase.from('users').select().eq('id', id);
-      
+      final cleanEmail = email.trim().toLowerCase();
+
+      // 1. Check by email first (for whitelisted / added team members)
+      if (cleanEmail.isNotEmpty) {
+        final List<dynamic> emailData =
+            await _supabase.from('users').select().eq('email', cleanEmail);
+        if (emailData.isNotEmpty) {
+          return UserModel.fromJson(emailData.first);
+        }
+      }
+
+      // 2. Check by id
+      final List<dynamic> data =
+          await _supabase.from('users').select().eq('id', id);
+
       if (data.isEmpty) {
         // Automatically set 'admin' role for your specific admin email
-        final isMasterAdmin = email.toLowerCase() == 'info@dynetixhub.com';
-        
+        final isMasterAdmin = cleanEmail == 'info@dynetixhub.com';
+
         final defaultData = {
           'id': id,
-          'email': email,
-          'name': email.split('@').first,
+          'email': cleanEmail,
+          'name': cleanEmail.split('@').first,
           'role': isMasterAdmin ? 'admin' : 'customer',
         };
-        
+
         // Try to save this profile in the background
-        _supabase.from('users').insert(defaultData).then((_) => print('Default profile created')).catchError((e) => print('Profile insert error: $e'));
-        
+        _supabase
+            .from('users')
+            .insert(defaultData)
+            .then((_) => print('Default profile created'))
+            .catchError((e) => print('Profile insert error: $e'));
+
         return UserModel.fromJson(defaultData);
       }
-      
+
       return UserModel.fromJson(data.first);
     } catch (e) {
       // Fallback if table doesn't exist yet
+      final cleanEmail = email.trim().toLowerCase();
       return UserModel(
-        id: id, 
-        email: email, 
-        role: email.toLowerCase() == 'info@dynetixhub.com' ? 'admin' : 'customer',
-        name: email.split('@').first
+        id: id,
+        email: cleanEmail,
+        role: cleanEmail == 'info@dynetixhub.com' ? 'admin' : 'customer',
+        name: cleanEmail.split('@').first,
       );
     }
   }

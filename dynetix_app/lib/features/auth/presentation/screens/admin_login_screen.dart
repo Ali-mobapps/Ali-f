@@ -88,10 +88,19 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                               BlocConsumer<AuthCubit, AuthState>(
                                 listener: (context, state) {
                                   if (state is AuthAuthenticated) {
-                                    if (state.user.role == 'admin') {
-                                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const AdminDashboardScreen()), (route) => false);
+                                    final role = state.user.role.toLowerCase();
+                                    if (role == 'admin' || role == 'team_member') {
+                                      Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const AdminDashboardScreen()),
+                                          (route) => false);
                                     } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unauthorized: Account does not have admin privileges.')));
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Unauthorized: Account does not have admin privileges.')));
                                       context.read<AuthCubit>().logout();
                                     }
                                   } else if (state is AuthError) {

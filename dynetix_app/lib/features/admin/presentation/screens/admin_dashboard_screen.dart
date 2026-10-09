@@ -34,6 +34,8 @@ import '../../../profile/presentation/bloc/profile_cubit.dart';
 import '../../../profile/presentation/bloc/profile_state.dart' as profile_state;
 import '../../../profile/presentation/screens/edit_profile_screen.dart';
 import '../../../profile/presentation/screens/settings_features_screens.dart';
+import 'team_management_screen.dart';
+import '../widgets/add_team_member_modal.dart';
 import '../../../notifications/presentation/bloc/announcement_cubit.dart';
 import '../../../../core/notifications/notification_service.dart';
 import '../../../../core/services/pdf_service.dart';
@@ -1981,6 +1983,14 @@ class _AdminProfileDashboardState extends State<_AdminProfileDashboard> {
               const SizedBox(height: 48),
               _buildOption(
                 context,
+                Icons.admin_panel_settings_outlined,
+                'Team Members / Whitelist',
+                onTap: () =>
+                    Navigator.push(context, MaterialPageRoute(
+                        builder: (_) => const TeamManagementScreen())),
+              ),
+              _buildOption(
+                context,
                 Icons.settings_outlined,
                 'System Settings',
                 onTap: () =>
@@ -2010,6 +2020,32 @@ class _AdminProfileDashboardState extends State<_AdminProfileDashboard> {
                 onTap: () =>
                     Navigator.push(context, MaterialPageRoute(
                         builder: (_) => const AboutDynetixScreen())),
+              ),
+
+              const SizedBox(height: 32),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Team & Access Control', style: TextStyle(fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.getOnBackgroundColor(context))),
+              ),
+              const SizedBox(height: 16),
+              DynetixButton(
+                text: '+ ADD TEAM MEMBER / WHITELIST',
+                color: AppColors.primary,
+                textColor: Colors.white,
+                onPressed: () => AddTeamMemberModal.show(context),
+              ),
+              const SizedBox(height: 12),
+              DynetixButton(
+                text: 'MANAGE TEAM MEMBERS',
+                color: AppColors.primary.withValues(alpha: 0.1),
+                textColor: AppColors.primary,
+                isOutline: true,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const TeamManagementScreen()),
+                ),
               ),
 
               const SizedBox(height: 32),
