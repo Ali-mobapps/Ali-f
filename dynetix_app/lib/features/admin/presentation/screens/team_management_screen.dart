@@ -25,12 +25,16 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
   }
 
   Future<void> _fetchTeamMembers() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
     try {
       final List<dynamic> response = await _supabase
           .from('users')
           .select()
-          .order('name', ascending: true);
+          .order('name', ascending: true)
+          .timeout(const Duration(seconds: 4));
+
+      if (!mounted) return;
 
       final List<Map<String, dynamic>> allUsers =
           List<Map<String, dynamic>>.from(response);
@@ -48,10 +52,22 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
       }).toList();
 
       setState(() {
-        _teamMembers = filtered;
+        _teamMembers = filtered.isNotEmpty
+            ? filtered
+            : [
+                {
+                  'id': '1',
+                  'name': 'Master Admin',
+                  'email': 'info@dynetixhub.com',
+                  'role': 'admin',
+                  'is_whitelisted': true,
+                  'temp_password': 'MasterPassword',
+                },
+              ];
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       // Fallback default list if DB offline or empty
       setState(() {
         _teamMembers = [
@@ -76,6 +92,8 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
         'is_whitelisted': true,
       }).eq('email', email);
 
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Updated role to ${newRole == "admin" ? "Admin" : "Team Member"}'),
@@ -84,6 +102,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
       );
       _fetchTeamMembers();
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to update role: $e'),
@@ -113,13 +132,15 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
       ),
     );
 
-    if (confirm != true) return;
+    if (confirm != true || !mounted) return;
 
     try {
       await _supabase.from('users').update({
         'role': 'customer',
         'is_whitelisted': false,
       }).eq('email', email);
+
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -129,6 +150,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
       );
       _fetchTeamMembers();
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to remove member: $e'),
@@ -156,15 +178,16 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF1F5F9), // Soft contrasting background
       appBar: AppBar(
         title: const Text(
           'TEAM & WHITELIST',
-          style: TextStyle(letterSpacing: 2, fontSize: 14, fontWeight: FontWeight.bold),
+          style: TextStyle(letterSpacing: 2, fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
         ),
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: AppColors.primary),
@@ -190,7 +213,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
           // Top Banner / Add Trigger
           Container(
             padding: const EdgeInsets.all(20),
-            color: AppColors.surface,
+            color: Colors.white,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -214,7 +237,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                             'Manage administrators and whitelisted team members with access.',
                             style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.textDisabled,
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -256,10 +279,14 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                           prefixIcon: const Icon(Icons.search_rounded, size: 20, color: AppColors.textDisabled),
                           contentPadding: const EdgeInsets.symmetric(vertical: 10),
                           filled: true,
-                          fillColor: AppColors.softGrey,
+                          fillColor: const Color(0xFFF8FAFC),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                           ),
                         ),
                       ),
@@ -285,7 +312,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
             ),
           ),
 
-          const Divider(height: 1),
+          const Divider(height: 1, color: Color(0xFFCBD5E1)),
 
           // Member List View
           Expanded(
@@ -310,7 +337,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                             const SizedBox(height: 8),
                             const Text(
                               'Tap "+ Whitelist Member" to add a new administrator.',
-                              style: TextStyle(fontSize: 12, color: AppColors.textDisabled),
+                              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                             ),
                             const SizedBox(height: 20),
                             ElevatedButton.icon(
@@ -439,7 +466,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                                       } else if (value == 'make_member') {
                                         _updateMemberRole(email, 'team_member');
                                       } else if (value == 'remove') {
-                                        _removeTeamMember(email, name);
+                                        _screenshotRemoveTeamMember(email, name);
                                       }
                                     },
                                     itemBuilder: (context) => [
@@ -462,7 +489,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                                             children: [
                                               Icon(Icons.person_outline, size: 18),
                                               SizedBox(width: 10),
-                                              Text('Change to Team Member'),
+                                              Text('Code to Team Member'),
                                             ],
                                           ),
                                         ),
@@ -500,7 +527,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
       selected: isSelected,
       onSelected: (_) => setState(() => _roleFilter = value),
       selectedColor: AppColors.primary,
-      backgroundColor: AppColors.softGrey,
+      backgroundColor: const Color(0xFFE2E8F0),
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -508,5 +535,9 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
+  }
+
+  void _screenshotRemoveTeamMember(String email, String name) {
+    _removeTeamMember(email, name);
   }
 }

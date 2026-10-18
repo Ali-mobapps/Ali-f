@@ -156,14 +156,15 @@ class _AddTeamMemberModalState extends State<AddTeamMemberModal> {
     final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
 
     return Container(
-      constraints: const BoxConstraints(maxWidth: 520),
+      width: 460,
+      constraints: const BoxConstraints(maxHeight: 650),
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.1),
+            color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.2),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
@@ -342,67 +343,70 @@ class _AddTeamMemberModalState extends State<AddTeamMemberModal> {
 
               const SizedBox(height: 28),
 
-              // Action Buttons Row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  OutlinedButton(
-                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 14),
-                      side: BorderSide(color: borderColor),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+              // Action Buttons Row wrapped with MainAxisSize.min
+              Align(
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    OutlinedButton(
+                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
+                        side: BorderSide(color: borderColor),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      onPressed: _isLoading ? null : _submitAddMember,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _submitAddMember,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.add_rounded, size: 18),
-                              SizedBox(width: 6),
-                              Text(
-                                'Add Member',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
                               ),
-                            ],
-                          ),
-                  ),
-                ],
+                            )
+                          : const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.add_rounded, size: 18),
+                                SizedBox(width: 6),
+                                Text(
+                                  'Add Member',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -486,12 +490,21 @@ class _AddTeamMemberModalState extends State<AddTeamMemberModal> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isSelected
-                  ? AppColors.primary
-                  : (isDark ? const Color(0xFF94A3B8) : AppColors.textDisabled),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.primary.withValues(alpha: 0.15)
+                    : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: isSelected
+                    ? AppColors.primary
+                    : (isDark ? const Color(0xFF94A3B8) : AppColors.textDisabled),
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(

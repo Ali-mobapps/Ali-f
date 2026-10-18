@@ -1377,14 +1377,24 @@ void _showAddOrderDialog(BuildContext context) {
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: isCurrent
-              ? AppColors.primary
-              : (color ?? AppColors.getOnBackgroundColor(context).withValues(alpha: 0.05)),
-          foregroundColor: isCurrent ? Colors.black : (color ?? AppColors.getOnBackgroundColor(context).withValues(alpha: 0.7)),
+              ? (color ?? AppColors.primary)
+              : (color?.withValues(alpha: 0.15) ?? const Color(0xFFF1F5F9)),
+          foregroundColor: isCurrent
+              ? Colors.white
+              : (color ?? AppColors.textPrimary),
+          disabledBackgroundColor: color ?? AppColors.primary,
+          disabledForegroundColor: Colors.white,
+          elevation: isCurrent ? 2 : 0,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           minimumSize: const Size(0, 40),
-          // Fix: Prevent infinite width crash in horizontal Row
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: isCurrent
+                  ? Colors.transparent
+                  : (color?.withValues(alpha: 0.3) ?? const Color(0xFFCBD5E1)),
+            ),
+          ),
         ),
         icon: Icon(icon, size: 16),
         label: Text(label,
@@ -2042,8 +2052,7 @@ class _AdminProfileDashboardState extends State<_AdminProfileDashboard> {
                 color: AppColors.primary.withValues(alpha: 0.1),
                 textColor: AppColors.primary,
                 isOutline: true,
-                onPressed: () => Navigator.push(
-                  context,
+                onPressed: () => Navigator.of(context, rootNavigator: true).push(
                   MaterialPageRoute(builder: (_) => const TeamManagementScreen()),
                 ),
               ),

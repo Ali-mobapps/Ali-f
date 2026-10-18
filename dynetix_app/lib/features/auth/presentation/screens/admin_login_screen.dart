@@ -100,11 +100,14 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                           const SnackBar(
                                               content: Text(
-                                                  'Unauthorized: Account does not have admin privileges.')));
+                                                  'Access Denied: You do not have Admin privileges. Ask the Admin to whitelist you first.')));
                                       context.read<AuthCubit>().logout();
                                     }
                                   } else if (state is AuthError) {
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: AppColors.error));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(state.message),
+                                            backgroundColor: AppColors.error));
                                   }
                                 },
                                 builder: (context, state) {

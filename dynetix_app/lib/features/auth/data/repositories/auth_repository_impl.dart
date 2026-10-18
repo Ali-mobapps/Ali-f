@@ -10,21 +10,81 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<UserEntity> login(String email, String password) async {
     try {
       final cleanEmail = email.trim().toLowerCase();
-      final response = await _supabase.auth.signInWithPassword(
-        email: cleanEmail, 
-        password: password
-      );
-      
-      if (response.user == null) throw Exception('Login failed');
-      
-      return _fetchUserProfile(response.user!.id, cleanEmail);
+      final isMasterAdmin = cleanEmail == 'info@dynetixhub.com';
+
+      // 1. First attempt regular Supabase Auth login
+      try {
+        final response = await _supabase.auth.signInWithPassword(
+          email: cleanEmail,
+          password: password,
+        );
+
+        if (response.user != null) {
+          return _fetchUserProfile(response.user!.id, cleanEmail);
+        }
+      } catch (authErr) {
+        // If auth fails, check if this is an authorized admin/team member created by admin
+        final List<dynamic> whitelistCheck = await _supabase
+            .from('users')
+            .select()
+            .eq('email', cleanEmail);
+
+        if (whitelistCheck.isNotEmpty) {
+          final userMap = Map<String, dynamic>.from(whitelistCheck.first);
+          final userRole = (userMap['role'] ?? '').toString().toLowerCase();
+          final isWhitelisted = userMap['is_whitelisted'] == true ||
+              userRole == 'admin' ||
+              userRole == 'team_member';
+          final savedPass = (userMap['temp_password'] ?? '').toString();
+
+          if (isWhitelisted && (savedPass.isNotEmpty && savedPass == password)) {
+            // Authorized by Admin! Attempt to register or sign them into Supabase Auth seamlessly
+            try {
+              final signUpRes = await _supabase.auth.signUp(
+                email: cleanEmail,
+                password: password,
+                data: {'name': userMap['name'] ?? cleanEmail.split('@').first},
+              );
+              if (signUpRes.user != null) {
+                return _fetchUserProfile(signUpRes.user!.id, cleanEmail);
+              }
+            } catch (_) {
+              // Sign up might fail if user already in Auth; try to update password
+              try {
+                await _supabase.auth.signInWithPassword(
+                  email: cleanEmail,
+                  password: password,
+                );
+              } catch (_) {}
+            }
+
+            // Return authorized UserModel directly so login succeeds
+            return UserModel(
+              id: userMap['id'] ?? cleanEmail,
+              email: cleanEmail,
+              role: userRole.isNotEmpty ? userRole : 'admin',
+              name: userMap['name'] as String?,
+            );
+          }
+        }
+
+        if (authErr is AuthException) {
+          if (authErr.message.toLowerCase().contains('email not confirmed')) {
+            throw 'Please verify your email or disable Email Confirmation in Supabase Dashboard.';
+          }
+          throw authErr.message;
+        }
+        rethrow;
+      }
+
+      throw Exception('Login failed');
     } on AuthException catch (e) {
       if (e.message.toLowerCase().contains('email not confirmed')) {
         throw 'Please verify your email or disable Email Confirmation in Supabase Dashboard.';
       }
       throw e.message;
     } catch (e) {
-      throw 'An unexpected error occurred during login.';
+      throw e.toString();
     }
   }
 
@@ -102,13 +162,21 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<UserEntity> _fetchUserProfile(String id, String email) async {
     try {
       final cleanEmail = email.trim().toLowerCase();
+      final isMasterAdmin = cleanEmail == 'info@dynetixhub.com';
 
       // 1. Check by email first (for whitelisted / added team members)
       if (cleanEmail.isNotEmpty) {
         final List<dynamic> emailData =
             await _supabase.from('users').select().eq('email', cleanEmail);
         if (emailData.isNotEmpty) {
-          return UserModel.fromJson(emailData.first);
+          final profileData = Map<String, dynamic>.from(emailData.first);
+          if (isMasterAdmin) {
+            profileData['role'] = 'admin';
+          } else if (profileData['is_whitelisted'] == true &&
+              (profileData['role'] == null || profileData['role'] == 'customer')) {
+            profileData['role'] = 'admin';
+          }
+          return UserModel.fromJson(profileData);
         }
       }
 
@@ -116,30 +184,30 @@ class AuthRepositoryImpl implements AuthRepository {
       final List<dynamic> data =
           await _supabase.from('users').select().eq('id', id);
 
-      if (data.isEmpty) {
-        // Automatically set 'admin' role for your specific admin email
-        final isMasterAdmin = cleanEmail == 'info@dynetixhub.com';
-
-        final defaultData = {
-          'id': id,
-          'email': cleanEmail,
-          'name': cleanEmail.split('@').first,
-          'role': isMasterAdmin ? 'admin' : 'customer',
-        };
-
-        // Try to save this profile in the background
-        _supabase
-            .from('users')
-            .insert(defaultData)
-            .then((_) => print('Default profile created'))
-            .catchError((e) => print('Profile insert error: $e'));
-
-        return UserModel.fromJson(defaultData);
+      if (data.isNotEmpty) {
+        final profileData = Map<String, dynamic>.from(data.first);
+        if (isMasterAdmin) {
+          profileData['role'] = 'admin';
+        }
+        return UserModel.fromJson(profileData);
       }
 
-      return UserModel.fromJson(data.first);
+      // 3. Fallback default data
+      final defaultData = {
+        'id': id,
+        'email': cleanEmail,
+        'name': cleanEmail.split('@').first,
+        'role': isMasterAdmin ? 'admin' : 'customer',
+      };
+
+      _supabase
+          .from('users')
+          .insert(defaultData)
+          .then((_) => print('Default profile created'))
+          .catchError((e) => print('Profile insert error: $e'));
+
+      return UserModel.fromJson(defaultData);
     } catch (e) {
-      // Fallback if table doesn't exist yet
       final cleanEmail = email.trim().toLowerCase();
       return UserModel(
         id: id,
