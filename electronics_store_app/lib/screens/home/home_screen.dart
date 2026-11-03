@@ -4,6 +4,7 @@ import '../../providers/product_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../product_detail/product_detail_screen.dart';
+import '../admin/manage_products_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int) onNavigateTab;
@@ -67,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'Find the best electronics for you',
+                          'Find smartphones, laptops & electronics',
                           style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
                         ),
                       ],
@@ -106,6 +107,69 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
+
+                // Admin Control Panel Card (Visible when Admin is logged in)
+                if (user?.role == 'admin') ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF6B21A8), Color(0xFF9333EA)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.purple.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.admin_panel_settings, color: Colors.white, size: 36),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Administrator Panel',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Add, edit, delete items & change pictures',
+                                style: TextStyle(color: Colors.white70, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF6B21A8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
+                          icon: const Icon(Icons.inventory_2, size: 16),
+                          label: const Text('Manage Store'),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const ManageProductsScreen()),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
                 const SizedBox(height: 20),
 
                 // Search Bar
@@ -155,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Text(
-                          'MIDTERM SPECIAL',
+                          'ELECTRONICS FESTIVAL',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -165,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 12),
                       const Text(
-                        'Next-Gen Tech\nUp to 30% Off',
+                        'Smartphones & Laptops\nUp to 30% Off',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -182,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                         ),
                         onPressed: () => widget.onNavigateTab(1),
-                        child: const Text('Shop Now'),
+                        child: const Text('Shop Catalog'),
                       ),
                     ],
                   ),
@@ -275,8 +339,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               crossAxisSpacing: 12,
                               mainAxisSpacing: 12,
                             ),
-                            itemCount: productProvider.products.length > 6
-                                ? 6
+                            itemCount: productProvider.products.length > 8
+                                ? 8
                                 : productProvider.products.length,
                             itemBuilder: (context, index) {
                               final product = productProvider.products[index];

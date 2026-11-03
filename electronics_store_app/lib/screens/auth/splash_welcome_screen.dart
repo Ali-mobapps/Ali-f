@@ -19,15 +19,20 @@ class SplashWelcomeScreen extends StatelessWidget {
               const Spacer(),
               Center(
                 child: Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: const Color(0xFF2563EB).withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.devices_other,
-                    size: 80,
-                    color: Color(0xFF2563EB),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 100,
+                    height: 100,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.devices_other,
+                      size: 80,
+                      color: Color(0xFF2563EB),
+                    ),
                   ),
                 ),
               ),

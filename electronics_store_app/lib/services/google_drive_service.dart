@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import '../database/database_helper.dart';
+import 'backup_storage.dart' as storage;
 
 class GoogleDriveService {
   static final GoogleDriveService instance = GoogleDriveService._init();
@@ -65,6 +66,38 @@ class GoogleDriveService {
     };
 
     return jsonEncode(backupData);
+  }
+
+  // Local Device Backup (Web-safe & IO-safe)
+  Future<String> backupToDeviceLocal() async {
+    try {
+      final jsonString = await exportDatabaseToJson();
+      return await storage.saveLocalBackup(jsonString);
+    } catch (e) {
+      debugPrint('Local Device Backup Error: $e');
+      rethrow;
+    }
+  }
+
+  // List Local Device Backups
+  Future<List<Map<String, dynamic>>> listLocalBackups() async {
+    try {
+      return await storage.listLocalBackups();
+    } catch (e) {
+      debugPrint('List Local Backups Error: $e');
+      return [];
+    }
+  }
+
+  // Restore from Local Device Backup file or key
+  Future<void> restoreFromLocalFile(String filePathOrKey) async {
+    try {
+      final jsonString = await storage.readLocalBackup(filePathOrKey);
+      await restoreDatabaseFromJson(jsonString);
+    } catch (e) {
+      debugPrint('Restore Local File Error: $e');
+      rethrow;
+    }
   }
 
   // Backup to Google Drive appDataFolder
@@ -134,7 +167,6 @@ class GoogleDriveService {
         }
       }
 
-      // Sort by newest first
       backups.sort((a, b) => b['createdTime'].compareTo(a['createdTime']));
       return backups;
     } catch (e) {
@@ -180,7 +212,6 @@ class GoogleDriveService {
       final db = await DatabaseHelper.instance.database;
 
       await db.transaction((txn) async {
-        // Clear existing tables in correct order to respect foreign keys
         await txn.delete('order_items');
         await txn.delete('orders');
         await txn.delete('wishlists');
@@ -189,49 +220,42 @@ class GoogleDriveService {
         await txn.delete('categories');
         await txn.delete('users');
 
-        // Restore users
         if (tables['users'] != null) {
           for (var row in tables['users']) {
             await txn.insert('users', Map<String, dynamic>.from(row));
           }
         }
 
-        // Restore categories
         if (tables['categories'] != null) {
           for (var row in tables['categories']) {
             await txn.insert('categories', Map<String, dynamic>.from(row));
           }
         }
 
-        // Restore products
         if (tables['products'] != null) {
           for (var row in tables['products']) {
             await txn.insert('products', Map<String, dynamic>.from(row));
           }
         }
 
-        // Restore cart_items
         if (tables['cart_items'] != null) {
           for (var row in tables['cart_items']) {
             await txn.insert('cart_items', Map<String, dynamic>.from(row));
           }
         }
 
-        // Restore wishlists
         if (tables['wishlists'] != null) {
           for (var row in tables['wishlists']) {
             await txn.insert('wishlists', Map<String, dynamic>.from(row));
           }
         }
 
-        // Restore orders
         if (tables['orders'] != null) {
           for (var row in tables['orders']) {
             await txn.insert('orders', Map<String, dynamic>.from(row));
           }
         }
 
-        // Restore order_items
         if (tables['order_items'] != null) {
           for (var row in tables['order_items']) {
             await txn.insert('order_items', Map<String, dynamic>.from(row));

@@ -5,15 +5,105 @@ class OrderDetailScreen extends StatelessWidget {
   final OrderModel order;
   const OrderDetailScreen({super.key, required this.order});
 
+  Widget _buildTrackingTimeline(String currentStatus) {
+    final statuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered'];
+    int currentIndex = statuses.indexOf(currentStatus);
+    if (currentIndex == -1) currentIndex = 0;
+    if (currentStatus == 'Cancelled') {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Text(
+          'Order Status: Cancelled',
+          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Order Tracking Timeline',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: List.generate(statuses.length, (index) {
+            bool isCompleted = index <= currentIndex;
+            bool isLast = index == statuses.length - 1;
+            return Expanded(
+              child: Row(
+                children: [
+                  Column(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: isCompleted ? const Color(0xFF2563EB) : Colors.grey[300],
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isCompleted ? Icons.check : Icons.fiber_manual_record,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        statuses[index],
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: isCompleted ? FontWeight.bold : FontWeight.normal,
+                          color: isCompleted ? const Color(0xFF2563EB) : Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (!isLast)
+                    Expanded(
+                      child: Container(
+                        height: 3,
+                        color: index < currentIndex ? const Color(0xFF2563EB) : Colors.grey[300],
+                      ),
+                    ),
+                ],
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Order ${order.orderNumber}')),
+      appBar: AppBar(title: Text('Order #${order.orderNumber}')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Tracking Timeline Card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 6, offset: const Offset(0, 3)),
+                ],
+              ),
+              child: _buildTrackingTimeline(order.status),
+            ),
+            const SizedBox(height: 20),
+
             // Status Card
             Container(
               padding: const EdgeInsets.all(16),
