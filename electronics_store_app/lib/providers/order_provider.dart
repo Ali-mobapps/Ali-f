@@ -58,9 +58,18 @@ class OrderProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updateOrderStatus(int orderId, String newStatus, int userId, bool isAdmin) async {
+  Future<void> updateOrderStatus(int orderId, String newStatus, String trackingNote, int userId, bool isAdmin) async {
     try {
-      await _orderRepo.updateOrderStatus(orderId, newStatus);
+      await _orderRepo.updateOrderStatus(orderId, newStatus, trackingNote);
+      await fetchOrders(userId: userId, isAdmin: isAdmin);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> cancelOrder(int orderId, int userId, bool isAdmin) async {
+    try {
+      await _orderRepo.cancelOrder(orderId);
       await fetchOrders(userId: userId, isAdmin: isAdmin);
     } catch (e) {
       rethrow;

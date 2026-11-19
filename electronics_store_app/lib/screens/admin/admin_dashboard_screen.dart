@@ -29,6 +29,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
+                childAspectRatio: 1.1,
                 children: [
                   _AdminCard(
                     title: 'Manage Products',
@@ -81,7 +82,7 @@ class _AdminCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -97,17 +98,19 @@ class _AdminCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircleAvatar(
-              radius: 30,
+              radius: 26,
               backgroundColor: color.withOpacity(0.1),
-              child: Icon(icon, size: 30, color: color),
+              child: Icon(icon, size: 26, color: color),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             Text(
               title,
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 14,
                 color: Color(0xFF0F172A),
               ),
             ),

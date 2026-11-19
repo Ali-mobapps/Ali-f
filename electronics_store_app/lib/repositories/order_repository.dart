@@ -63,6 +63,7 @@ class OrderRepository {
         'customer_name': customerName,
         'customer_phone': customerPhone,
         'delivery_address': deliveryAddress,
+        'tracking_note': 'Order received successfully. Awaiting admin confirmation.',
         'created_at': DateTime.now().toIso8601String(),
       });
 
@@ -120,13 +121,29 @@ class OrderRepository {
     return orders;
   }
 
-  Future<void> updateOrderStatus(int orderId, String newStatus) async {
+  Future<void> updateOrderStatus(int orderId, String newStatus, String trackingNote) async {
     final db = await _dbHelper.database;
     await db.update(
       'orders',
-      {'status': newStatus},
+      {
+        'status': newStatus,
+        'tracking_note': trackingNote,
+      },
       where: 'id = ?',
       whereArgs: [orderId],
+    );
+  }
+
+  Future<void> cancelOrder(int orderId) async {
+    final db = await _dbHelper.database;
+    await db.update(
+      'orders',
+      {
+        'status': 'Cancelled',
+        'tracking_note': 'Order cancelled by customer.',
+      },
+      where: 'id = ? AND (status = ? OR status = ?)',
+      whereArgs: [orderId, 'Pending', 'Confirmed'],
     );
   }
 }

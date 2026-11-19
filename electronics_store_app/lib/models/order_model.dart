@@ -54,6 +54,7 @@ class OrderModel {
   final String customerName;
   final String customerPhone;
   final String deliveryAddress;
+  final String trackingNote;
   final String createdAt;
   final List<OrderItemModel> items;
 
@@ -69,6 +70,7 @@ class OrderModel {
     required this.customerName,
     required this.customerPhone,
     required this.deliveryAddress,
+    required this.trackingNote,
     required this.createdAt,
     required this.items,
   });
@@ -86,6 +88,7 @@ class OrderModel {
       'customer_name': customerName,
       'customer_phone': customerPhone,
       'delivery_address': deliveryAddress,
+      'tracking_note': trackingNote,
       'created_at': createdAt,
     };
   }
@@ -103,6 +106,7 @@ class OrderModel {
       customerName: map['customer_name'],
       customerPhone: map['customer_phone'],
       deliveryAddress: map['delivery_address'],
+      trackingNote: map['tracking_note'] ?? 'Order placed successfully. Preparing for dispatch.',
       createdAt: map['created_at'],
       items: items ?? [],
     );

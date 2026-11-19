@@ -11,6 +11,7 @@ class GoogleDriveService {
   GoogleDriveService._init();
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: kIsWeb ? '211460440589-dnkurumk645oqstvsjvctv6ttuflrtsi.apps.googleusercontent.com' : null,
     scopes: <String>[drive.DriveApi.driveAppdataScope],
   );
 

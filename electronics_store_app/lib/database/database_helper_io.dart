@@ -30,6 +30,10 @@ class DatabaseHelper {
   }
 
   Future<void> _ensureSeeded(Database db) async {
+    try {
+      await db.execute('ALTER TABLE orders ADD COLUMN tracking_note TEXT DEFAULT "Order received successfully."');
+    } catch (_) {}
+
     final adminCheck = await db.query(
       'users',
       where: 'email = ?',
