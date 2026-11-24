@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'manage_products_screen.dart';
 import 'admin_orders_screen.dart';
+import '../backup/backup_screen.dart';
+import '../../providers/auth_provider.dart';
+import '../auth/login_screen.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -8,19 +12,35 @@ class AdminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Dashboard')),
+      appBar: AppBar(
+        title: const Text('Admin Store Dashboard'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.red),
+            tooltip: 'Logout',
+            onPressed: () {
+              Provider.of<AuthProvider>(context, listen: false).logout();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Store Management',
+              'Store Management System',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
             ),
             const SizedBox(height: 8),
             const Text(
-              'Manage products, inventory, and customer orders',
+              'Manage products, inventory, customer orders, and cloud backups',
               style: TextStyle(color: Color(0xFF64748B)),
             ),
             const SizedBox(height: 24),
@@ -50,6 +70,17 @@ class AdminDashboardScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const AdminOrdersScreen()),
+                      );
+                    },
+                  ),
+                  _AdminCard(
+                    title: 'Backup & Restore',
+                    icon: Icons.cloud_sync_outlined,
+                    color: Colors.green,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const BackupScreen()),
                       );
                     },
                   ),
